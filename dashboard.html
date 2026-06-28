@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1C6B57">
+<title>Кабинет арендатора · Саяхат</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%231C6B57'/%3E%3Cpath%20d='M9%2025V15a7%207%200%200%201%2014%200v10h-3.4V15a3.6%203.6%200%200%200-7.2%200v10z'%20fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body{background:var(--surface-2)}
+  .appbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;min-height:66px;padding:10px 22px;background:var(--surface);border-bottom:1px solid var(--line)}
+  .appbar__title{font-size:16px;color:var(--ink-soft);font-weight:600;padding-left:16px;border-left:1px solid var(--line)}
+  .back{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--ink-soft);margin-left:auto}
+  .back:hover{color:var(--brand-700)}.back svg{width:16px;height:16px}
+
+  .dash{max-width:1120px;margin:0 auto;padding:26px 22px 70px}
+  .dash h1{font-size:clamp(26px,4vw,34px);color:var(--ink);margin:0 0 4px}
+  .dash__sub{color:var(--muted);font-size:17px;margin:0 0 26px}
+
+  .shopcard{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);overflow:hidden;display:grid;grid-template-columns:200px 1fr;margin-bottom:26px}
+  .shopcard__pic{background:url('assets/photos/cover.jpg') center/cover}
+  .shopcard__body{padding:22px 26px;display:flex;flex-direction:column}
+  .shopcard__top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .shopcard__top h2{font-family:var(--font-display);font-size:24px;color:var(--ink)}
+  .badge-pub{display:inline-flex;align-items:center;gap:6px;background:var(--brand-50);color:var(--brand-700);font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:999px}
+  .badge-pub i{width:8px;height:8px;border-radius:50%;background:var(--brand);display:block}
+  .shopcard__loc{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:14.5px;margin-bottom:18px}
+  .shopcard__loc svg{width:16px;height:16px;color:var(--accent-700)}
+  .shopcard__acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+
+  .grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:22px;align-items:start}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);padding:22px 24px}
+  .panel h3{font-family:var(--font-display);font-size:19px;color:var(--ink);margin:0 0 4px}
+  .panel .muted{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+  .metric .lbl{font-size:13px;color:var(--muted);font-weight:600}
+  .metric .val{font-family:var(--font-display);font-size:30px;color:var(--ink);margin:4px 0 6px}
+  .trend{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .trend.up{background:var(--brand-50);color:var(--brand-700)}
+  .trend.down{background:#FCEBE6;color:var(--terracotta-700)}
+  .trend svg{width:12px;height:12px}
+
+  .chart svg{width:100%;height:auto;display:block}
+  .topp{display:flex;flex-direction:column;gap:14px}
+  .topp__row{display:flex;align-items:center;gap:12px}
+  .topp__pic{width:46px;height:46px;border-radius:12px;background-size:cover;background-position:center;flex:none}
+  .topp__n{flex:1}.topp__n b{font-size:15px;color:var(--ink);display:block}.topp__n span{font-size:13px;color:var(--muted)}
+  .topp__v{font-family:var(--font-display);font-weight:700;color:var(--brand-700);font-size:16px}
+
+  .tip{background:linear-gradient(120deg,var(--brand),var(--brand-700));color:#fff;border-radius:20px;padding:24px 26px;margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .tip__t b{font-family:var(--font-display);font-size:21px;display:block;margin-bottom:5px}
+  .tip__t span{color:rgba(255,255,255,.85);font-size:15px}
+
+  @media(max-width:860px){.grid2{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.shopcard{grid-template-columns:1fr}.shopcard__pic{height:150px}}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="brand" href="dashboard.html"><span class="brand__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 21V11a7 7 0 0 1 14 0v10h-3.4V11a3.6 3.6 0 0 0-7.2 0v10z"/></svg></span><span class="brand__name">Саяхат</span></a>
+  <div class="appbar__title">Кабинет арендатора</div>
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> На сайт базара</a>
+</header>
+
+<div class="dash">
+  <h1>Здравствуйте, Виктор!</h1>
+  <p class="dash__sub">Вот как идут дела у вашего магазина на базаре Саяхат.</p>
+
+  <div class="shopcard">
+    <div class="shopcard__pic"></div>
+    <div class="shopcard__body">
+      <div class="shopcard__top">
+        <h2>Дастархан</h2>
+        <span class="badge-pub"><i></i> Опубликован</span>
+      </div>
+      <div class="shopcard__loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Ряд Б, павильон 14 · sayahat.kz/dastarkhan</div>
+      <div class="shopcard__acts">
+        <a class="btn btn--primary" href="constructor.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Редактировать</a>
+        <a class="btn btn--ghost" href="shop.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg> Открыть сайт</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="lbl">Просмотры за неделю</div><div class="val">1 286</div><span class="trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg> +18%</span></div>
+    <div class="metric"><div class="lbl">Переходы в магазин</div><div class="val">214</div><span class="trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg> +9%</span></div>
+    <div class="metric"><div class="lbl">Звонки и WhatsApp</div><div class="val">63</div><span class="trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 15l6-6 6 6"/></svg> +12%</span></div>
+    <div class="metric"><div class="lbl">Добавили в избранное</div><div class="val">41</div><span class="trend down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg> −4%</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel chart">
+      <h3>Просмотры по дням</h3>
+      <p class="muted">Последние 7 дней. Видно, что к выходным интерес растёт.</p>
+      <svg viewBox="0 0 640 230" fill="none" font-family="Manrope">
+        <line x1="20" y1="185" x2="620" y2="185" stroke="#EBE2D3" stroke-width="2"/>
+        <g>
+          <rect x="40"  y="142" width="50" height="43"  rx="6" fill="#9FE1CB"/><text x="65"  y="132" font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">86</text>
+          <rect x="124" y="118" width="50" height="67"  rx="6" fill="#9FE1CB"/><text x="149" y="108" font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">124</text>
+          <rect x="208" y="136" width="50" height="49"  rx="6" fill="#9FE1CB"/><text x="233" y="126" font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">98</text>
+          <rect x="292" y="98"  width="50" height="87"  rx="6" fill="#5DCAA5"/><text x="317" y="88"  font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">156</text>
+          <rect x="376" y="68"  width="50" height="117" rx="6" fill="#5DCAA5"/><text x="401" y="58"  font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">210</text>
+          <rect x="460" y="33"  width="50" height="152" rx="6" fill="#DE9627"/><text x="485" y="23"  font-size="13" font-weight="700" fill="#B5741A" text-anchor="middle">318</text>
+          <rect x="544" y="52"  width="50" height="133" rx="6" fill="#5DCAA5"/><text x="569" y="42"  font-size="13" font-weight="700" fill="#14513F" text-anchor="middle">274</text>
+        </g>
+        <g font-size="13" font-weight="600" fill="#6E655A" text-anchor="middle">
+          <text x="65" y="208">Пн</text><text x="149" y="208">Вт</text><text x="233" y="208">Ср</text><text x="317" y="208">Чт</text><text x="401" y="208">Пт</text><text x="485" y="208">Сб</text><text x="569" y="208">Вс</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="panel">
+      <h3>Популярные товары</h3>
+      <p class="muted">Что чаще всего смотрят</p>
+      <div class="topp">
+        <div class="topp__row"><div class="topp__pic" style="background-image:url('assets/photos/fistashki.jpg')"></div><div class="topp__n"><b>Фисташки солёные</b><span>4 600 ₸ / кг</span></div><div class="topp__v">312</div></div>
+        <div class="topp__row"><div class="topp__pic" style="background-image:url('assets/photos/kuraga.jpg')"></div><div class="topp__n"><b>Курага узбекская</b><span>2 400 ₸ / кг</span></div><div class="topp__v">268</div></div>
+        <div class="topp__row"><div class="topp__pic" style="background-image:url('assets/photos/lukum.jpg')"></div><div class="topp__n"><b>Рахат-лукум</b><span>2 700 ₸ / кг</span></div><div class="topp__v">191</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <div class="tip__t"><b>Покупатели заходят чаще за акциями</b><span>Добавьте или обновите скидку недели — она сразу появится на вашем сайте.</span></div>
+    <a class="btn btn--accent btn--lg" href="constructor.html">Обновить акцию</a>
+  </div>
+</div>
+
+</body>
+</html>
