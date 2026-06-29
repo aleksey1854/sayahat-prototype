@@ -1,8 +1,3 @@
-/* ============================================================
-   Саяхат — мультилендинг платформа · дизайн-система прототипа
-   Палитра: «премиальный восточный базар»
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Onest:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -59,7 +54,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .section { padding: 76px 0; }
 .section--tight { padding: 52px 0; }
 
-/* ---------- helpers ---------- */
 .eyebrow {
   font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--accent-700);
@@ -69,7 +63,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .section-head h2 { font-size: clamp(28px, 4vw, 40px); color: var(--ink); }
 .section-head p { margin: 12px 0 0; color: var(--muted); font-size: 17px; max-width: 58ch; }
 
-/* ---------- buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; gap: 9px;
   font-family: var(--font-body); font-weight: 600; font-size: 15px;
@@ -90,7 +83,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .btn svg { width: 18px; height: 18px; flex: none; }
 .btn--lg svg { width: 19px; height: 19px; }
 
-/* ---------- chips / badges ---------- */
 .chip {
   display: inline-flex; align-items: center; gap: 7px;
   font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
@@ -106,9 +98,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .badge--stock { background: var(--brand-50); color: var(--brand-700); }
 .badge--hot { background: #F7E2D8; color: var(--terracotta-700); }
 
-/* ============================================================
-   Платформенная шапка (мульти-арендный контекст)
-   ============================================================ */
 .topbar {
   position: sticky; top: 0; z-index: 40;
   background: rgba(250,246,239,.86); backdrop-filter: blur(12px);
@@ -135,9 +124,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .topbar__back:hover { color: var(--brand-700); }
 .topbar__back svg { width: 16px; height: 16px; }
 
-/* ============================================================
-   1 · Обложка (hero)
-   ============================================================ */
 .hero {
   position: relative; overflow: hidden;
   background:
@@ -174,9 +160,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   text-shadow: 0 2px 18px rgba(0,0,0,.25);
 }
 
-/* ============================================================
-   2 · Полоса доверия
-   ============================================================ */
 .trust { background: var(--brand); color: #fff; }
 .trust__inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 30px 0; }
 .trust__item { display: flex; align-items: center; gap: 13px; }
@@ -184,9 +167,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .trust__item b { display: block; font-size: 16px; font-weight: 700; }
 .trust__item span { font-size: 13.5px; color: rgba(255,255,255,.72); }
 
-/* ============================================================
-   3 · О магазине
-   ============================================================ */
 .about__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: center; }
 .about__text p { color: var(--ink-soft); font-size: 17px; }
 .about__pic {
@@ -196,22 +176,20 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .about__pic span { font-family: var(--font-display); color: rgba(255,255,255,.92); font-size: 20px; }
 
-/* ============================================================
-   4 · Ассортимент (товары)
-   ============================================================ */
 .grid-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .card {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius-lg); overflow: hidden;
   box-shadow: var(--shadow-sm); transition: transform .2s ease, box-shadow .25s ease;
+  display: flex; flex-direction: column;
 }
 .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
 .card__pic { aspect-ratio: 4/3; position: relative; display: grid; place-items: end start; padding: 14px; }
 .card__pic .badge { position: absolute; top: 12px; right: 12px; }
-.card__body { padding: 16px 18px 20px; }
+.card__body { padding: 16px 18px 20px; flex: 1; display: flex; flex-direction: column; }
 .card__body h3 { font-family: var(--font-body); font-size: 17px; font-weight: 700; color: var(--ink); }
 .card__body p { margin: 6px 0 14px; font-size: 14px; color: var(--muted); }
-.card__foot { display: flex; align-items: center; justify-content: space-between; }
+.card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
 .price { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--brand-700); }
 .price small { font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--muted); }
 
@@ -224,9 +202,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .pic--mix       { background: linear-gradient(145deg,#E8A23C,#9A4123); }
 .pic--shop      { background: linear-gradient(145deg,#2E8068,#14513F); }
 
-/* ============================================================
-   5 · Акция
-   ============================================================ */
 .promo {
   border-radius: var(--radius-xl); overflow: hidden; position: relative;
   background: linear-gradient(120deg, var(--terracotta) 0%, #9A4123 100%);
@@ -241,17 +216,11 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .promo__txt p { margin: 8px 0 0; color: rgba(255,255,255,.82); font-size: 16px; }
 .promo .btn { position: relative; flex: none; }
 
-/* ============================================================
-   6 · Галерея
-   ============================================================ */
 .gallery { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 160px; gap: 14px; }
 .gallery > div { border-radius: var(--radius); display: grid; place-items: center; box-shadow: var(--shadow-sm); }
 .gallery > div span { font-family: var(--font-display); color: rgba(255,255,255,.9); font-size: 16px; }
 .gallery .span2 { grid-column: span 2; grid-row: span 2; }
 
-/* ============================================================
-   7 · Прайс-лист
-   ============================================================ */
 .pricelist { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
 .pricelist table { width: 100%; border-collapse: collapse; }
 .pricelist th { text-align: left; font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 16px 26px; background: var(--surface-2); }
@@ -260,9 +229,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .pricelist td.name { font-weight: 600; }
 .pricelist td.cost { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--brand-700); }
 
-/* ============================================================
-   8 · Контакты + Где найти
-   ============================================================ */
 .contact__inner { display: grid; grid-template-columns: 1fr 1.05fr; gap: 30px; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 30px 32px; box-shadow: var(--shadow-sm); }
 .panel h3 { font-family: var(--font-body); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 18px; }
@@ -272,23 +238,16 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .contact-row b { font-size: 16px; font-weight: 600; }
 .contact-row span { display: block; font-size: 13px; color: var(--muted); }
 
-/* мини-схема базара */
 .scheme { background: var(--surface-2); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
 .scheme svg { width: 100%; height: auto; }
 .locrow { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--ink-soft); margin-bottom: 18px; }
 .locrow svg { width: 18px; height: 18px; color: var(--accent-700); flex: none; }
 
-/* ============================================================
-   Подвал платформы
-   ============================================================ */
 .footer { background: var(--surface-2); border-top: 1px solid var(--line); padding: 40px 0; }
 .footer__inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 .footer__made { font-size: 14px; color: var(--muted); }
 .footer__made b { color: var(--brand-700); font-weight: 700; }
 
-/* ============================================================
-   Адаптив
-   ============================================================ */
 @media (max-width: 920px) {
   .hero__inner, .about__inner, .contact__inner { grid-template-columns: 1fr; gap: 36px; }
   .hero__art { max-width: 360px; margin-inline: auto; }
@@ -307,9 +266,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .trust__inner { grid-template-columns: 1fr 1fr; }
 }
 
-/* ============================================================
-   ГЛАВНАЯ БАЗАРА / КАТАЛОГ
-   ============================================================ */
 .lang {
   display: inline-flex; border: 1px solid var(--line); border-radius: 999px;
   overflow: hidden; background: var(--surface); font-size: 13px; font-weight: 700;
@@ -375,7 +331,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .pic--veg   { background: linear-gradient(145deg,#9CC25A,#4E7A22); }
 .pic--candy { background: linear-gradient(145deg,#E07AA0,#A8345E); }
 
-/* Новости */
 .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .news-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px 26px; box-shadow: var(--shadow-sm); transition: transform .2s ease; }
 .news-card:hover { transform: translateY(-3px); }
@@ -383,11 +338,9 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .news-card h3 { font-family: var(--font-body); font-size: 18px; font-weight: 700; color: var(--ink); margin: 8px 0 10px; line-height: 1.3; }
 .news-card p { margin: 0; color: var(--muted); font-size: 14.5px; }
 
-/* Карта базара */
 .bazaar-map { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
 .bazaar-map svg { width: 100%; height: auto; }
 
-/* CTA-полоса «добавь свой магазин» */
 .cta-band {
   background: linear-gradient(120deg, var(--brand) 0%, var(--brand-700) 100%);
   color: #fff; border-radius: var(--radius-xl); padding: 48px 52px; position: relative; overflow: hidden;
@@ -417,7 +370,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   }
 }
 
-/* Липкая панель связи (лендинг магазина, только телефон) */
 .callbar { display: none; }
 @media (max-width: 640px) {
   .callbar {
@@ -430,4 +382,12 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .callbar .btn { justify-content: center; }
   body { padding-bottom: 74px; }
   .assistant { bottom: 86px !important; }
+}
+
+.foot-cols { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 32px; align-items: start; }
+@media (max-width: 600px) {
+  .foot-cols { grid-template-columns: 1fr; gap: 22px; }
+  
+  .bazaar-map { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .bazaar-map svg { min-width: 600px; }
 }

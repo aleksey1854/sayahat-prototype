@@ -24,14 +24,16 @@
   .bigbtn--ghost{background:#fff;color:var(--ink);border-color:var(--line-strong)}.bigbtn--ghost:hover{border-color:var(--brand);color:var(--brand-700)}
   .bigbtn:disabled{opacity:.4;cursor:default}
 
-  .editor{max-width:1220px;margin:0 auto;padding:24px 22px 60px;display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start}
+  .editor{max-width:1240px;margin:0 auto;padding:24px 22px 60px;display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:28px;align-items:start}
   .intro{background:var(--brand-50);border:1px solid #CDE5DC;border-radius:18px;padding:20px 24px;margin-bottom:20px}
   .intro h2{font-family:var(--font-display);font-size:24px;color:var(--brand-700);margin-bottom:6px}
   .intro p{margin:0 0 14px;color:var(--ink-soft);font-size:16px}
 
   .sec{background:#fff;border:1.5px solid var(--line);border-radius:18px;margin-bottom:14px;overflow:hidden;transition:opacity .2s,border-color .2s}
   .sec.off{opacity:.55}.sec.open{border-color:var(--brand)}
-  .sec__top{display:flex;align-items:center;gap:15px;padding:18px 20px}
+  .sec__top{display:flex;align-items:flex-start;gap:14px;padding:18px 20px 2px}
+  .sec__bar{display:flex;align-items:center;gap:9px;padding:12px 20px 18px;flex-wrap:wrap}
+  .sec__bar [data-edit]{margin-left:auto}
   .sec__num{width:40px;height:40px;border-radius:50%;background:var(--brand-50);color:var(--brand-700);font-weight:700;display:grid;place-items:center;font-size:19px;flex:none}
   .sec.off .sec__num{background:var(--surface-2);color:var(--muted)}
   .sec__t b{display:block;font-size:18px;font-weight:700;color:var(--ink)}
@@ -40,14 +42,12 @@
   .qhint:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
   .qtip{position:fixed;display:none;max-width:250px;background:var(--ink);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:500;line-height:1.5;padding:11px 14px;border-radius:12px;box-shadow:var(--shadow-lg);z-index:80}
   .sec__t{flex:1;min-width:0}
-  .sec__photo{width:50px;height:50px;border-radius:12px;flex:none;cursor:pointer;background-size:cover;background-position:center;border:2px solid var(--line-strong);position:relative;overflow:hidden;display:grid;place-items:center;color:var(--muted)}
-  .sec__photo.empty{border-style:dashed;background:var(--bg)}
-  .sec__photo:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
-  .sec__photo svg{width:22px;height:22px}
+  .sec__photo{display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 16px;border-radius:12px;border:2px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink-soft);font-family:var(--font-body);font-weight:700;font-size:14px;position:relative;white-space:nowrap}
+  .sec__photo.empty{border-style:dashed;color:var(--muted)}
+  .sec__photo:hover{border-color:var(--brand);color:var(--brand-700);background:var(--brand-50)}
+  .sec__photo svg{width:20px;height:20px;flex:none}
+  .sec__photo .pthumb{width:30px;height:30px;border-radius:8px;background-size:cover;background-position:center;flex:none}
   .sec__photo input{position:absolute;opacity:0;width:1px;height:1px}
-  .sec__photo-n{position:absolute;bottom:3px;right:3px;background:var(--brand);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;line-height:1.4}
-  .sec__photo-cam{position:absolute;bottom:3px;right:3px;background:var(--brand);color:#fff;width:18px;height:18px;border-radius:50%;display:grid;place-items:center}
-  .sec__photo-cam svg{width:11px;height:11px}
   .sec__ctrls{margin-left:auto;display:flex;gap:8px;align-items:center}
   .iconbtn{width:48px;height:48px;border-radius:13px;border:2px solid var(--line-strong);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--ink-soft)}
   .iconbtn:hover{border-color:var(--brand);color:var(--brand)}.iconbtn:disabled{opacity:.35;cursor:default}.iconbtn svg{width:22px;height:22px}
@@ -159,7 +159,6 @@
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;font-size:15px;opacity:0;transition:.25s;z-index:70;pointer-events:none;max-width:90vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* мастер */
   .wizstep{font-size:14px;font-weight:700;color:var(--muted);margin-bottom:8px}
   .wizprog{height:9px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:20px}
   .wizprog i{display:block;height:100%;background:var(--brand);border-radius:999px;transition:width .35s ease}
@@ -184,9 +183,7 @@
     .appbar__title{display:none}
     .appbar .lbl,.saved .lbl{display:none}
     .appbar .bigbtn{padding:0 13px;min-height:44px;gap:0}
-    .sec__top{flex-wrap:wrap}
-    .sec__ctrls{margin-left:0;width:100%;margin-top:12px;gap:8px}
-    .sec__ctrls .bigbtn{flex:1}
+    .sec__bar [data-edit]{flex:1 1 100%;margin-left:0}
     .eye .lbl{display:none}
     .eye{width:48px;padding:0;justify-content:center;flex:none}
     .mbar{display:flex}
@@ -236,7 +233,6 @@
   </div>
 </div>
 
-<!-- Мобильная панель: открыть витрину -->
 <div class="mbar" id="mbar">
   <button class="bigbtn bigbtn--primary" style="width:100%" onclick="openMP()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Посмотреть мой сайт</button>
 </div>
@@ -248,10 +244,8 @@
   <div class="mpreview__body" id="mstage"></div>
 </div>
 
-<!-- Мастер первого запуска -->
 <div class="overlay" id="wizard" style="display:none"><div class="modal" id="wizbody"></div></div>
 
-<!-- Помощь -->
 <div class="overlay" id="help" style="display:none">
   <div class="modal">
     <h2>Как пользоваться</h2>
@@ -322,8 +316,8 @@
   function normPhone(v){
     if(!v) return "";
     var d=(""+v).replace(/\D/g,"");
-    if(d.length>10) d=d.slice(-10);          // отбрасываем 8 / +8 / +7 / 7 спереди
-    if(d.length!==10) return "";             // мало цифр — не трогаем ввод
+    if(d.length>10) d=d.slice(-10);
+    if(d.length!==10) return "";
     return "+7 "+d.slice(0,3)+" "+d.slice(3,6)+" "+d.slice(6,8)+" "+d.slice(8,10);
   }
   function normLoc(v){
@@ -337,10 +331,9 @@
     if(row&&num) return "Ряд "+row+", павильон "+num;
     if(row) return "Ряд "+row;
     if(num) return "Павильон "+num;
-    return "";                               // не разобрали — оставляем как есть
+    return "";
   }
 
-  /* ---------- редактор ---------- */
   function editForm(s){
     if(s.id==="cover") return field("Как называется ваш магазин?","name","Например: Дастархан")+field("Короткое описание","tag","Например: восточные сладости и орехи, опт и розница",true)+uploader("coverImg","Перетащите сюда фото обложки","или нажмите — с телефона откроется камера или галерея","горизонтальное фото, от 1200×800 px");
     if(s.id==="about") return field("Заголовок","atitle","Например: Вкус, к которому возвращаются")+field("Расскажите о себе","atext","Сколько лет на рынке, что особенного",true)+field("Преимущество 1","fact1","Например: 15 лет на рынке")+field("Преимущество 2","fact2","Например: своя обжарка")+field("Преимущество 3","fact3","Например: доставка по городу")+uploader("aboutImg","Перетащите фото прилавка","или нажмите, чтобы выбрать с устройства","горизонтальное фото, от 1200×800 px");
@@ -379,27 +372,28 @@
       '<div class="field"><label>Действует до</label><input type="date" data-promo="until" value="'+esc(pr.until||"")+'"><div class="ex">Покажем «осталось N дней». Можно не указывать.</div></div>'+
       '<div class="field"><label>Цены по акции на товары</label><p class="ex" style="margin:-2px 0 10px">Впишите цену со скидкой — на карточке появится зачёркнутая старая цена и значок «−%».</p>'+sales+'</div>';
   }
-  function doneBar(){return '<div class="donebar"><span style="font-size:14px;color:var(--muted)">Изменения видно сразу справа →</span><button class="bigbtn bigbtn--ghost" data-done>'+ico('<path d="M5 12l5 5L20 7"/>')+'Готово</button></div>';}
-
   function secPhoto(s){
     var cam='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="3"/><path d="M7 5l1.5-2h7L17 5"/></svg>';
-    var camBadge='<span class="sec__photo-cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="3"/></svg></span>';
-    if(s.id==="cover"||s.id==="about"){var k=s.id==="cover"?"coverImg":"aboutImg",img=data[k];
-      return '<label class="sec__photo'+(img?"":" empty")+'" data-dz="'+k+'" aria-label="Фото блока: добавить или заменить"'+(img?' style="background-image:url('+img+')"':'')+'>'+(img?camBadge:cam)+'<input type="file" accept="image/*" data-file="'+k+'"></label>';}
-    if(s.id==="gallery"){var n=(data.gallery||[]).length,first=n?data.gallery[0]:"";
-      return '<label class="sec__photo'+(n?"":" empty")+'" data-dz="gallery" aria-label="Фото галереи: добавить"'+(first?' style="background-image:url('+first+')"':'')+'>'+(n?'<span class="sec__photo-n">'+n+'</span>':cam)+'<input type="file" accept="image/*" multiple data-file="gallery"></label>';}
+    function photoBtn(key,img,multi,label,filledText){
+      var lead=img?'<span class="pthumb" style="background-image:url('+img+')"></span>':cam;
+      return '<label class="sec__photo'+(img?"":" empty")+'" data-dz="'+key+'" aria-label="'+label+'">'+lead+'<span>'+(img?filledText:"Добавить фото")+'</span><input type="file" accept="image/*"'+(multi?" multiple":"")+' data-file="'+key+'"></label>';
+    }
+    if(s.id==="cover") return photoBtn("coverImg",data.coverImg,false,"Фото обложки","Сменить фото");
+    if(s.id==="about") return photoBtn("aboutImg",data.aboutImg,false,"Фото о магазине","Сменить фото");
+    if(s.id==="gallery"){var n=(data.gallery||[]).length;return photoBtn("gallery",n?data.gallery[0]:"",true,"Фото галереи","Фото · "+n);}
     return "";
   }
+  function doneBar(){return '<div class="donebar"><span style="font-size:14px;color:var(--muted)">Изменения видно сразу справа →</span><button class="bigbtn bigbtn--ghost" data-done>'+ico('<path d="M5 12l5 5L20 7"/>')+'Готово</button></div>';}
   function renderList(){
     list.innerHTML="";
     secs.forEach(function(s,i){
       var el=document.createElement("div");
       el.className="sec"+(s.on?"":" off")+(openId===s.id?" open":"");
-      el.innerHTML='<div class="sec__top"><div class="sec__num">'+(i+1)+'</div><div class="sec__t"><b>'+s.title+' <button class="qhint" data-hint="'+esc(HINTS[s.id]||"")+'" aria-label="Что это за раздел">?</button></b><span>'+s.desc+'</span></div>'+secPhoto(s)+
-        '<div class="sec__ctrls"><button class="iconbtn" data-up '+(i===0?"disabled":"")+' aria-label="Выше">'+ico('<path d="M6 15l6-6 6 6"/>')+'</button>'+
+      el.innerHTML='<div class="sec__top"><div class="sec__num">'+(i+1)+'</div><div class="sec__t"><b>'+s.title+' <button class="qhint" data-hint="'+esc(HINTS[s.id]||"")+'" aria-label="Что это за раздел">?</button></b><span>'+s.desc+'</span></div></div>'+'<div class="sec__bar">'+secPhoto(s)+
+        '<button class="iconbtn" data-up '+(i===0?"disabled":"")+' aria-label="Выше">'+ico('<path d="M6 15l6-6 6 6"/>')+'</button>'+
         '<button class="iconbtn" data-dn '+(i===secs.length-1?"disabled":"")+' aria-label="Ниже">'+ico('<path d="M6 9l6 6 6-6"/>')+'</button>'+
         '<button class="eye'+(s.on?"":" is-off")+'" data-eye>'+(s.on?ico('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>')+'<span class="lbl">Показывать</span>':ico('<path d="M3 3l18 18M10.6 5.1A10.9 10.9 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.3 3.9M6.6 6.6A17 17 0 0 0 2 12s4 7 10 7a10.9 10.9 0 0 0 4-.7"/>')+'<span class="lbl">Скрыто</span>')+'</button>'+
-        '<button class="bigbtn bigbtn--primary" data-edit>'+(openId===s.id?"Свернуть":ico('<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')+"Изменить")+'</button></div></div>'+
+        '<button class="bigbtn bigbtn--primary" data-edit>'+(openId===s.id?"Свернуть":ico('<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')+"Изменить")+'</button></div>'+
         '<div class="sec__edit">'+(openId===s.id?editForm(s)+doneBar():"")+'</div>';
       el.querySelector("[data-up]").onclick=function(){if(i>0)move(i,i-1);};
       el.querySelector("[data-dn]").onclick=function(){if(i<secs.length-1)move(i,i+1);};
@@ -445,7 +439,6 @@
   function move(a,b){var t=secs[a];secs[a]=secs[b];secs[b]=t;persist();renderList();renderPrev();}
   window.addProduct=function(){data.products.push({n:"",p:""});persist();renderList();renderPrev();};
   window.delProduct=function(i){data.products.splice(i,1);persist();renderList();renderPrev();};
-
   function prevBlock(s){
     if(s.id==="cover"){var cb=data.coverImg?' style="background:linear-gradient(135deg,rgba(28,107,87,.82),rgba(20,81,63,.9)),url('+data.coverImg+') center/cover"':'';return '<div class="pb pb-cover"'+cb+'><div class="nm">'+esc(data.name)+'</div><div class="tg">'+esc(data.tag)+'</div><span class="pill acc">Перейти в магазин</span><span class="pill">WhatsApp</span></div>';}
     if(s.id==="about"){var ff=[data.fact1,data.fact2,data.fact3].filter(function(f){return f&&(""+f).trim();});var fh=ff.length?'<div class="pb-facts">'+ff.map(function(f){return '<span>'+esc(f)+'</span>';}).join("")+'</div>':'';return '<div class="pb">'+(data.aboutImg?'<img src="'+data.aboutImg+'" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:12px;display:block">':'')+'<h5>'+esc(data.atitle)+'</h5><p>'+esc(data.atext)+'</p>'+fh+'</div>';}
@@ -466,8 +459,6 @@
     return "";
   }
   function renderPrev(){var on=secs.filter(function(s){return s.on;});var html=on.length?on.map(prevBlock).join(""):'<div class="empty">Включите хотя бы один раздел кнопкой «Показывать».</div>';stage.innerHTML=html;var ms=document.getElementById("mstage");if(ms)ms.innerHTML=html;document.getElementById("doc-name").textContent=data.name||"Магазин";}
-
-  /* ---------- сохранение ---------- */
   var savedEl=document.getElementById("saved"),tmr;
   function persist(){
     try{
@@ -493,7 +484,6 @@
   };
   var big=false;window.toggleBig=function(){big=!big;document.body.style.zoom=big?"1.15":"1";toast(big?"Текст увеличен":"Обычный размер");};
 
-  /* ---------- мастер первого запуска ---------- */
   var wiz={step:0,cat:null};
   var WB=document.getElementById("wizbody"),WO=document.getElementById("wizard");
   function wizProducts(){
@@ -586,7 +576,6 @@
     qtip.style.display="none";
   });
 
-  /* ---------- старт ---------- */
   var loaded=false;
   try{var raw=localStorage.getItem(KEY);if(raw){var sv=JSON.parse(raw);if(sv&&sv.data&&sv.secs){data=sv.data;secs=sv.secs;loaded=true;}}}catch(e){}
   if(!loaded)defaults();

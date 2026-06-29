@@ -1,11 +1,6 @@
-/* ============================================================
-   Саяхат — интерактив прототипа
-   чат-бот · scroll-анимации · фильтр каталога · RU/KZ
-   ============================================================ */
 (function () {
   "use strict";
 
-  /* ---------- стили виджетов (инжектим, чтобы работало на любой странице) ---------- */
   var css = `
   [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
   [data-reveal].seen{opacity:1;transform:none}
@@ -40,7 +35,6 @@
   `;
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
-  /* ---------- scroll-анимации ---------- */
   function initReveal() {
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     var els = document.querySelectorAll(".section, .hero, .cat-hero, .store, .news-card");
@@ -52,7 +46,6 @@
     els.forEach(function (e) { io.observe(e); });
   }
 
-  /* ---------- фильтр каталога (только если есть .stores) ---------- */
   function initCatalog() {
     var grid = document.querySelector(".stores"); if (!grid) return;
     var chips = document.querySelectorAll(".cat-chip");
@@ -79,7 +72,6 @@
     if (search) search.addEventListener("input", apply);
   }
 
-  /* ---------- RU / KZ ---------- */
   function initLang() {
     var box = document.querySelector(".lang"); if (!box) return;
     box.addEventListener("click", function (e) {
@@ -93,7 +85,6 @@
     });
   }
 
-  /* ---------- чат-бот «Помощник базара» ---------- */
   var FLOW = {
     start: { quicks: ["Где купить орехи и сухофрукты?", "Часы работы базара", "Как стать арендатором?", "Найти магазин"] },
     "Где купить орехи и сухофрукты?": "Это лавка «Дастархан» — ряд Б, павильон №14, напротив главного входа. Своя обжарка, опт и розница. <a href='shop.html'>Открыть магазин →</a>",

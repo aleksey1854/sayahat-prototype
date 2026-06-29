@@ -55,12 +55,22 @@
   .tip__t span{color:rgba(255,255,255,.85);font-size:15px}
 
   @media(max-width:860px){.grid2{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.shopcard{grid-template-columns:1fr}.shopcard__pic{height:150px}}
+  @media(max-width:560px){
+    .appbar{min-height:56px;padding:8px 14px;gap:10px}
+    .appbar__title{display:none}
+    .dash{padding:18px 16px 56px}
+    .metrics{gap:10px}
+    .metric{padding:14px 15px}.metric .val{font-size:26px}
+    .shopcard__body{padding:18px 18px}
+    .panel{padding:18px 18px}
+    .tip{padding:20px 20px}
+  }
 </style>
 </head>
 <body>
 
 <header class="appbar">
-  <a class="brand" href="dashboard.html"><span class="brand__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 21V11a7 7 0 0 1 14 0v10h-3.4V11a3.6 3.6 0 0 0-7.2 0v10z"/></svg></span><span class="brand__name">Саяхат</span></a>
+  <a class="brand" href="index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 21V11a7 7 0 0 1 14 0v10h-3.4V11a3.6 3.6 0 0 0-7.2 0v10z"/></svg></span><span class="brand__name">Саяхат</span></a>
   <div class="appbar__title">Кабинет арендатора</div>
   <a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> На сайт базара</a>
 </header>
