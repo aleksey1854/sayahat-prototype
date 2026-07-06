@@ -1,0 +1,540 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { db } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { getLang, pick, type Lang } from "@/lib/i18n";
+import { site, waLink } from "@/lib/site";
+import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
+import { absUrl } from "@/lib/seo";
+import { Header } from "@/components/Header";
+import { CallBar } from "@/components/CallBar";
+import { BazaarMap } from "@/components/BazaarMap";
+import { GoalTracker } from "@/components/GoalTracker";
+
+type ShopLayout = {
+  tagline?: string;
+  about?: { title?: string; image?: string; paragraphs?: string[] };
+  trust?: { title: string; sub: string }[];
+  promo?: { eyebrow?: string; title?: string; text?: string };
+  gallery?: string[];
+};
+
+function parseLayout(raw: string | null): ShopLayout {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as ShopLayout;
+  } catch {
+    return {};
+  }
+}
+
+function telHref(phone: string) {
+  return `tel:${phone.replace(/[^+\d]/g, "")}`;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const shop = await db.shop.findUnique({
+    where: { slug: params.slug },
+    include: { products: { orderBy: { order: "asc" }, take: 4, select: { nameRu: true } } },
+  });
+  if (!shop) return { title: "Магазин не найден" };
+  const title = shop.metaTitle ?? `${shop.nameRu} · базар Саяхат, Костанай`;
+
+  // Описание для поисковой выдачи: если не задано вручную (metaDesc),
+  // собирается из живых данных — товары дают ключевые слова в сниппете.
+  const goods = shop.products.map((p) => p.nameRu.toLowerCase()).join(", ");
+  const bits: string[] = [];
+  if (shop.descRu) bits.push(shop.descRu.replace(/\.\s*$/, ""));
+  if (goods) bits.push(`В наличии: ${goods}`);
+  if (shop.row && shop.pavilion) bits.push(`Ряд ${shop.row}, павильон ${shop.pavilion}`);
+  const description =
+    shop.metaDesc ??
+    (bits.length > 0
+      ? `${shop.nameRu} на базаре Саяхат (Костанай). ${bits.join(". ")}.`
+      : `${shop.nameRu} на рынке Саяхат в Костанае.`);
+  return {
+    title: { absolute: title },
+    description,
+    alternates: { canonical: `/shop/${shop.slug}` },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: shop.cover ? [photoUrl(shop.cover)!] : undefined,
+    },
+  };
+}
+
+export default async function ShopPage({ params }: { params: { slug: string } }) {
+  const shop = await db.shop.findUnique({
+    where: { slug: params.slug },
+    include: { category: true, products: { orderBy: { order: "asc" } } },
+  });
+
+  if (!shop) notFound();
+
+  let draftPreview = false;
+  if (shop.status !== "published") {
+    const session = await getSession();
+    if (session.role === "admin" || session.shopId === shop.id) draftPreview = true;
+    else notFound();
+  }
+
+  const lang: Lang = getLang();
+  const layout = parseLayout(shop.layout);
+  const name = pick(lang, shop.nameRu, shop.nameKz);
+  const mono = shop.nameRu.trim().charAt(0).toUpperCase();
+  const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
+
+  const MAP_ROWS = ["А", "Б", "В", "Г", "Д", "Е"];
+  const rowLetter = shop.row?.trim().toUpperCase() ?? "";
+  const mapHighlight = MAP_ROWS.includes(rowLetter) ? rowLetter : undefined;
+
+  const shopUrl = absUrl(`/shop/${shop.slug}`);
+
+  const priceValues = shop.products.map((p) => p.price).filter((v): v is number => v != null);
+  const priceRange =
+    priceValues.length > 0
+      ? Math.min(...priceValues) === Math.max(...priceValues)
+        ? price(Math.min(...priceValues))
+        : `${price(Math.min(...priceValues))} – ${price(Math.max(...priceValues))}`
+      : undefined;
+
+  const storeLd = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "@id": `${shopUrl}#store`,
+    name: shop.nameRu,
+    url: shopUrl,
+    image: absUrl(photoUrl(shop.cover)),
+    description: shop.descRu ?? undefined,
+    telephone: shop.phone ?? undefined,
+    priceRange,
+    sameAs: shop.instagram ? [`https://instagram.com/${shop.instagram}`] : undefined,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: site.city,
+      addressCountry: "KZ",
+    },
+    openingHours: "Mo-Su 08:00-19:00",
+    parentOrganization: { "@type": "ShoppingCenter", name: "Базар Саяхат", url: absUrl("/") },
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Базар Саяхат", item: absUrl("/") },
+      { "@type": "ListItem", position: 2, name: shop.nameRu },
+    ],
+  };
+
+  const productsLd =
+    shop.products.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: shop.products.map((p, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "Product",
+              name: p.nameRu,
+              image: absUrl(photoUrl(p.image)),
+              description: p.descRu ?? undefined,
+              offers:
+                p.price != null
+                  ? {
+                      "@type": "Offer",
+                      price: p.price,
+                      priceCurrency: "KZT",
+                      availability: "https://schema.org/InStock",
+                      url: shopUrl,
+                    }
+                  : undefined,
+            },
+          })),
+        }
+      : null;
+
+  const jsonLd = [storeLd, breadcrumbLd, ...(productsLd ? [productsLd] : [])];
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <GoalTracker shop={shop.slug} />
+      <Header variant="shop" />
+
+      {draftPreview && (
+        <div className="wrap" style={{ paddingTop: 14 }}>
+          <div className="notice notice--warn" style={{ marginBottom: 0 }}>
+            Черновик — страницу видите только вы. Опубликовать можно в админке.
+          </div>
+        </div>
+      )}
+
+      <section className="hero">
+        <div className="wrap hero__inner">
+          <div>
+            <div className="hero__mono">{mono}</div>
+            <div className="eyebrow">
+              {pick(lang, `Ряд ${shop.row} · павильон ${shop.pavilion}`, `${shop.row} қатар · ${shop.pavilion} павильон`)}
+            </div>
+            <h1>{name}</h1>
+            {layout.tagline && <p className="hero__tag">{layout.tagline}</p>}
+            {layout.trust && layout.trust.length > 0 && (
+              <div className="hero__chips">
+                {layout.trust.slice(0, 3).map((t, i) => (
+                  <span className="chip" key={i}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path d="M5 12l5 5L20 7" />
+                    </svg>
+                    {t.title} · {t.sub}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="hero__cta">
+              {shop.phone && (
+                <a className="btn btn--primary btn--lg" href={telHref(shop.phone)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
+                  </svg>
+                  {pick(lang, "Позвонить", "Қоңырау шалу")}
+                </a>
+              )}
+              {wa && (
+                <a className="btn btn--ghost btn--lg" href={wa}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.3A8.5 8.5 0 1 1 21 11.5z" />
+                  </svg>
+                  WhatsApp
+                </a>
+              )}
+              {shop.kaspiUrl ? (
+                <a className="btn btn--accent btn--lg" href={shop.kaspiUrl} data-goal="kaspi_click" target="_blank" rel="noopener">
+                  {pick(lang, "Перейти в магазин", "Дүкенге өту")}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M7 17L17 7M9 7h8v8" />
+                  </svg>
+                </a>
+              ) : (
+                shop.products.length > 0 && (
+                  <a className="btn btn--accent btn--lg" href="#tovary">
+                    {pick(lang, "Смотреть товары", "Тауарларды көру")}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </a>
+                )
+              )}
+            </div>
+          </div>
+          <div
+            className="hero__art"
+            style={shop.cover ? { background: `url('${photoUrl(shop.cover)}') center/cover` } : undefined}
+          >
+            {!shop.cover && <span>{name}</span>}
+          </div>
+        </div>
+      </section>
+
+      {layout.trust && layout.trust.length > 0 && (
+        <section className="trust">
+          <div className="wrap trust__inner">
+            {layout.trust.slice(0, 4).map((t, i) => (
+              <div className="trust__item" key={i}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+                <div>
+                  <b>{t.title}</b>
+                  <span>{t.sub}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {layout.about && (
+        <section className="section">
+          <div className="wrap about__inner">
+            <div className="about__text">
+              <div className="eyebrow">{pick(lang, "О магазине", "Дүкен туралы")}</div>
+              {layout.about.title && (
+                <h2 style={{ fontSize: 36, color: "var(--ink)", margin: "10px 0 18px" }}>{layout.about.title}</h2>
+              )}
+              {(layout.about.paragraphs ?? []).map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+            <div
+              className={layout.about.image ? "about__pic" : "about__pic about__pic--empty"}
+              style={layout.about.image ? { background: `url('${photoUrl(layout.about.image)}') center/cover` } : undefined}
+            >
+              {!layout.about.image && <span>{name}</span>}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {shop.products.length > 0 && (
+        <section className="section section--tight" id="tovary" style={{ background: "var(--surface-2)" }}>
+          <div className="wrap">
+            <div className="section-head">
+              <div className="eyebrow">{pick(lang, "Ассортимент", "Ассортимент")}</div>
+              <h2>{pick(lang, "Что есть на прилавке", "Прилавкеде не бар")}</h2>
+            </div>
+            <div className="grid-cards">
+              {shop.products.map((p, i) => {
+                const disc = p.oldPrice && p.price ? discountPercent(p.price, p.oldPrice) : 0;
+                const emptyClass = "card__pic card__pic--empty" + (i % 4 ? ` tile-g${i % 4}` : "");
+                return (
+                  <article className="card" key={p.id}>
+                    <div className={p.image ? "card__pic" : emptyClass}>
+                      {p.image ? (
+                        <img
+                          className="card__img"
+                          src={srcSetFor(photoUrl(p.image))!.src}
+                          srcSet={srcSetFor(photoUrl(p.image))!.srcSet}
+                          sizes="(max-width: 640px) 92vw, 300px"
+                          alt={p.nameRu}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="tile-mono">{p.nameRu.trim().charAt(0).toUpperCase()}</span>
+                      )}
+                      {disc > 0 ? (
+                        <span className="badge badge--hot">−{disc}%</span>
+                      ) : (
+                        <span className="badge badge--stock">{pick(lang, "в наличии", "сатылымда")}</span>
+                      )}
+                    </div>
+                    <div className="card__body">
+                      <h3>{pick(lang, p.nameRu, p.nameKz)}</h3>
+                      {p.descRu && <p>{p.descRu}</p>}
+                      <div className="card__foot">
+                        {p.price != null && (
+                          <span className="price">
+                            {price(p.price)} {p.unit && <small>/ {p.unit}</small>}
+                          </span>
+                        )}
+                        {wa && (
+                          <a className="btn btn--ghost" href={wa}>
+                            {pick(lang, "Заказать", "Тапсырыс")}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {layout.promo && (
+        <section className="section section--tight">
+          <div className="wrap">
+            <div className="promo">
+              <div className="promo__txt">
+                {layout.promo.eyebrow && <div className="eyebrow">{layout.promo.eyebrow}</div>}
+                {layout.promo.title && <h3>{layout.promo.title}</h3>}
+                {layout.promo.text && <p>{layout.promo.text}</p>}
+              </div>
+              {wa && (
+                <a className="btn btn--accent btn--lg" href={wa}>
+                  {pick(lang, "Заказать со скидкой", "Жеңілдікпен тапсырыс")}
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {layout.gallery && layout.gallery.length > 0 && (
+        <section className="section section--tight">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="eyebrow">{pick(lang, "Галерея", "Галерея")}</div>
+              <h2>{pick(lang, "Прилавок и товар", "Прилавок пен тауар")}</h2>
+            </div>
+            <div className="gallery">
+              {layout.gallery.map((img, i) => (
+                <div
+                  key={i}
+                  className={i === 0 ? "span2" : undefined}
+                  style={{ background: `url('${photoUrl(img)}') center/cover` }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {shop.products.length > 0 && (
+        <section className="section">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="eyebrow">{pick(lang, "Прайс-лист", "Бағалар")}</div>
+              <h2>{pick(lang, "Цены", "Бағалар тізімі")}</h2>
+            </div>
+            <div className="pricelist">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{pick(lang, "Позиция", "Атауы")}</th>
+                    <th>{pick(lang, "Цена", "Бағасы")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shop.products.map((p) => (
+                    <tr key={p.id}>
+                      <td className="name">{pick(lang, p.nameRu, p.nameKz)}</td>
+                      <td className="cost">
+                        {p.price != null ? price(p.price) : "—"}
+                        {p.price != null && p.unit ? ` / ${p.unit}` : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="section section--tight" id="kaspi" style={{ background: "var(--surface-2)" }}>
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">{pick(lang, "Контакты", "Байланыс")}</div>
+            <h2>{pick(lang, "Как нас найти", "Бізді қалай табуға болады")}</h2>
+          </div>
+          <div className="contact__inner">
+            <div className="panel">
+              <h3>{pick(lang, "Связаться", "Байланысу")}</h3>
+              {shop.phone && (
+                <div className="contact-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
+                  </svg>
+                  <div>
+                    <b>{shop.phone}</b>
+                    <span>{pick(lang, "звонок и WhatsApp", "қоңырау және WhatsApp")}</span>
+                  </div>
+                </div>
+              )}
+              {shop.instagram && (
+                <div className="contact-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="1" />
+                  </svg>
+                  <div>
+                    <b>@{shop.instagram}</b>
+                    <span>Instagram</span>
+                  </div>
+                </div>
+              )}
+              <div className="contact-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+                <div>
+                  <b>{shop.hours}</b>
+                  <span>{pick(lang, "часы работы", "жұмыс уақыты")}</span>
+                </div>
+              </div>
+              {shop.kaspiUrl ? (
+                <a className="btn btn--accent btn--block btn--lg" style={{ marginTop: 22 }} href={shop.kaspiUrl} data-goal="kaspi_click" target="_blank" rel="noopener">
+                  {pick(lang, "Перейти в магазин на Kaspi", "Kaspi-де дүкенге өту")}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M7 17L17 7M9 7h8v8" />
+                  </svg>
+                </a>
+              ) : (
+                wa && (
+                  <a className="btn btn--accent btn--block btn--lg" style={{ marginTop: 22 }} href={wa}>
+                    {pick(lang, "Написать в WhatsApp", "WhatsApp-қа жазу")}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.3A8.5 8.5 0 1 1 21 11.5z" />
+                    </svg>
+                  </a>
+                )
+              )}
+            </div>
+
+            <div className="panel">
+              <h3>{pick(lang, "Где мы на базаре", "Базарда қайдамыз")}</h3>
+              <div className="locrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                {pick(lang, `Ряд ${shop.row}, павильон №${shop.pavilion}`, `${shop.row} қатар, №${shop.pavilion} павильон`)}
+                {shop.landmark ? ` — ${shop.landmark}` : ""}
+              </div>
+              {mapHighlight && (
+                <p style={{ color: "var(--muted)", fontSize: 14.5, margin: "12px 0 0" }}>
+                  {pick(lang, "Ряд подсвечен на схеме ниже.", "Қатар төмендегі сызбада белгіленген.")}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <BazaarMap lang={lang} highlightRow={mapHighlight} />
+          </div>
+        </div>
+      </section>
+
+      <footer className="footer">
+        <div className="wrap">
+          <div className="foot-cols">
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
+                {name}
+              </div>
+              {shop.descRu && (
+                <p style={{ margin: 0, color: "var(--muted)", fontSize: 14.5, maxWidth: "36ch" }}>{shop.descRu}</p>
+              )}
+            </div>
+            <div>
+              <div style={{ fontSize: 12.5, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 700, marginBottom: 12 }}>
+                {pick(lang, "Связь", "Байланыс")}
+              </div>
+              {shop.phone && (
+                <a href={telHref(shop.phone)} style={{ display: "block", color: "var(--ink-soft)", fontSize: 14.5, marginBottom: 8 }}>
+                  {shop.phone}
+                </a>
+              )}
+              {wa && (
+                <a href={wa} style={{ display: "block", color: "var(--ink-soft)", fontSize: 14.5, marginBottom: 8 }}>
+                  WhatsApp
+                </a>
+              )}
+              {shop.instagram && (
+                <span style={{ display: "block", color: "var(--ink-soft)", fontSize: 14.5 }}>@{shop.instagram}</span>
+              )}
+            </div>
+            <div>
+              <div style={{ fontSize: 12.5, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 700, marginBottom: 12 }}>
+                {pick(lang, "Адрес и часы", "Мекенжай және уақыт")}
+              </div>
+              <div style={{ color: "var(--ink-soft)", fontSize: 14.5, marginBottom: 8 }}>
+                {pick(lang, `Базар Саяхат, ряд ${shop.row}, павильон №${shop.pavilion}`, `Саяхат базары, ${shop.row} қатар, №${shop.pavilion} павильон`)}
+              </div>
+              <div style={{ color: "var(--ink-soft)", fontSize: 14.5 }}>{shop.hours}</div>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <CallBar phone={shop.phone} whatsapp={shop.whatsapp} />
+    </>
+  );
+}

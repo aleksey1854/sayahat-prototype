@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id           String   @id @default(cuid())
+  login        String   @unique
+  passwordHash String
+  role         String   @default("tenant") // tenant | admin
+  shopId       String?  @unique
+  shop         Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id     String @id @default(cuid())
+  slug   String @unique
+  nameRu String
+  nameKz String
+  order  Int    @default(0)
+  shops  Shop[]
+}
+
+model Shop {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  nameRu     String
+  nameKz     String
+  descRu     String?
+  descKz     String?
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  cover      String?
+  phone      String?
+  whatsapp   String?
+  instagram  String?
+  kaspiUrl   String?
+  row        String?
+  pavilion   String?
+  landmark   String?
+  hours      String?  @default("Пн–Вс, 8:00–19:00")
+  rating     Float?
+  layout     String?
+  metaTitle  String?
+  metaDesc   String?
+  status     String   @default("published")
+  account    Account?
+  products   Product[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id       String  @id @default(cuid())
+  shopId   String
+  shop     Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  nameRu   String
+  nameKz   String?
+  descRu   String?
+  price    Int?
+  oldPrice Int?
+  unit     String?
+  image    String?
+  order    Int     @default(0)
+}
+
+model NewsPost {
+  id          String   @id @default(cuid())
+  titleRu     String
+  titleKz     String?
+  bodyRu      String?
+  bodyKz      String?
+  image       String?
+  publishedAt DateTime @default(now())
+}
