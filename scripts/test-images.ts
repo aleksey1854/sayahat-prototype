@@ -48,13 +48,13 @@ async function main() {
 
   const dir = process.env.UPLOAD_DIR!;
   const mainPath = path.join(dir, path.basename(res.url));
-  const smPath = mainPath.replace(/\.webp$/, "@sm.webp");
+  const smPath = mainPath.replace(/\.webp$/, "-sm.webp");
   const smMeta = await sharp(smPath).metadata();
-  check(smMeta.width === 640, `@sm-версия 640px (${smMeta.width})`);
+  check(smMeta.width === 640, `-sm-версия 640px (${smMeta.width})`);
 
   const smBytes = (await fs.stat(smPath)).size;
   check(res.bytes < bigBuf.length, `легче оригинала: ${(bigBuf.length / 1024) | 0} КБ → ${(res.bytes / 1024) | 0} КБ`);
-  check(smBytes < res.bytes, `@sm легче основного: ${(smBytes / 1024) | 0} КБ`);
+  check(smBytes < res.bytes, `-sm легче основного: ${(smBytes / 1024) | 0} КБ`);
 
   await removeUpload(res.url);
   const gone = await Promise.all(

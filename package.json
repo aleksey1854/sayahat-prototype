@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
@@ -12,7 +12,8 @@
     "postinstall": "prisma generate",
     "admin:create": "tsx scripts/create-admin.ts",
     "test:search": "tsx scripts/test-search.ts",
-    "test:images": "tsx scripts/test-images.ts"
+    "test:images": "tsx scripts/test-images.ts",
+    "db:deploy": "prisma db push"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -21,6 +22,7 @@
     "@fontsource/manrope": "^5.2.8",
     "@fontsource/onest": "^5.2.11",
     "@prisma/client": "5.22.0",
+    "@vercel/blob": "^2.6.1",
     "bcryptjs": "^3.0.3",
     "iron-session": "^8.0.4",
     "next": "14.2.5",

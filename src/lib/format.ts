@@ -21,12 +21,17 @@ export function photoUrl(v?: string | null): string | null {
   return v.startsWith("/") || v.startsWith("http") ? v : `/photos/${v}`;
 }
 
-// У загруженных фото есть лёгкая @sm-версия (640px): на карточках браузер
-// возьмёт её через srcset. Демо-фото отдаются как есть.
+// У загруженных фото есть лёгкая -sm-версия (640px): на карточках браузер
+// возьмёт её через srcset. Работает и для локальных /uploads, и для Blob-URL.
+// Демо-фото (public/photos) отдаются как есть.
 export function srcSetFor(src: string | null | undefined): { src: string; srcSet?: string } | null {
   if (!src) return null;
-  if (src.startsWith("/uploads/") && src.endsWith(".webp") && !src.endsWith("@sm.webp")) {
-    const sm = src.replace(/\.webp$/, "@sm.webp");
+  const isUploaded =
+    (src.startsWith("/uploads/") || src.includes(".public.blob.vercel-storage.com")) &&
+    src.includes(".webp") &&
+    !src.includes("-sm.webp");
+  if (isUploaded) {
+    const sm = src.replace(/\.webp(\?|$)/, "-sm.webp$1");
     return { src: sm, srcSet: `${sm} 640w, ${src} 1600w` };
   }
   return { src };

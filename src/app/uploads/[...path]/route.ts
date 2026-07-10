@@ -29,10 +29,10 @@ export async function GET(_req: Request, { params }: { params: { path: string[] 
     const data = await fs.readFile(file);
     return new Response(new Uint8Array(data), { headers: headers(ext) });
   } catch {
-    // У старых загрузок нет @sm-версии — делаем на лету из большой и кэшируем.
-    if (file.endsWith("@sm.webp")) {
+    // У старых загрузок нет -sm-версии — делаем на лету из большой и кэшируем.
+    if (file.endsWith("-sm.webp")) {
       try {
-        const big = await fs.readFile(file.replace(/@sm\.webp$/, ".webp"));
+        const big = await fs.readFile(file.replace(/-sm\.webp$/, ".webp"));
         const sharp = (await import("sharp")).default;
         const out = await sharp(big)
           .resize({ width: 640, height: 640, fit: "inside", withoutEnlargement: true })
