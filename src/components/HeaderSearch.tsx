@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCatalogSearch } from "./CatalogProvider";
 import { SearchSuggest } from "./SearchSuggest";
@@ -13,19 +13,12 @@ type Labels = {
   approxLabel: string;
 };
 
+// Единственное поле поиска каталога — живёт в шапке, всегда видно.
 export function HeaderSearch({ placeholder, clearLabel, showAllLabel, emptyLabel, approxLabel }: Labels) {
   const { query, setQuery, hits, mode } = useCatalogSearch();
   const router = useRouter();
-  const [show, setShow] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-
-  useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 260);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const q = query.trim();
   const items = q ? hits.slice(0, 6) : [];
@@ -64,7 +57,7 @@ export function HeaderSearch({ placeholder, clearLabel, showAllLabel, emptyLabel
   }
 
   return (
-    <div className={show ? "topbar__search is-visible" : "topbar__search"} role="search" aria-hidden={!show}>
+    <div className="topbar__search" role="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
         <circle cx="11" cy="11" r="7" />
         <path d="M21 21l-4.3-4.3" />
@@ -82,7 +75,6 @@ export function HeaderSearch({ placeholder, clearLabel, showAllLabel, emptyLabel
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         aria-label="Поиск по базару"
-        tabIndex={show ? 0 : -1}
       />
       {query && (
         <button
@@ -93,7 +85,6 @@ export function HeaderSearch({ placeholder, clearLabel, showAllLabel, emptyLabel
             setQuery("");
             close();
           }}
-          tabIndex={show ? 0 : -1}
         >
           ×
         </button>

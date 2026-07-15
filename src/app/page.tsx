@@ -92,17 +92,11 @@ export default async function HomePage() {
       <Header variant="catalog" />
 
       <CatalogSection
-        heroTitle={pick(lang, "Базар «Саяхат» — весь базар онлайн", "«Саяхат» базары — бүкіл базар онлайн")}
         catalogEyebrow={pick(lang, "Каталог", "Каталог")}
         catalogTitle={pick(lang, "Магазины базара", "Базар дүкендері")}
         categories={catList}
         lang={lang}
         ui={{
-          searchPlaceholder: pick(
-            lang,
-            "Что ищете? Орехи, платок, обувь, специи…",
-            "Не іздейсіз? Жаңғақ, орамал, аяқ киім, дәмдеуіш…",
-          ),
           all: pick(lang, "Все", "Барлығы"),
           empty: pick(
             lang,
@@ -110,7 +104,6 @@ export default async function HomePage() {
             "Сұрауыңыз бойынша дүкен табылмады — басқа санатты байқап көріңіз.",
           ),
           open: pick(lang, "Открыть", "Ашу"),
-          clear: pick(lang, "Очистить", "Тазалау"),
           foundPrefix: pick(lang, "Есть: ", "Бар: "),
           looseNote: pick(
             lang,
@@ -119,7 +112,6 @@ export default async function HomePage() {
           ),
           showAllFound: pick(lang, "Показать все найденные", "Барлық табылғанды көрсету"),
           resetSearch: pick(lang, "Сбросить поиск", "Іздеуді тазалау"),
-          nothing: pick(lang, "Ничего не нашлось", "Ештеңе табылмады"),
         }}
       />
       </CatalogProvider>

@@ -2,26 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCatalogSearch, type CardShop, type CardProduct } from "./CatalogProvider";
+import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
-import { SearchSuggest } from "./SearchSuggest";
 
 type Ui = {
-  searchPlaceholder: string;
   all: string;
   empty: string;
   open: string;
-  clear: string;
   foundPrefix: string;
   looseNote: string;
   showAllFound: string;
   resetSearch: string;
-  nothing: string;
 };
 
 type Props = {
-  heroTitle: string;
   catalogEyebrow: string;
   catalogTitle: string;
   categories: { slug: string; name: string }[];
@@ -38,49 +32,12 @@ function PinIcon() {
   );
 }
 
-export function CatalogSection({ heroTitle, catalogEyebrow, catalogTitle, categories, lang, ui }: Props) {
+export function CatalogSection({ catalogEyebrow, catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode } = useCatalogSearch();
-  const router = useRouter();
   const [cat, setCat] = useState("all");
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(-1);
 
   const q = query.trim();
-  const items = q ? hits.slice(0, 6) : [];
   const shown = hits.filter((m) => cat === "all" || m.shop.categorySlug === cat);
-
-  function close() {
-    setOpen(false);
-    setActive(-1);
-  }
-  function showAll() {
-    close();
-    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!q) return;
-    if (e.key === "Escape") return close();
-    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
-      setOpen(true);
-      return;
-    }
-    if (!open) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive((a) => Math.min(a + 1, items.length));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((a) => Math.max(a - 1, -1));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (active >= 0 && active < items.length) {
-        close();
-        router.push(`/shop/${items[active].shop.slug}`);
-      } else {
-        showAll();
-      }
-    }
-  }
 
   const countLine =
     q && hits.length > 0
@@ -91,63 +48,11 @@ export function CatalogSection({ heroTitle, catalogEyebrow, catalogTitle, catego
 
   return (
     <>
-      {/* Компактный верх: заголовок-строка и поиск, без большого hero-блока */}
-      <section className="cat-top">
-        <div className="wrap">
-          <h1 className="cat-top__title">{heroTitle}</h1>
-          <div className="searchbar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="7" />
-              <path d="M21 21l-4.3-4.3" />
-            </svg>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setOpen(true);
-                setActive(-1);
-              }}
-              onFocus={() => q && setOpen(true)}
-              onBlur={() => setTimeout(close, 120)}
-              onKeyDown={onKeyDown}
-              placeholder={ui.searchPlaceholder}
-            />
-            {query && (
-              <button
-                className="searchbar__clear"
-                type="button"
-                aria-label={ui.clear}
-                onClick={() => {
-                  setQuery("");
-                  close();
-                }}
-              >
-                ×
-              </button>
-            )}
-            {open && q && (
-              <SearchSuggest
-                items={items}
-                total={hits.length}
-                mode={mode}
-                active={active}
-                showAllLabel={ui.showAllFound}
-                emptyLabel={ui.nothing}
-                approxLabel={ui.looseNote}
-                onPick={close}
-                onShowAll={showAll}
-              />
-            )}
-          </div>
-        </div>
-      </section>
-
       <section className="section catalog-grid-section" id="catalog">
         <div className="wrap">
           <div className="section-head" style={{ textAlign: "center" }}>
             <div className="eyebrow">{catalogEyebrow}</div>
-            <h2 style={{ margin: "0 auto" }}>{catalogTitle}</h2>
+            <h1 style={{ margin: "0 auto" }}>{catalogTitle}</h1>
           </div>
 
           <div className="catbar" style={{ marginBottom: 32 }}>

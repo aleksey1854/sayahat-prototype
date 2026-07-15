@@ -23,16 +23,16 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
           )}
         </div>
 
+        {variant === "catalog" && (
+          <HeaderSearch
+            placeholder={pick(lang, "Что ищете? Орехи, платок, обувь…", "Не іздейсіз? Жаңғақ, орамал, аяқ киім…")}
+            clearLabel={pick(lang, "Очистить", "Тазалау")}
+            showAllLabel={pick(lang, "Показать все", "Барлығын көрсету")}
+            emptyLabel={pick(lang, "Ничего не нашлось", "Ештеңе табылмады")}
+            approxLabel={pick(lang, "Точных совпадений нет — похожие:", "Дәл сәйкестік жоқ — ұқсастары:")}
+          />
+        )}
         <div className="topbar__right">
-          {variant === "catalog" && (
-            <HeaderSearch
-              placeholder={pick(lang, "Поиск по базару…", "Базардан іздеу…")}
-              clearLabel={pick(lang, "Очистить", "Тазалау")}
-              showAllLabel={pick(lang, "Показать все", "Барлығын көрсету")}
-              emptyLabel={pick(lang, "Ничего не нашлось", "Ештеңе табылмады")}
-              approxLabel={pick(lang, "Точных совпадений нет — похожие:", "Дәл сәйкестік жоқ — ұқсастары:")}
-            />
-          )}
           <LangToggle lang={lang} />
         </div>
       </div>
