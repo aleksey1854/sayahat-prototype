@@ -1,26 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useCatalogSearch } from "./CatalogProvider";
+import { useRouter } from "next/navigation";
+import { useCatalogSearch, type CardShop, type CardProduct } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
-import { buildIndex, searchShops, type RawField } from "@/lib/search";
-import { trackEvent } from "@/lib/track";
-
-export type CardProduct = { name: string; price: number | null; unit: string | null };
-
-export type CardShop = {
-  slug: string;
-  name: string;
-  categorySlug: string;
-  categoryName: string;
-  cover: string | null;
-  location: string;
-  fields: RawField[];
-  products: CardProduct[];
-};
-
-type Stat = { value: string; label: string };
+import { SearchSuggest } from "./SearchSuggest";
 
 type Ui = {
   searchPlaceholder: string;
@@ -32,15 +17,13 @@ type Ui = {
   looseNote: string;
   showAllFound: string;
   resetSearch: string;
+  nothing: string;
 };
 
 type Props = {
   heroTitle: string;
-  heroSubtitle: string;
-  stats: Stat[];
   catalogEyebrow: string;
   catalogTitle: string;
-  shops: CardShop[];
   categories: { slug: string; name: string }[];
   lang: "ru" | "kz";
   ui: Ui;
@@ -55,65 +38,63 @@ function PinIcon() {
   );
 }
 
-export function CatalogSection({
-  heroTitle,
-  heroSubtitle,
-  stats,
-  catalogEyebrow,
-  catalogTitle,
-  shops,
-  categories,
-  lang,
-  ui,
-}: Props) {
-  const { query, setQuery } = useCatalogSearch();
+export function CatalogSection({ heroTitle, catalogEyebrow, catalogTitle, categories, lang, ui }: Props) {
+  const { query, setQuery, hits, mode } = useCatalogSearch();
+  const router = useRouter();
   const [cat, setCat] = useState("all");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
 
-  const index = useMemo(() => buildIndex(shops.map((s) => s.fields)), [shops]);
   const q = query.trim();
+  const items = q ? hits.slice(0, 6) : [];
+  const shown = hits.filter((m) => cat === "all" || m.shop.categorySlug === cat);
 
-  const { matched, mode } = useMemo(() => {
-    if (!q) {
-      return {
-        matched: shops.map((shop) => ({ shop, product: undefined as CardProduct | undefined })),
-        mode: "all" as const,
-      };
-    }
-    const res = searchShops(index, q);
-    return {
-      matched: res.hits.map((h) => ({
-        shop: shops[h.idx],
-        product: h.product != null ? shops[h.idx].products[h.product] : undefined,
-      })),
-      mode: res.mode,
-    };
-  }, [index, shops, q]);
-
-  const shown = matched.filter((m) => cat === "all" || m.shop.categorySlug === cat);
-
-  // Аналитика запросов: что ищут и что ищут впустую (после паузы в наборе).
-  useEffect(() => {
+  function close() {
+    setOpen(false);
+    setActive(-1);
+  }
+  function showAll() {
+    close();
+    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (!q) return;
-    const timer = setTimeout(() => {
-      trackEvent("search", { query: q, results: matched.length });
-      if (matched.length === 0) trackEvent("search_empty", { query: q });
-    }, 900);
-    return () => clearTimeout(timer);
-  }, [q, matched.length]);
+    if (e.key === "Escape") return close();
+    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+      setOpen(true);
+      return;
+    }
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((a) => Math.min(a + 1, items.length));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => Math.max(a - 1, -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (active >= 0 && active < items.length) {
+        close();
+        router.push(`/shop/${items[active].shop.slug}`);
+      } else {
+        showAll();
+      }
+    }
+  }
 
   const countLine =
-    q && matched.length > 0
+    q && hits.length > 0
       ? lang === "kz"
-        ? `«${q}»: ${matched.length} дүкен табылды`
-        : `Найдено ${matched.length} ${ruPlural(matched.length, "магазин", "магазина", "магазинов")} по запросу «${q}»`
+        ? `«${q}»: ${hits.length} дүкен табылды`
+        : `Найдено ${hits.length} ${ruPlural(hits.length, "магазин", "магазина", "магазинов")} по запросу «${q}»`
       : "";
 
   return (
     <>
-      <section className="cat-hero">
-        <div className="wrap cat-hero__inner">
-          <h1>{heroTitle}</h1>
-          <p>{heroSubtitle}</p>
+      {/* Компактный верх: заголовок-строка и поиск, без большого hero-блока */}
+      <section className="cat-top">
+        <div className="wrap">
+          <h1 className="cat-top__title">{heroTitle}</h1>
           <div className="searchbar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="7" />
@@ -122,22 +103,42 @@ export function CatalogSection({
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpen(true);
+                setActive(-1);
+              }}
+              onFocus={() => q && setOpen(true)}
+              onBlur={() => setTimeout(close, 120)}
+              onKeyDown={onKeyDown}
               placeholder={ui.searchPlaceholder}
             />
             {query && (
-              <button className="searchbar__clear" type="button" aria-label={ui.clear} onClick={() => setQuery("")}>
+              <button
+                className="searchbar__clear"
+                type="button"
+                aria-label={ui.clear}
+                onClick={() => {
+                  setQuery("");
+                  close();
+                }}
+              >
                 ×
               </button>
             )}
-          </div>
-          <div className="stats">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <b>{s.value}</b>
-                <span>{s.label}</span>
-              </div>
-            ))}
+            {open && q && (
+              <SearchSuggest
+                items={items}
+                total={hits.length}
+                mode={mode}
+                active={active}
+                showAllLabel={ui.showAllFound}
+                emptyLabel={ui.nothing}
+                approxLabel={ui.looseNote}
+                onPick={close}
+                onShowAll={showAll}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -167,7 +168,7 @@ export function CatalogSection({
           {countLine && (
             <div className="search-meta">
               <b>{countLine}</b>
-              {mode === "loose" && <div>{ui.looseNote}</div>}
+              {(mode === "fuzzy" || mode === "loose") && <div>{ui.looseNote}</div>}
             </div>
           )}
 
@@ -224,14 +225,14 @@ export function CatalogSection({
           {shown.length === 0 && (
             <div className="no-results" style={{ display: "block" }}>
               {ui.empty}
-              {q && matched.length > 0 && (
+              {q && hits.length > 0 && (
                 <div style={{ marginTop: 12 }}>
                   <button className="link-reset" onClick={() => setCat("all")}>
-                    {ui.showAllFound} ({matched.length})
+                    {ui.showAllFound} ({hits.length})
                   </button>
                 </div>
               )}
-              {q && matched.length === 0 && (
+              {q && hits.length === 0 && (
                 <div style={{ marginTop: 12 }}>
                   <button className="link-reset" onClick={() => setQuery("")}>
                     {ui.resetSearch}

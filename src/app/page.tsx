@@ -5,8 +5,8 @@ import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BazaarMap } from "@/components/BazaarMap";
-import { CatalogSection, type CardShop } from "@/components/CatalogSection";
-import { CatalogProvider } from "@/components/CatalogProvider";
+import { CatalogSection } from "@/components/CatalogSection";
+import { CatalogProvider, type CardShop } from "@/components/CatalogProvider";
 
 export default async function HomePage() {
   const lang = getLang();
@@ -88,30 +88,13 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <CatalogProvider>
+      <CatalogProvider shops={cards}>
       <Header variant="catalog" />
 
       <CatalogSection
-        heroTitle={pick(lang, "Весь базар Саяхат — теперь онлайн", "Бүкіл Саяхат базары — енді онлайн")}
-        heroSubtitle={pick(
-          lang,
-          "Находите магазины, смотрите товары и цены, переходите в их Kaspi и Instagram — не выходя из дома.",
-          "Дүкендерді табыңыз, тауарлар мен бағаларды көріңіз, олардың Kaspi мен Instagram-ына өтіңіз — үйден шықпай.",
-        )}
-        stats={[
-          {
-            value: String(shops.length),
-            label: pick(lang, ruPlural(shops.length, "магазин", "магазина", "магазинов"), "дүкен"),
-          },
-          { value: "6", label: pick(lang, "торговых рядов", "сауда қатары") },
-          {
-            value: String(categories.length),
-            label: pick(lang, ruPlural(categories.length, "категория", "категории", "категорий"), "санат"),
-          },
-        ]}
+        heroTitle={pick(lang, "Базар «Саяхат» — весь базар онлайн", "«Саяхат» базары — бүкіл базар онлайн")}
         catalogEyebrow={pick(lang, "Каталог", "Каталог")}
         catalogTitle={pick(lang, "Магазины базара", "Базар дүкендері")}
-        shops={cards}
         categories={catList}
         lang={lang}
         ui={{
@@ -136,6 +119,7 @@ export default async function HomePage() {
           ),
           showAllFound: pick(lang, "Показать все найденные", "Барлық табылғанды көрсету"),
           resetSearch: pick(lang, "Сбросить поиск", "Іздеуді тазалау"),
+          nothing: pick(lang, "Ничего не нашлось", "Ештеңе табылмады"),
         }}
       />
       </CatalogProvider>

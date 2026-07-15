@@ -461,11 +461,15 @@ function scoreDoc(
   let prodRaw = 0;
   let bestProd = -1;
 
+  let minRaw = 1; // худшее из «качеств» совпадения по токенам (1 точное … 0.4 опечатка)
+
   for (let k = 0; k < tokens.length; k++) {
     let best = 0;
+    let bestRawTok = 0;
     for (const f of doc) {
       const raw = tokenInField(tokens[k], tokenStems[k], expansions[k], f);
       if (!raw) continue;
+      if (raw > bestRawTok) bestRawTok = raw;
       const s = raw * f.weight;
       if (s > best) best = s;
       if (f.kind === "name" && raw > nameRaw) nameRaw = raw;
@@ -475,6 +479,7 @@ function scoreDoc(
       }
     }
     if (best === 0) allMatched = false;
+    else if (bestRawTok < minRaw) minRaw = bestRawTok;
     total += best;
   }
 
@@ -493,19 +498,21 @@ function scoreDoc(
   // Сниппет товара показываем, когда совпадение с товаром КАЧЕСТВЕННЕЕ,
   // чем с названием магазина: точность важнее веса поля.
   const product = bestProd >= 0 && prodRaw > nameRaw ? bestProd : undefined;
-  return { score: total, strict: allMatched, product };
+  return { score: total, strict: allMatched, product, minRaw };
 }
 
 // --- поиск: strict = нашлись все слова запроса; loose = только часть ---
 
+export type SearchMode = "all" | "strict" | "fuzzy" | "loose";
+
 export function searchShops(
   index: SearchIndex,
   rawQuery: string,
-): { mode: "all" | "strict" | "loose"; hits: Hit[] } {
+): { mode: SearchMode; hits: Hit[] } {
   const variants = queryVariants(rawQuery);
   if (variants.length === 0) return { mode: "all", hits: [] };
 
-  const bestByDoc = new Map<number, Hit & { strict: boolean }>();
+  const bestByDoc = new Map<number, Hit & { strict: boolean; minRaw: number }>();
   for (const v of variants) {
     const base = tokenizeBase(v);
     if (base.length === 0) continue;
@@ -521,17 +528,33 @@ export function searchShops(
         (r.strict && !prev.strict) ||
         (r.strict === prev.strict && r.score > prev.score)
       ) {
-        bestByDoc.set(i, { idx: i, score: r.score, product: r.product, strict: r.strict });
+        bestByDoc.set(i, { idx: i, score: r.score, product: r.product, strict: r.strict, minRaw: r.minRaw });
       }
     });
   }
 
   const all = [...bestByDoc.values()];
-  const strict = all.filter((h) => h.strict);
-  const pool = strict.length > 0 ? strict : all;
+  // Сильные совпадения (точное / начало / форма слова / синоним, качество >= 0.6)
+  // вытесняют слабые (опечатки, склейки): опечаточная логика включается
+  // ТОЛЬКО когда точных результатов нет вообще.
+  const strong = all.filter((h) => h.strict && h.minRaw >= 0.6);
+  const weak = all.filter((h) => h.strict && h.minRaw < 0.6);
+
+  let pool: typeof all;
+  let mode: SearchMode;
+  if (strong.length > 0) {
+    pool = strong;
+    mode = "strict";
+  } else if (weak.length > 0) {
+    pool = weak;
+    mode = "fuzzy";
+  } else {
+    pool = all;
+    mode = "loose";
+  }
   pool.sort((a, b) => b.score - a.score);
   return {
-    mode: strict.length > 0 ? "strict" : "loose",
+    mode,
     hits: pool.map(({ idx, score, product }) => ({ idx, score, product })),
   };
 }

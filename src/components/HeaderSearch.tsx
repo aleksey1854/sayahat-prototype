@@ -1,28 +1,66 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCatalogSearch } from "./CatalogProvider";
+import { SearchSuggest } from "./SearchSuggest";
 
-export function HeaderSearch({ placeholder, clearLabel }: { placeholder: string; clearLabel: string }) {
-  const { query, setQuery } = useCatalogSearch();
+type Labels = {
+  placeholder: string;
+  clearLabel: string;
+  showAllLabel: string;
+  emptyLabel: string;
+  approxLabel: string;
+};
+
+export function HeaderSearch({ placeholder, clearLabel, showAllLabel, emptyLabel, approxLabel }: Labels) {
+  const { query, setQuery, hits, mode } = useCatalogSearch();
+  const router = useRouter();
   const [show, setShow] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
 
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 380);
+    const onScroll = () => setShow(window.scrollY > 260);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  function onChange(v: string) {
-    // Начал печатать, уже пролистав каталог, — мягко возвращаем к результатам.
-    if (query === "" && v !== "") {
-      const el = document.getElementById("catalog");
-      if (el && el.getBoundingClientRect().top < 0) {
-        el.scrollIntoView({ behavior: "smooth" });
+  const q = query.trim();
+  const items = q ? hits.slice(0, 6) : [];
+
+  function close() {
+    setOpen(false);
+    setActive(-1);
+  }
+  function showAll() {
+    close();
+    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+  }
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!q) return;
+    if (e.key === "Escape") return close();
+    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+      setOpen(true);
+      return;
+    }
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((a) => Math.min(a + 1, items.length));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => Math.max(a - 1, -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (active >= 0 && active < items.length) {
+        close();
+        router.push(`/shop/${items[active].shop.slug}`);
+      } else {
+        showAll();
       }
     }
-    setQuery(v);
   }
 
   return (
@@ -34,7 +72,14 @@ export function HeaderSearch({ placeholder, clearLabel }: { placeholder: string;
       <input
         type="text"
         value={query}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+          setActive(-1);
+        }}
+        onFocus={() => q && setOpen(true)}
+        onBlur={() => setTimeout(close, 120)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         aria-label="Поиск по базару"
         tabIndex={show ? 0 : -1}
@@ -44,11 +89,27 @@ export function HeaderSearch({ placeholder, clearLabel }: { placeholder: string;
           className="searchbar__clear"
           type="button"
           aria-label={clearLabel}
-          onClick={() => setQuery("")}
+          onClick={() => {
+            setQuery("");
+            close();
+          }}
           tabIndex={show ? 0 : -1}
         >
           ×
         </button>
+      )}
+      {open && q && (
+        <SearchSuggest
+          items={items}
+          total={hits.length}
+          mode={mode}
+          active={active}
+          showAllLabel={showAllLabel}
+          emptyLabel={emptyLabel}
+          approxLabel={approxLabel}
+          onPick={close}
+          onShowAll={showAll}
+        />
       )}
     </div>
   );

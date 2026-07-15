@@ -28,6 +28,9 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
             <HeaderSearch
               placeholder={pick(lang, "Поиск по базару…", "Базардан іздеу…")}
               clearLabel={pick(lang, "Очистить", "Тазалау")}
+              showAllLabel={pick(lang, "Показать все", "Барлығын көрсету")}
+              emptyLabel={pick(lang, "Ничего не нашлось", "Ештеңе табылмады")}
+              approxLabel={pick(lang, "Точных совпадений нет — похожие:", "Дәл сәйкестік жоқ — ұқсастары:")}
             />
           )}
           <LangToggle lang={lang} />
