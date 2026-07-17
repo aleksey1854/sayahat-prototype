@@ -16,10 +16,7 @@ type Ui = {
 };
 
 type Props = {
-  catalogEyebrow: string;
   catalogTitle: string;
-  catalogSub?: string;
-  facts?: { rating: string; hours: string; address: string };
   categories: { slug: string; name: string }[];
   lang: "ru" | "kz";
   ui: Ui;
@@ -45,7 +42,7 @@ function tintFor(slug: string) {
   return TINT[slug] ?? "tile--shop";
 }
 
-export function CatalogSection({ catalogEyebrow, catalogTitle, catalogSub, facts, categories, lang, ui }: Props) {
+export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode } = useCatalogSearch();
   const [cat, setCat] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
@@ -98,32 +95,7 @@ export function CatalogSection({ catalogEyebrow, catalogTitle, catalogSub, facts
     <>
       <section className="section catalog-grid-section" id="catalog">
         <div className="wrap">
-          <div className="section-head" style={{ textAlign: "center" }}>
-            <div className="eyebrow">{catalogEyebrow}</div>
-            <h1 style={{ margin: "0 auto" }}>{catalogTitle}</h1>
-            {catalogSub && <p className="catalog-sub">{catalogSub}</p>}
-            {facts && (
-              <div className="factbar">
-                <span className="fact">
-                  <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                    <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16.9 5.9 19.4 7.4 12.9l-5-4.3 6.6-.6z" />
-                  </svg>
-                  {facts.rating}
-                </span>
-                <span className="fact">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 7v5l3 2" />
-                  </svg>
-                  {facts.hours}
-                </span>
-                <span className="fact">
-                  <PinIcon />
-                  {facts.address}
-                </span>
-              </div>
-            )}
-          </div>
+          <h1 className="sr-only">{catalogTitle}</h1>
 
           <div className="catbar" style={{ marginBottom: 32 }}>
             <button className={cat === "all" ? "cat-chip on" : "cat-chip"} onClick={() => setCat("all")}>

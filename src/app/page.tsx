@@ -114,14 +114,7 @@ export default async function HomePage() {
       <Header variant="catalog" />
 
       <CatalogSection
-        catalogEyebrow={pick(lang, "Рынок «Саяхат» · Костанай", "«Саяхат» базары · Қостанай")}
-        catalogTitle={pick(lang, "Все магазины рынка онлайн", "Базардың барлық дүкені онлайн")}
-        catalogSub={pick(lang, site.slogan, site.sloganKz)}
-        facts={{
-          rating: `★ ${site.rating} · 2ГИС`,
-          hours: pick(lang, "Вт–Вс 10–19", "Сс–Жс 10–19"),
-          address: pick(lang, "Карбышева 131", "Карбышев 131"),
-        }}
+        catalogTitle={pick(lang, "Все магазины рынка «Саяхат» — Костанай", "«Саяхат» базарының барлық дүкендері — Қостанай")}
         categories={catList}
         lang={lang}
         ui={{

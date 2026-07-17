@@ -525,16 +525,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .notice--ok { background: var(--brand-50); color: var(--brand-700); }
 .notice--err { background: #F7E2D8; color: var(--terracotta-700); }
 
-/* ── новая версия: слоган, факты, аренда, как добраться, соцблок ── */
-.catalog-sub { margin: 12px auto 0; max-width: 44ch; font-size: 18px; color: var(--ink-soft); font-weight: 500; }
-.factbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
-.fact {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 14px; font-weight: 600; color: var(--ink-soft);
-  background: var(--surface); border: 1px solid var(--line);
-  padding: 8px 14px; border-radius: 999px;
-}
-.fact svg { width: 16px; height: 16px; color: var(--accent-700); flex: none; }
+/* ── новая версия: аренда, как добраться, соцблок ── */
 
 /* Свободные места — акцентная полоса */
 .arenda {
@@ -626,7 +617,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .store__pic, .card__pic { overflow: hidden; }
 .store__pic > *, .card__pic > * { transition: transform .35s var(--ease-out-expo); }
 .store:hover .store__pic > *, .card:hover .card__pic > * { transform: scale(1.03); }
-.fact { transition: transform .16s var(--ease-out-quint), border-color .16s ease; }
 
 /* Scroll-reveal (IntersectionObserver — работает во всех браузерах).
    Скрытое состояние применяется ТОЛЬКО при html.js. Без JS/при сбое бандла
@@ -646,7 +636,7 @@ html.js .reveal.reveal--in { opacity: 1; transform: none; }
 .store.reveal:hover, .store.reveal:active { transition-delay: 0s; }
 
 /* Типографика: ровные строки в заголовках, меньше «сирот» в прозе */
-h1, h2, h3, .section-head h2, .catalog-sub { text-wrap: balance; }
+h1, h2, h3, .section-head h2 { text-wrap: balance; }
 p, .store__body p, .getthere__note { text-wrap: pretty; }
 /* Крупный текст — минусовой трекинг (Apple: чем крупнее, тем плотнее) */
 h1 { letter-spacing: -0.022em; }
@@ -671,5 +661,11 @@ h2 { letter-spacing: -0.018em; }
 .store--sk:hover { transform: none; box-shadow: var(--shadow-sm); }
 .store--sk .store__pic.sk { border-radius: 0; }
 @media (prefers-reduced-motion: reduce) { .sk::after { display: none; } }
+
+/* визуально скрыто, доступно скринридерам/поисковикам */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
 
 @tailwind utilities;

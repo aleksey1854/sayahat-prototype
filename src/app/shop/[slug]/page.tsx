@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const description =
     shop.metaDesc ??
     (bits.length > 0
-      ? `${shop.nameRu} на базаре Саяхат (Костанай). ${bits.join(". ")}.`
+      ? `${shop.nameRu} на рынке Саяхат (Костанай). ${bits.join(". ")}.`
       : `${shop.nameRu} на рынке Саяхат в Костанае.`);
   return {
     title: { absolute: title },
@@ -142,7 +142,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Базар Саяхат", item: absUrl("/") },
+      { "@type": "ListItem", position: 1, name: "Рынок Саяхат", item: absUrl("/") },
       { "@type": "ListItem", position: 2, name: shop.nameRu },
     ],
   };
