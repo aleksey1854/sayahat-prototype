@@ -8,6 +8,7 @@ import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
 import { CallBar } from "@/components/CallBar";
+import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { BazaarMap } from "@/components/BazaarMap";
 import { GoalTracker } from "@/components/GoalTracker";
 
@@ -257,7 +258,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       </section>
 
       {layout.trust && layout.trust.length > 0 && (
-        <section className="trust">
+        <section className="trust reveal">
           <div className="wrap trust__inner">
             {layout.trust.slice(0, 4).map((t, i) => (
               <div className="trust__item" key={i}>
@@ -275,10 +276,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       )}
 
       {layout.about && (
-        <section className="section">
+        <section className="section reveal">
           <div className="wrap about__inner">
             <div className="about__text">
-              <div className="eyebrow">{pick(lang, "О магазине", "Дүкен туралы")}</div>
               {layout.about.title && (
                 <h2 style={{ fontSize: 36, color: "var(--ink)", margin: "10px 0 18px" }}>{layout.about.title}</h2>
               )}
@@ -297,10 +297,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       )}
 
       {shop.products.length > 0 && (
-        <section className="section section--tight" id="tovary" style={{ background: "var(--surface-2)" }}>
+        <section className="section section--tight reveal" id="tovary" style={{ background: "var(--surface-2)" }}>
           <div className="wrap">
             <div className="section-head">
-              <div className="eyebrow">{pick(lang, "Ассортимент", "Ассортимент")}</div>
               <h2>{pick(lang, "Что есть на прилавке", "Прилавкеде не бар")}</h2>
             </div>
             <div className="grid-cards">
@@ -353,7 +352,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       )}
 
       {layout.promo && (
-        <section className="section section--tight">
+        <section className="section section--tight reveal">
           <div className="wrap">
             <div className="promo">
               <div className="promo__txt">
@@ -372,10 +371,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       )}
 
       {layout.gallery && layout.gallery.length > 0 && (
-        <section className="section section--tight">
+        <section className="section section--tight reveal">
           <div className="wrap">
             <div className="section-head">
-              <div className="eyebrow">{pick(lang, "Галерея", "Галерея")}</div>
               <h2>{pick(lang, "Прилавок и товар", "Прилавок пен тауар")}</h2>
             </div>
             <div className="gallery">
@@ -392,10 +390,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       )}
 
       {shop.products.length > 0 && (
-        <section className="section">
+        <section className="section reveal">
           <div className="wrap">
             <div className="section-head">
-              <div className="eyebrow">{pick(lang, "Прайс-лист", "Бағалар")}</div>
               <h2>{pick(lang, "Цены", "Бағалар тізімі")}</h2>
             </div>
             <div className="pricelist">
@@ -423,10 +420,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         </section>
       )}
 
-      <section className="section section--tight" id="kaspi" style={{ background: "var(--surface-2)" }}>
+      <section className="section section--tight reveal" id="kaspi" style={{ background: "var(--surface-2)" }}>
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">{pick(lang, "Контакты", "Байланыс")}</div>
             <h2>{pick(lang, "Как нас найти", "Бізді қалай табуға болады")}</h2>
           </div>
           <div className="contact__inner">
@@ -552,6 +548,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         </div>
       </footer>
 
+      <RevealOnScroll />
       <CallBar phone={shop.phone} whatsapp={shop.whatsapp} />
     </>
   );

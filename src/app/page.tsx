@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { BazaarMap } from "@/components/BazaarMap";
 import { FreeSpaces } from "@/components/FreeSpaces";
 import { GettingThere } from "@/components/GettingThere";
+import { Reveal } from "@/components/Reveal";
 import { CatalogSection } from "@/components/CatalogSection";
 import { CatalogProvider, type CardShop } from "@/components/CatalogProvider";
 
@@ -144,44 +145,51 @@ export default async function HomePage() {
       </CatalogProvider>
 
       {news.length > 0 && (
-        <section className="section section--tight" style={{ background: "var(--surface-2)" }}>
-          <div className="wrap">
-            <div className="section-head">
-              <div className="eyebrow">{pick(lang, "Что нового", "Не жаңалық")}</div>
-              <h2>{pick(lang, "Новости базара", "Базар жаңалықтары")}</h2>
+        <Reveal>
+          <section className="section section--tight" style={{ background: "var(--surface-2)" }}>
+            <div className="wrap">
+              <div className="section-head">
+                <h2>{pick(lang, "Новости рынка", "Базар жаңалықтары")}</h2>
+              </div>
+              <div className="news-grid">
+                {news.map((n) => (
+                  <article className="news-card" key={n.id}>
+                    <time>{newsDate(n.publishedAt)}</time>
+                    <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
+                    {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
+                  </article>
+                ))}
+              </div>
             </div>
-            <div className="news-grid">
-              {news.map((n) => (
-                <article className="news-card" key={n.id}>
-                  <time>{newsDate(n.publishedAt)}</time>
-                  <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
-                  {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+          </section>
+        </Reveal>
       )}
 
-      <section className="section">
-        <div className="wrap">
-          <div className="section-head">
-            <h2>{pick(lang, "Карта рынка", "Базар картасы")}</h2>
-            <p>
-              {pick(
-                lang,
-                "Продуктовый и два вещевых павильона плюс ярмарка Art Bazar. Найдите нужный павильон заранее — и приходите сразу к бутику.",
-                "Азық-түлік және екі киім павильоны, Art Bazar жәрмеңкесі. Қажет павильонды алдын ала табыңыз — бутикке бірден келіңіз.",
-              )}
-            </p>
+      <Reveal>
+        <section className="section">
+          <div className="wrap">
+            <div className="section-head">
+              <h2>{pick(lang, "Карта рынка", "Базар картасы")}</h2>
+              <p>
+                {pick(
+                  lang,
+                  "Продуктовый и два вещевых павильона плюс ярмарка Art Bazar. Найдите нужный павильон заранее — и приходите сразу к бутику.",
+                  "Азық-түлік және екі киім павильоны, Art Bazar жәрмеңкесі. Қажет павильонды алдын ала табыңыз — бутикке бірден келіңіз.",
+                )}
+              </p>
+            </div>
+            <BazaarMap lang={lang} />
           </div>
-          <BazaarMap lang={lang} />
-        </div>
-      </section>
+        </section>
+      </Reveal>
 
-      <GettingThere lang={lang} />
+      <Reveal>
+        <GettingThere lang={lang} />
+      </Reveal>
 
-      <FreeSpaces lang={lang} />
+      <Reveal>
+        <FreeSpaces lang={lang} />
+      </Reveal>
 
       <Footer />
     </>

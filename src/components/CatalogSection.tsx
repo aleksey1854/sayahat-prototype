@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
@@ -48,9 +48,44 @@ function tintFor(slug: string) {
 export function CatalogSection({ catalogEyebrow, catalogTitle, catalogSub, facts, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode } = useCatalogSearch();
   const [cat, setCat] = useState("all");
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
   const q = query.trim();
   const shown = hits.filter((m) => cat === "all" || m.shop.categorySlug === cat);
+
+  // Стаггер карточек: каждая появляется, когда входит в вьюпорт.
+  // Состояние в Set (React-controlled) — переживает ре-рендер при фильтрации без мигания.
+  const shownKey = shown.map((x) => x.shop.slug).join(",");
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-slug]"));
+    if (typeof IntersectionObserver === "undefined") {
+      setRevealed((prev) => {
+        const n = new Set(prev);
+        cards.forEach((c) => c.dataset.slug && n.add(c.dataset.slug));
+        return n;
+      });
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const add: string[] = [];
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            const slug = (e.target as HTMLElement).dataset.slug;
+            if (slug) add.push(slug);
+            io.unobserve(e.target);
+          }
+        }
+        if (add.length) setRevealed((prev) => new Set([...prev, ...add]));
+      },
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.05 },
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, [shownKey]);
 
   const countLine =
     q && hits.length > 0
@@ -112,9 +147,15 @@ export function CatalogSection({ catalogEyebrow, catalogTitle, catalogSub, facts
             </div>
           )}
 
-          <div className="stores">
-            {shown.map(({ shop: s, product: m }) => (
-              <Link className="store" href={`/shop/${s.slug}`} key={s.slug}>
+          <div className="stores" ref={gridRef}>
+            {shown.map(({ shop: s, product: m }, i) => (
+              <Link
+                className={`store reveal ${revealed.has(s.slug) ? "reveal--in" : ""}`}
+                href={`/shop/${s.slug}`}
+                key={s.slug}
+                data-slug={s.slug}
+                style={{ transitionDelay: `${(i % 3) * 45}ms` }}
+              >
                 <div className={s.cover ? "store__pic" : `store__pic card__pic--empty ${tintFor(s.categorySlug)}`}>
                   {s.cover ? (
                     <img

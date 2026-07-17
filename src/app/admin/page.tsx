@@ -281,7 +281,7 @@ export default async function AdminPage({
         <div className="wrap cab" style={{ maxWidth: 860 }}>
           <div className="cab__top">
             <div>
-              <div className="eyebrow">Администрация базара</div>
+              <div className="eyebrow">Администрация рынка</div>
               <h1 style={{ fontSize: 34, margin: "8px 0 0" }}>Магазины ({shops.length})</h1>
             </div>
             <form action={logout}>
@@ -403,7 +403,6 @@ export default async function AdminPage({
 
           <div className="cab__top" style={{ marginTop: 40 }}>
             <div>
-              <div className="eyebrow">Каталог</div>
               <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Категории ({categories.length})</h2>
             </div>
           </div>
@@ -460,7 +459,6 @@ export default async function AdminPage({
 
           <div className="cab__top" style={{ marginTop: 40 }}>
             <div>
-              <div className="eyebrow">Главная страница</div>
               <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Новости ({news.length})</h2>
             </div>
           </div>

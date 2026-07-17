@@ -433,7 +433,6 @@ export default async function CabinetPage({
 
           <div className="cab__top" style={{ marginTop: 40 }}>
             <div>
-              <div className="eyebrow">Ассортимент</div>
               <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Товары ({shop.products.length})</h2>
             </div>
           </div>

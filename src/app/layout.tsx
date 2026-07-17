@@ -43,8 +43,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = getLang();
   return (
-    <html lang={lang}>
+    <html lang={lang} suppressHydrationWarning>
       <body>
+        <script
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
         {children}
         <Analytics />
       </body>

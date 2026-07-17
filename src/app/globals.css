@@ -628,21 +628,22 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .store:hover .store__pic > *, .card:hover .card__pic > * { transform: scale(1.03); }
 .fact { transition: transform .16s var(--ease-out-quint), border-color .16s ease; }
 
-/* Scroll-reveal: только там, где поддерживается, и только без reduced-motion.
-   Контент виден по умолчанию — анимация не прячет его на старых браузерах/без JS. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .store, .news-card, .section-head, .arenda, .getthere > .panel {
-      animation: revealUp linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 55%;
-    }
-  }
+/* Scroll-reveal (IntersectionObserver — работает во всех браузерах).
+   Скрытое состояние применяется ТОЛЬКО при html.js. Без JS/при сбое бандла
+   контент виден (базовый .reveal без opacity) — секция не «уедет пустой». */
+.reveal { transition: opacity .55s var(--ease-out-expo), transform .55s var(--ease-out-expo); }
+html.js .reveal { opacity: 0; transform: translateY(18px); }
+html.js .reveal.reveal--in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal, html.js .reveal.reveal--in { opacity: 1; transform: none; transition: none; }
 }
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: none; }
+/* Карточка каталога = и ховер, и reveal на одном элементе: один общий transition,
+   чтобы reveal не затирал анимацию тени/подъёма на ховере. */
+.store.reveal, .card.reveal, .news-card.reveal {
+  transition: opacity .5s var(--ease-out-expo), transform .32s var(--ease-out-expo), box-shadow .28s var(--ease-out-expo);
 }
+/* Задержка нужна только для входа при скролле; ховер/нажатие — мгновенно. */
+.store.reveal:hover, .store.reveal:active { transition-delay: 0s; }
 
 /* Типографика: ровные строки в заголовках, меньше «сирот» в прозе */
 h1, h2, h3, .section-head h2, .catalog-sub { text-wrap: balance; }
@@ -656,5 +657,19 @@ h2 { letter-spacing: -0.018em; }
   .store:hover .store__pic > *, .card:hover .card__pic > * { transform: none; }
   .btn:active, .card:active, .store:active, .cat-chip:active, .socials a:active { transform: none; }
 }
+
+/* ═══ скелетоны загрузки ═══ */
+.sk { position: relative; overflow: hidden; background: var(--surface-2); }
+.sk::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: sk-shimmer 1.4s infinite;
+}
+@keyframes sk-shimmer { to { transform: translateX(100%); } }
+.sk-line { border-radius: 7px; }
+.store--sk { cursor: default; pointer-events: none; }
+.store--sk:hover { transform: none; box-shadow: var(--shadow-sm); }
+.store--sk .store__pic.sk { border-radius: 0; }
+@media (prefers-reduced-motion: reduce) { .sk::after { display: none; } }
 
 @tailwind utilities;
