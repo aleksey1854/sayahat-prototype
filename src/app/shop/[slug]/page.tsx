@@ -32,6 +32,23 @@ function telHref(phone: string) {
   return `tel:${phone.replace(/[^+\d]/g, "")}`;
 }
 
+// Адрес точки: pavilion = павильон, row = номер бутика.
+function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): string {
+  if (!pavilion) return "";
+  const b = booth ? pick(lang, ` · бутик №${booth}`, ` · №${booth} бутик`) : "";
+  return `${pavilion}${b}`;
+}
+
+// Ключ павильона для подсветки на схеме.
+function pavilionKey(pavilion?: string | null): string | undefined {
+  if (!pavilion) return undefined;
+  const p = pavilion.toLowerCase();
+  if (p.includes("продукт")) return "prod";
+  if (p.includes("№2")) return "v2";
+  if (p.includes("№1")) return "v1";
+  return undefined;
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const shop = await db.shop.findUnique({
     where: { slug: params.slug },
@@ -46,7 +63,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const bits: string[] = [];
   if (shop.descRu) bits.push(shop.descRu.replace(/\.\s*$/, ""));
   if (goods) bits.push(`В наличии: ${goods}`);
-  if (shop.row && shop.pavilion) bits.push(`Ряд ${shop.row}, павильон ${shop.pavilion}`);
+  if (shop.pavilion) bits.push(shop.row ? `${shop.pavilion}, бутик №${shop.row}` : shop.pavilion);
   const description =
     shop.metaDesc ??
     (bits.length > 0
@@ -86,9 +103,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const mono = shop.nameRu.trim().charAt(0).toUpperCase();
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
-  const MAP_ROWS = ["А", "Б", "В", "Г", "Д", "Е"];
-  const rowLetter = shop.row?.trim().toUpperCase() ?? "";
-  const mapHighlight = MAP_ROWS.includes(rowLetter) ? rowLetter : undefined;
+  const mapHighlight = pavilionKey(shop.pavilion);
 
   const shopUrl = absUrl(`/shop/${shop.slug}`);
 
@@ -113,11 +128,13 @@ export default async function ShopPage({ params }: { params: { slug: string } })
     sameAs: shop.instagram ? [`https://instagram.com/${shop.instagram}`] : undefined,
     address: {
       "@type": "PostalAddress",
+      streetAddress: site.address,
       addressLocality: site.city,
       addressCountry: "KZ",
     },
-    openingHours: "Mo-Su 08:00-19:00",
-    parentOrganization: { "@type": "ShoppingCenter", name: "Базар Саяхат", url: absUrl("/") },
+    geo: { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng },
+    openingHours: site.openingHoursSchema,
+    parentOrganization: { "@type": "ShoppingCenter", name: "Рынок Саяхат", url: absUrl("/") },
   };
 
   const breadcrumbLd = {
@@ -178,7 +195,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div>
             <div className="hero__mono">{mono}</div>
             <div className="eyebrow">
-              {pick(lang, `Ряд ${shop.row} · павильон ${shop.pavilion}`, `${shop.row} қатар · ${shop.pavilion} павильон`)}
+              {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, shop.category.nameRu, shop.category.nameKz)}
             </div>
             <h1>{name}</h1>
             {layout.tagline && <p className="hero__tag">{layout.tagline}</p>}
@@ -469,25 +486,25 @@ export default async function ShopPage({ params }: { params: { slug: string } })
             </div>
 
             <div className="panel">
-              <h3>{pick(lang, "Где мы на базаре", "Базарда қайдамыз")}</h3>
+              <h3>{pick(lang, "Где мы на рынке", "Базарда қайдамыз")}</h3>
               <div className="locrow">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
-                {pick(lang, `Ряд ${shop.row}, павильон №${shop.pavilion}`, `${shop.row} қатар, №${shop.pavilion} павильон`)}
+                {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, "Уточняется", "Нақтылануда")}
                 {shop.landmark ? ` — ${shop.landmark}` : ""}
               </div>
               {mapHighlight && (
                 <p style={{ color: "var(--muted)", fontSize: 14.5, margin: "12px 0 0" }}>
-                  {pick(lang, "Ряд подсвечен на схеме ниже.", "Қатар төмендегі сызбада белгіленген.")}
+                  {pick(lang, "Павильон подсвечен на схеме ниже.", "Павильон төмендегі сызбада белгіленген.")}
                 </p>
               )}
             </div>
           </div>
 
           <div style={{ marginTop: 18 }}>
-            <BazaarMap lang={lang} highlightRow={mapHighlight} />
+            <BazaarMap lang={lang} highlight={mapHighlight} />
           </div>
         </div>
       </section>
@@ -526,9 +543,10 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 {pick(lang, "Адрес и часы", "Мекенжай және уақыт")}
               </div>
               <div style={{ color: "var(--ink-soft)", fontSize: 14.5, marginBottom: 8 }}>
-                {pick(lang, `Базар Саяхат, ряд ${shop.row}, павильон №${shop.pavilion}`, `Саяхат базары, ${shop.row} қатар, №${shop.pavilion} павильон`)}
+                {pick(lang, "Рынок «Саяхат», ", "«Саяхат» базары, ")}
+                {shopLoc(lang, shop.pavilion, shop.row) || site.address}
               </div>
-              <div style={{ color: "var(--ink-soft)", fontSize: 14.5 }}>{shop.hours}</div>
+              <div style={{ color: "var(--ink-soft)", fontSize: 14.5 }}>{shop.hours ?? site.hours}</div>
             </div>
           </div>
         </div>

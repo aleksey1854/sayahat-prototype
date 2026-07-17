@@ -18,6 +18,8 @@ type Ui = {
 type Props = {
   catalogEyebrow: string;
   catalogTitle: string;
+  catalogSub?: string;
+  facts?: { rating: string; hours: string; address: string };
   categories: { slug: string; name: string }[];
   lang: "ru" | "kz";
   ui: Ui;
@@ -32,7 +34,18 @@ function PinIcon() {
   );
 }
 
-export function CatalogSection({ catalogEyebrow, catalogTitle, categories, lang, ui }: Props) {
+// Плитка-заглушка для карточек без фото — тон по категории.
+const TINT: Record<string, string> = {
+  meat: "tile--meat", sweets: "tile--sweets", cloth: "tile--cloth", veg: "tile--veg",
+  flowers: "tile--flowers", shoe: "tile--shoe", kids: "tile--kids", home: "tile--home",
+  beauty: "tile--beauty", optics: "tile--optics", tech: "tile--tech", tea: "tile--tea",
+  pets: "tile--pets", handmade: "tile--handmade", bags: "tile--bags",
+};
+function tintFor(slug: string) {
+  return TINT[slug] ?? "tile--shop";
+}
+
+export function CatalogSection({ catalogEyebrow, catalogTitle, catalogSub, facts, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode } = useCatalogSearch();
   const [cat, setCat] = useState("all");
 
@@ -53,6 +66,28 @@ export function CatalogSection({ catalogEyebrow, catalogTitle, categories, lang,
           <div className="section-head" style={{ textAlign: "center" }}>
             <div className="eyebrow">{catalogEyebrow}</div>
             <h1 style={{ margin: "0 auto" }}>{catalogTitle}</h1>
+            {catalogSub && <p className="catalog-sub">{catalogSub}</p>}
+            {facts && (
+              <div className="factbar">
+                <span className="fact">
+                  <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <path d="M12 2l2.9 6 6.6.6-5 4.3 1.5 6.5L12 16.9 5.9 19.4 7.4 12.9l-5-4.3 6.6-.6z" />
+                  </svg>
+                  {facts.rating}
+                </span>
+                <span className="fact">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                  {facts.hours}
+                </span>
+                <span className="fact">
+                  <PinIcon />
+                  {facts.address}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="catbar" style={{ marginBottom: 32 }}>
@@ -80,7 +115,7 @@ export function CatalogSection({ catalogEyebrow, catalogTitle, categories, lang,
           <div className="stores">
             {shown.map(({ shop: s, product: m }) => (
               <Link className="store" href={`/shop/${s.slug}`} key={s.slug}>
-                <div className={s.cover ? "store__pic" : "store__pic card__pic--empty"}>
+                <div className={s.cover ? "store__pic" : `store__pic card__pic--empty ${tintFor(s.categorySlug)}`}>
                   {s.cover ? (
                     <img
                       className="store__img"

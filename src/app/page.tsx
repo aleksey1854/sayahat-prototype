@@ -1,12 +1,22 @@
 import { db } from "@/lib/db";
 import { getLang, pick } from "@/lib/i18n";
-import { newsDate, photoUrl, ruPlural } from "@/lib/format";
+import { newsDate, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
+import { site } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BazaarMap } from "@/components/BazaarMap";
+import { FreeSpaces } from "@/components/FreeSpaces";
+import { GettingThere } from "@/components/GettingThere";
 import { CatalogSection } from "@/components/CatalogSection";
 import { CatalogProvider, type CardShop } from "@/components/CatalogProvider";
+
+// Адрес точки: «Павильон · бутик №N». pavilion = павильон, row = номер бутика.
+function shopLocation(lang: "ru" | "kz", pavilion?: string | null, booth?: string | null): string {
+  if (!pavilion) return "";
+  const boothLabel = booth ? pick(lang, ` · бутик №${booth}`, ` · №${booth} бутик`) : "";
+  return `${pavilion}${boothLabel}`;
+}
 
 export default async function HomePage() {
   const lang = getLang();
@@ -37,8 +47,8 @@ export default async function HomePage() {
       { text: s.slug, weight: 2, kind: "other" as const },
     ];
     if (s.descRu) fields.push({ text: s.descRu, weight: 3, kind: "other" });
-    if (s.row && s.pavilion) {
-      fields.push({ text: `ряд қатар ${s.row} павильон ${s.pavilion}`, weight: 1, kind: "other" });
+    if (s.pavilion) {
+      fields.push({ text: `павильон бутик ${s.pavilion} ${s.row ?? ""}`, weight: 1, kind: "other" });
     }
 
     return {
@@ -47,10 +57,7 @@ export default async function HomePage() {
       categorySlug: s.category.slug,
       categoryName: pick(lang, s.category.nameRu, s.category.nameKz),
       cover: photoUrl(s.cover),
-      location:
-        s.row && s.pavilion
-          ? pick(lang, `Ряд ${s.row} · павильон ${s.pavilion}`, `${s.row} қатар · ${s.pavilion} павильон`)
-          : "",
+      location: shopLocation(lang, s.pavilion, s.row),
       fields,
       products: s.products.map((p) => ({
         name: pick(lang, p.nameRu, p.nameKz),
@@ -66,12 +73,26 @@ export default async function HomePage() {
     {
       "@context": "https://schema.org",
       "@type": "ShoppingCenter",
-      name: "Базар Саяхат",
+      name: "Рынок Саяхат",
       url: absUrl("/"),
       image: absUrl("/logo.png"),
-      description: "Рынок Саяхат в Костанае: каталог магазинов, товары и цены онлайн.",
-      address: { "@type": "PostalAddress", addressLocality: "Костанай", addressCountry: "KZ" },
-      openingHours: "Mo-Su 08:00-19:00",
+      description: "Рынок «Саяхат» в Костанае: каталог магазинов и товаров, навигация по павильонам.",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: site.address,
+        addressLocality: site.city,
+        addressCountry: "KZ",
+      },
+      geo: { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng },
+      hasMap: site.gis2Url,
+      telephone: site.phones[0],
+      openingHours: site.openingHoursSchema,
+      sameAs: [site.instagramUrl, site.gis2Url],
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: site.rating,
+        reviewCount: site.ratingCount,
+      },
     },
     {
       "@context": "https://schema.org",
@@ -92,8 +113,14 @@ export default async function HomePage() {
       <Header variant="catalog" />
 
       <CatalogSection
-        catalogEyebrow={pick(lang, "Каталог", "Каталог")}
-        catalogTitle={pick(lang, "Магазины базара", "Базар дүкендері")}
+        catalogEyebrow={pick(lang, "Рынок «Саяхат» · Костанай", "«Саяхат» базары · Қостанай")}
+        catalogTitle={pick(lang, "Все магазины рынка онлайн", "Базардың барлық дүкені онлайн")}
+        catalogSub={pick(lang, site.slogan, site.sloganKz)}
+        facts={{
+          rating: `★ ${site.rating} · 2ГИС`,
+          hours: pick(lang, "Вт–Вс 10–19", "Сс–Жс 10–19"),
+          address: pick(lang, "Карбышева 131", "Карбышев 131"),
+        }}
         categories={catList}
         lang={lang}
         ui={{
@@ -139,19 +166,22 @@ export default async function HomePage() {
       <section className="section">
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">{pick(lang, "Навигация", "Навигация")}</div>
-            <h2>{pick(lang, "Карта базара", "Базар картасы")}</h2>
+            <h2>{pick(lang, "Карта рынка", "Базар картасы")}</h2>
             <p>
               {pick(
                 lang,
-                "6 торговых рядов. Найдите нужный ряд заранее — и приезжайте сразу к павильону.",
-                "6 сауда қатары. Қажет қатарды алдын ала табыңыз — павильонға бірден келіңіз.",
+                "Продуктовый и два вещевых павильона плюс ярмарка Art Bazar. Найдите нужный павильон заранее — и приходите сразу к бутику.",
+                "Азық-түлік және екі киім павильоны, Art Bazar жәрмеңкесі. Қажет павильонды алдын ала табыңыз — бутикке бірден келіңіз.",
               )}
             </p>
           </div>
           <BazaarMap lang={lang} />
         </div>
       </section>
+
+      <GettingThere lang={lang} />
+
+      <FreeSpaces lang={lang} />
 
       <Footer />
     </>

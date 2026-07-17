@@ -3,341 +3,170 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+const HOURS = "Вт–Вс, 10:00–19:00";
+
+// Реальные категории рынка (порядок ~ по объёму контента).
 const categories = [
-  { slug: "prod", nameRu: "Продукты", nameKz: "Азық-түлік", order: 1 },
-  { slug: "sweets", nameRu: "Сладости и орехи", nameKz: "Тәттілер мен жаңғақтар", order: 2 },
+  { slug: "meat", nameRu: "Мясо и колбасы", nameKz: "Ет және шұжық", order: 1 },
+  { slug: "sweets", nameRu: "Сладости, хлеб, бакалея", nameKz: "Тәттілер, нан, азық-түлік", order: 2 },
   { slug: "cloth", nameRu: "Одежда", nameKz: "Киім", order: 3 },
-  { slug: "shoe", nameRu: "Обувь", nameKz: "Аяқ киім", order: 4 },
-  { slug: "home", nameRu: "Дом", nameKz: "Үй тауарлары", order: 5 },
-  { slug: "tech", nameRu: "Электроника", nameKz: "Электроника", order: 6 },
+  { slug: "veg", nameRu: "Овощи и фрукты", nameKz: "Көкөніс пен жеміс", order: 4 },
+  { slug: "shoe", nameRu: "Обувь", nameKz: "Аяқ киім", order: 5 },
+  { slug: "kids", nameRu: "Детские товары", nameKz: "Балалар тауарлары", order: 6 },
+  { slug: "home", nameRu: "Дом, текстиль, мебель", nameKz: "Үй, тоқыма, жиһаз", order: 7 },
+  { slug: "beauty", nameRu: "Косметика и здоровье", nameKz: "Косметика және денсаулық", order: 8 },
+  { slug: "bags", nameRu: "Сумки", nameKz: "Сөмкелер", order: 9 },
+  { slug: "flowers", nameRu: "Цветы", nameKz: "Гүлдер", order: 10 },
+  { slug: "optics", nameRu: "Оптика", nameKz: "Оптика", order: 11 },
+  { slug: "tech", nameRu: "Электроника", nameKz: "Электроника", order: 12 },
+  { slug: "tea", nameRu: "Чай и масла", nameKz: "Шай және май", order: 13 },
+  { slug: "pets", nameRu: "Зоотовары", nameKz: "Жануарларға арналған тауарлар", order: 14 },
+  { slug: "handmade", nameRu: "Handmade и подарки", nameKz: "Қолдан жасалған, сыйлықтар", order: 15 },
 ];
 
-type SeedProduct = {
-  nameRu: string;
-  descRu?: string;
-  price: number;
-  oldPrice?: number;
-  unit?: string;
-  image?: string;
-};
-
-type SeedShop = {
+type Tenant = {
   slug: string;
   nameRu: string;
-  nameKz: string;
   category: string;
-  descRu: string;
-  cover: string;
-  phone: string;
-  whatsapp: string;
-  instagram: string;
-  row: string;
-  pavilion: string;
-  landmark?: string;
-  rating: number;
-  metaTitle?: string;
-  metaDesc?: string;
-  layout: Record<string, unknown>;
-  products: SeedProduct[];
+  ig: string;
+  phone?: string;
+  pav?: string;   // павильон
+  booth?: string; // номер бутика (в БД — поле row)
+  desc: string;
+  layout?: Record<string, unknown>;
 };
 
-const shops: SeedShop[] = [
+const P_PROD = "Продуктовый";
+const P_V1 = "Вещевой №1";
+const P_V2 = "Вещевой №2";
+
+// Реальные арендаторы из КОНТЕКСТ-РЫНКА.md. Цены не заводим — их дают сами
+// точки через /cabinet. Телефоны — только где известны.
+const tenants: Tenant[] = [
+  // МЯСО
   {
-    slug: "dastarkhan",
-    nameRu: "Дастархан",
-    nameKz: "Дастархан",
-    category: "sweets",
-    descRu: "Восточные сладости, орехи и сухофрукты. Своя обжарка, опт и розница.",
-    cover: "prilavok.jpg",
-    phone: "+7 705 123 45 67",
-    whatsapp: "77051234567",
-    instagram: "dastarkhan_ksn",
-    row: "Б",
-    pavilion: "14",
-    landmark: "напротив главного входа",
-    rating: 4.9,
-    metaTitle: "Дастархан — восточные сладости, орехи и сухофрукты · базар Саяхат",
-    metaDesc:
-      "Дастархан — лавка восточных сладостей, орехов и сухофруктов на рынке Саяхат в Костанае. Своя обжарка, доставка по городу, опт и розница.",
+    slug: "ayan-et", nameRu: "AYAN ET", category: "meat", ig: "ayan.et_karatal",
+    pav: P_PROD, booth: "витрина 13",
+    desc: "Мясо высокого качества: конина, говядина, баранина, курица. На рынке больше 10 лет.",
     layout: {
-      tagline: "Восточные сладости, орехи и сухофрукты на базаре Саяхат — с 2009 года.",
+      tagline: "Мясо высокого качества — конина, говядина, баранина, курица.",
       about: {
-        title: "Вкус, к которому возвращаются",
-        image: "cover.jpg",
+        title: "Мясо, которому доверяют",
         paragraphs: [
-          "«Дастархан» держит семья Сапаровых — на Саяхат мы с 2009 года, начинали с одного прилавка. Привозим сухофрукты и орехи из Узбекистана, Ирана и Таджикистана и обжариваем сами, в тот же день, поэтому всё свежее и ароматное.",
-          "Курага, чернослив, грецкий орех, фисташки, финики, домашний рахат-лукум и пахлава. Берите килограммами на дастархан или коробками — оптом для кафе и магазинов.",
+          "AYAN ET работает на «Саяхат» больше десяти лет. Сотрудничаем только с проверенными производителями области — конина, говядина, баранина и курица всегда свежие.",
+          "Найти нас просто: продуктовый павильон, витрина 13. Рубим при вас, поможем выбрать под плов, бешбармак или на праздник.",
         ],
       },
       trust: [
-        { title: "15 лет", sub: "работаем на Саяхат" },
-        { title: "Свежее", sub: "обжарка каждый день" },
-        { title: "Доставка", sub: "по городу от 1 кг" },
-        { title: "Опт и розница", sub: "цены от объёма" },
+        { title: "10+ лет", sub: "на рынке «Саяхат»" },
+        { title: "Витрина 13", sub: "продуктовый павильон" },
+        { title: "Конина · говядина", sub: "баранина · курица" },
       ],
-      promo: {
-        eyebrow: "Акция недели",
-        title: "−15% на все орехи",
-        text: "До конца недели грецкий орех и фисташки дешевле. Успейте на дастархан к выходным.",
-      },
-      gallery: ["cover.jpg", "kuraga.jpg", "fistashki.jpg", "lukum.jpg", "finiki.jpg"],
     },
-    products: [
-      { nameRu: "Курага узбекская", descRu: "Крупная, мясистая, без обработки сахаром.", price: 2400, unit: "кг", image: "kuraga.jpg" },
-      { nameRu: "Чернослив вяленый", descRu: "Мягкий, с косточкой и без. Идеален для компота.", price: 1900, unit: "кг", image: "chernosliv.jpg" },
-      { nameRu: "Грецкий орех очищенный", descRu: "Свежий урожай, светлая половинка, своя чистка.", price: 3200, oldPrice: 3765, unit: "кг", image: "oreh.jpg" },
-      { nameRu: "Фисташки солёные", descRu: "Иранские, крупные, обжарка с морской солью.", price: 4600, oldPrice: 5412, unit: "кг", image: "fistashki.jpg" },
-      { nameRu: "Финики «Меджул»", descRu: "Королевские, крупные, мягкие и сочные.", price: 3800, unit: "кг", image: "finiki.jpg" },
-      { nameRu: "Рахат-лукум домашний", descRu: "С орехом, розой и фисташкой. Делаем сами.", price: 2700, unit: "кг", image: "lukum.jpg" },
-      { nameRu: "Пахлава медовая", descRu: "Слоёная, на меду и грецком орехе.", price: 3400, unit: "кг" },
-    ],
   },
+  { slug: "tvoy-myasnoy", nameRu: "Твой Мясной", category: "meat", ig: "tvoi_myasnoi_kst", phone: "+7 701 028 49 49", pav: P_PROD, desc: "Свежее мясо каждый день. Работаем с проверенными производителями." },
+  { slug: "et-market", nameRu: "Ет Маркет", category: "meat", ig: "et_market.kst", pav: P_PROD, booth: "витрина 18", desc: "Конина и мясные деликатесы." },
+  { slug: "et-kostanay", nameRu: "Ет Kostanay", category: "meat", ig: "et_kostanay_10", pav: P_PROD, desc: "Шужык, казы и домашние колбасы." },
+  { slug: "assalim", nameRu: "Assalim", category: "meat", ig: "assalim.kst", pav: P_PROD, desc: "Халяль-колбасы и мясные изделия." },
+  { slug: "bravo", nameRu: "Bravo", category: "meat", ig: "bravo_company.kz", phone: "+7 707 773 06 55", pav: P_PROD, desc: "Мясные деликатесы и колбасы." },
+  { slug: "chicken-kostanay", nameRu: "Chicken Kostanay", category: "meat", ig: "chicken.kostanay", pav: P_PROD, desc: "Курица и яйца от местных производителей." },
+
+  // ОВОЩИ И ФРУКТЫ
+  { slug: "fruktovyy-ray", nameRu: "Фруктовый рай", category: "veg", ig: "fruktovyy_ray_kst", pav: P_PROD, desc: "Свежие фрукты и овощи каждый день." },
+  { slug: "vitaminka", nameRu: "Витаминка", category: "veg", ig: "vitaminka.kst", pav: P_PROD, desc: "Овощи, фрукты и зелень от проверенных хозяйств." },
+  { slug: "frutto", nameRu: "Frutto", category: "veg", ig: "frutto.kz", pav: P_PROD, desc: "Фрукты и овощи, свежий завоз." },
+
+  // СЛАДОСТИ, ХЛЕБ, БАКАЛЕЯ
+  { slug: "pekarnya-rudny", nameRu: "Пекарня Рудный", category: "sweets", ig: "pekarnya.rud", pav: P_PROD, desc: "Свежий хлеб и выпечка из Рудного." },
+  { slug: "sladkoejka", nameRu: "Сладкоежка", category: "sweets", ig: "sladkoejka.kostanay", pav: P_PROD, desc: "Сладости, конфеты и десерты на развес." },
+  { slug: "candyshop", nameRu: "CandyShop", category: "sweets", ig: "candyshop_kst", pav: P_PROD, desc: "Всё для кондитеров: посыпки, начинки, декор." },
+  { slug: "belorussprodukt", nameRu: "Белорусские продукты", category: "sweets", ig: "kst_belorussprodukt", pav: P_PROD, desc: "Бакалея и продукты из Беларуси." },
+
+  // ЧАЙ И МАСЛА
+  { slug: "mindalka", nameRu: "Миндалка", category: "tea", ig: "mindalka_kostanay", pav: P_PROD, desc: "Чай, кофе и орехи на развес." },
+  { slug: "amber-oil", nameRu: "Amber Oil", category: "tea", ig: "amber.oil", pav: P_PROD, desc: "Натуральные масла холодного отжима." },
+
+  // ОДЕЖДА
+  { slug: "sportswear", nameRu: "Sportswear", category: "cloth", ig: "sportswear.kst", pav: P_V1, booth: "37", desc: "Спортивная одежда и экипировка." },
+  { slug: "nata-li", nameRu: "Nata Li", category: "cloth", ig: "nata.liclothes", pav: P_V1, booth: "82", desc: "Женская одежда." },
+  { slug: "svoy-style", nameRu: "Свой стиль", category: "cloth", ig: "svoy_style_kst", pav: P_V1, booth: "33", desc: "Одежда для беременных." },
+  { slug: "menhouse", nameRu: "MenHouse", category: "cloth", ig: "menhouse_kst", pav: P_V1, desc: "Мужская одежда." },
+  { slug: "miamoda", nameRu: "MiaModa", category: "cloth", ig: "miamoda_kst", pav: P_V1, desc: "Женская одежда и аксессуары." },
+  { slug: "anzhelika24", nameRu: "Anzhelika24", category: "cloth", ig: "anzhelika24.kst", pav: P_V2, booth: "2", desc: "Женская одежда." },
+  { slug: "batniki-gempera", nameRu: "Батники Gempera", category: "cloth", ig: "batniki_gempera_kst", pav: P_V2, booth: "17", desc: "Батники, кофты, трикотаж." },
+  { slug: "oksana-kurtki", nameRu: "Оксана · куртки", category: "cloth", ig: "oksana.kurtki.kst", pav: P_V1, desc: "Куртки и верхняя одежда." },
+  { slug: "kupalniki-tanja", nameRu: "Купальники (Таня)", category: "cloth", ig: "kupalniki_kostanai_tanja", pav: P_V1, booth: "79", desc: "Купальники и пляжная одежда." },
+  { slug: "shock-price", nameRu: "Shock Price", category: "cloth", ig: "shock_price_kst", pav: P_V2, desc: "Одежда и товары по фиксированной цене — от 500 ₸." },
+
+  // ОБУВЬ
+  { slug: "obuv-oleg", nameRu: "Обувь от Олега", category: "shoe", ig: "obuv_by_oleg", desc: "Обувь для всей семьи." },
+  { slug: "obuv-muslim", nameRu: "Обувь Muslim", category: "shoe", ig: "obuv_kostanay.muslim", pav: P_V2, desc: "Мужская и женская обувь." },
+
+  // ДЕТСКОЕ
+  { slug: "nomi-kids", nameRu: "Nomi Kids", category: "kids", ig: "nomi_kids_kostanay", pav: P_V2, booth: "39", desc: "Детская одежда." },
+  { slug: "topkids", nameRu: "TopKids", category: "kids", ig: "topkids_kst", desc: "Детская обувь и одежда." },
+
+  // СУМКИ
+  { slug: "novaya-sumka", nameRu: "Новая сумка", category: "bags", ig: "novaya_sumka_kostanay", pav: P_V2, booth: "54", desc: "Сумки, рюкзаки и аксессуары." },
+
+  // ЦВЕТЫ
+  { slug: "cvetok", nameRu: "Цветок", category: "flowers", ig: "cvetok.kst", desc: "Цветы и букеты к любому поводу." },
+
+  // ОПТИКА
+  { slug: "best-sunglasses", nameRu: "Best Sunglasses", category: "optics", ig: "best_sunglasses2025", pav: P_V1, booth: "2", desc: "Солнцезащитные очки и оптика." },
+
+  // КОСМЕТИКА И ЗДОРОВЬЕ
+  { slug: "atomy", nameRu: "Atomy", category: "beauty", ig: "atomy_perfect_cosmetics", pav: P_V1, booth: "78", desc: "Корейская косметика Atomy." },
+  { slug: "tibet-shop", nameRu: "Тибет-Шоп", category: "beauty", ig: "tibet_shop_kst", desc: "Товары для здоровья и красоты." },
+
+  // ДОМ, ТЕКСТИЛЬ, МЕБЕЛЬ
+  { slug: "tekstil-kst", nameRu: "Текстиль KST", category: "home", ig: "tekstilkst10", pav: P_V1, desc: "Домашний текстиль: постельное, полотенца, шторы." },
+  { slug: "zeta", nameRu: "ZETA", category: "home", ig: "zeta.kostanay", desc: "Мебель для дома." },
+
+  // HANDMADE
+  { slug: "valentina-handmade", nameRu: "Valentina Handmade", category: "handmade", ig: "valentina_handmade_kostanai", desc: "Изделия ручной работы." },
   {
-    slug: "beket",
-    nameRu: "Мясная лавка «Бекет»",
-    nameKz: "«Бекет» ет дүкені",
-    category: "prod",
-    descRu: "Свежее мясо каждый день: говядина, баранина, конина и домашняя казы.",
-    cover: "meat.jpg",
-    phone: "+7 705 204 11 03",
-    whatsapp: "77052041103",
-    instagram: "beket_meat_ksn",
-    row: "А",
-    pavilion: "3",
-    rating: 4.8,
+    slug: "ostrovok-tvorchestva", nameRu: "Островок Творчества", category: "handmade", ig: "ostrovoktvorchestva6",
+    desc: "Свечи, мыло и декор ручной работы.",
     layout: {
-      tagline: "Свежее мясо каждый день: говядина, баранина, конина и домашняя казы.",
+      tagline: "Свечи, мыло и декор ручной работы — с душой.",
       about: {
-        title: "Мясо с рынка — без посредников",
+        title: "Ручная работа на «Саяхат»",
         paragraphs: [
-          "Работаем на Саяхат не первый год. Привозим мясо с проверенных хозяйств области, рубим при вас. Говядина, баранина, конина, субпродукты и домашняя казы к празднику.",
+          "Делаем ароматные свечи, натуральное мыло и декор для дома. Отличный подарок ручной работы на праздник или просто так.",
+          "Покупатели в отзывах отмечают качество и внимание к деталям — заходите, поможем выбрать.",
         ],
       },
+      trust: [
+        { title: "Ручная работа", sub: "свечи · мыло · декор" },
+        { title: "Подарки", sub: "к любому поводу" },
+        { title: "Хвалят в отзывах", sub: "2ГИС" },
+      ],
     },
-    products: [
-      { nameRu: "Говядина (мякоть)", price: 2900, unit: "кг" },
-      { nameRu: "Баранина", price: 3200, unit: "кг" },
-      { nameRu: "Конина", price: 3400, unit: "кг" },
-      { nameRu: "Казы домашняя", price: 4500, unit: "кг" },
-    ],
   },
-  {
-    slug: "spetsii-vostoka",
-    nameRu: "Специи Востока",
-    nameKz: "Шығыс дәмдеуіштері",
-    category: "prod",
-    descRu: "Специи, приправы и сухие травы на развес — для плова, мяса и выпечки.",
-    cover: "spices.jpg",
-    phone: "+7 707 318 22 14",
-    whatsapp: "77073182214",
-    instagram: "vostok_spice_ksn",
-    row: "А",
-    pavilion: "11",
-    rating: 4.7,
-    layout: {
-      tagline: "Специи, приправы и сухие травы на развес — для плова, мяса и выпечки.",
-      about: {
-        title: "Аромат настоящего Востока",
-        paragraphs: [
-          "Зира, куркума, паприка, готовые смеси для плова и шашлыка, чай и сухие травы. Берите сколько нужно — взвесим на месте.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Зира", price: 600, unit: "100 г" },
-      { nameRu: "Куркума молотая", price: 450, unit: "100 г" },
-      { nameRu: "Смесь для плова", price: 700, unit: "100 г" },
-      { nameRu: "Перец чёрный горошком", price: 550, unit: "100 г" },
-    ],
-  },
-  {
-    slug: "baksha",
-    nameRu: "Овощи и зелень «Бақша»",
-    nameKz: "«Бақша» көкөністері",
-    category: "prod",
-    descRu: "Овощи, зелень и фрукты от хозяйств области — свежий завоз каждый день.",
-    cover: "veg.jpg",
-    phone: "+7 705 442 70 09",
-    whatsapp: "77054427009",
-    instagram: "baksha_ovoshi",
-    row: "А",
-    pavilion: "7",
-    rating: 4.6,
-    layout: {
-      tagline: "Овощи, зелень и фрукты от хозяйств области — свежий завоз каждый день.",
-      about: {
-        title: "С грядки — на ваш стол",
-        paragraphs: [
-          "Помидоры, огурцы, картофель, зелень и сезонные фрукты. Завозим утром, поэтому всё свежее. Оптом для кафе — дешевле.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Помидоры", price: 600, unit: "кг" },
-      { nameRu: "Огурцы", price: 500, unit: "кг" },
-      { nameRu: "Зелень", price: 150, unit: "пучок" },
-      { nameRu: "Картофель", price: 250, unit: "кг" },
-    ],
-  },
-  {
-    slug: "aruna",
-    nameRu: "Текстиль «Аруна»",
-    nameKz: "«Аруна» тоқыма",
-    category: "cloth",
-    descRu: "Платки, ткани и домашний текстиль. Большой выбор расцветок.",
-    cover: "textile.jpg",
-    phone: "+7 747 511 22 30",
-    whatsapp: "77475112230",
-    instagram: "aruna_textile",
-    row: "В",
-    pavilion: "22",
-    rating: 4.8,
-    layout: {
-      tagline: "Платки, ткани и домашний текстиль. Большой выбор расцветок.",
-      about: {
-        title: "Ткани для дома и праздника",
-        paragraphs: [
-          "Павлопосадские платки, отрезы хлопка и шёлка, постельное бельё и полотенца. Поможем подобрать и отмерим нужный метраж.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Платок павлопосадский", price: 4500, unit: "шт" },
-      { nameRu: "Отрез ткани, хлопок", price: 1800, unit: "метр" },
-      { nameRu: "Постельное бельё", price: 9000, unit: "комплект" },
-    ],
-  },
-  {
-    slug: "kadam",
-    nameRu: "Обувь «Қадам»",
-    nameKz: "«Қадам» аяқ киім",
-    category: "shoe",
-    descRu: "Обувь для всей семьи: повседневная, зимняя и рабочая.",
-    cover: "shoes.jpg",
-    phone: "+7 708 633 30 12",
-    whatsapp: "77086333012",
-    instagram: "kadam_shoes",
-    row: "В",
-    pavilion: "30",
-    rating: 4.5,
-    layout: {
-      tagline: "Обувь для всей семьи: повседневная, зимняя и рабочая.",
-      about: {
-        title: "Обувь на каждый день и сезон",
-        paragraphs: [
-          "Кроссовки, ботинки, зимние сапоги и домашние тапочки для взрослых и детей. Размеры в наличии, меняем если не подошло.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Кроссовки", price: 9900, unit: "пара" },
-      { nameRu: "Зимние сапоги", price: 18000, unit: "пара" },
-      { nameRu: "Тапочки домашние", price: 2500, unit: "пара" },
-    ],
-  },
-  {
-    slug: "sheker",
-    nameRu: "Сладости «Шекер»",
-    nameKz: "«Шекер» тәттілері",
-    category: "sweets",
-    descRu: "Торты на заказ, восточные сладости и конфеты на развес.",
-    cover: "lukum.jpg",
-    phone: "+7 705 718 18 44",
-    whatsapp: "77057181844",
-    instagram: "sheker_sweets",
-    row: "Б",
-    pavilion: "18",
-    rating: 4.7,
-    layout: {
-      tagline: "Торты на заказ, восточные сладости и конфеты на развес.",
-      about: {
-        title: "Сладко по любому поводу",
-        paragraphs: [
-          "Печём торты на заказ к празднику, держим чак-чак, пахлаву и конфеты ассорти на развес. Скажите дату — успеем к сроку.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Торт на заказ", price: 6500, unit: "кг" },
-      { nameRu: "Чак-чак", price: 2200, unit: "кг" },
-      { nameRu: "Конфеты ассорти", price: 2800, unit: "кг" },
-      { nameRu: "Пахлава", price: 3400, unit: "кг" },
-    ],
-  },
-  {
-    slug: "uy",
-    nameRu: "Хозтовары «Үй»",
-    nameKz: "«Үй» тұрмыстық тауарлары",
-    category: "home",
-    descRu: "Посуда, бытовая химия и всё для дома — по ценам базара.",
-    cover: "household.jpg",
-    phone: "+7 700 841 41 05",
-    whatsapp: "77008414105",
-    instagram: "uy_home_ksn",
-    row: "Г",
-    pavilion: "41",
-    rating: 4.6,
-    layout: {
-      tagline: "Посуда, бытовая химия и всё для дома — по ценам базара.",
-      about: {
-        title: "Всё для дома в одном месте",
-        paragraphs: [
-          "Кастрюли и сковороды, посуда, хозяйственные мелочи и бытовая химия. То, что нужно каждый день, без переплаты.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Набор кастрюль", price: 12000, unit: "набор" },
-      { nameRu: "Сковорода", price: 4500, unit: "шт" },
-      { nameRu: "Бытовая химия, набор", price: 3500, unit: "набор" },
-    ],
-  },
-  {
-    slug: "volt",
-    nameRu: "Электроника «Volt»",
-    nameKz: "«Volt» электроника",
-    category: "tech",
-    descRu: "Зарядки, наушники, кабели и мелкая электроника. С гарантией.",
-    cover: "electronics.jpg",
-    phone: "+7 747 945 45 19",
-    whatsapp: "77479454519",
-    instagram: "volt_electro",
-    row: "Г",
-    pavilion: "45",
-    rating: 4.4,
-    layout: {
-      tagline: "Зарядки, наушники, кабели и мелкая электроника. С гарантией.",
-      about: {
-        title: "Мелкая электроника рядом",
-        paragraphs: [
-          "Наушники, кабели, зарядные устройства, повербанки и аксессуары для телефонов. На технику даём гарантию и поможем выбрать.",
-        ],
-      },
-    },
-    products: [
-      { nameRu: "Беспроводные наушники", price: 8900, unit: "шт" },
-      { nameRu: "Кабель USB-C", price: 1200, unit: "шт" },
-      { nameRu: "Powerbank 10000 мА·ч", price: 6500, unit: "шт" },
-      { nameRu: "Зарядное устройство", price: 2500, unit: "шт" },
-    ],
-  },
+
+  // ЭЛЕКТРОНИКА
+  { slug: "aks-shop", nameRu: "AKS Shop", category: "tech", ig: "aksshop.kst", desc: "Чехлы и аксессуары для телефонов." },
+
+  // ЗООТОВАРЫ
+  { slug: "nyusha", nameRu: "Нюша", category: "pets", ig: "nyushakst", phone: "+7 777 763 64 38", desc: "Зоотовары и корма для животных." },
 ];
 
 const news = [
   {
-    titleRu: "Базар Саяхат теперь онлайн",
-    bodyRu: "У каждого магазина появился свой сайт-лендинг. Находите товары и цены, не приезжая на рынок.",
-    publishedAt: new Date("2026-06-22"),
+    titleRu: "Рынок «Саяхат» теперь онлайн",
+    bodyRu: "Каталог магазинов и навигация по павильонам. Ищите товары и точки, не приезжая на рынок.",
+    publishedAt: new Date("2026-07-10"),
   },
   {
-    titleRu: "Режим работы на Курбан айт",
-    bodyRu: "В праздничные дни базар работает с 7:00 до 20:00. Мясные ряды — без перерыва.",
-    publishedAt: new Date("2026-06-18"),
+    titleRu: "Скидочный день на мясо — каждую среду",
+    bodyRu: "По средам мясные точки продают со скидкой. Следите за скидочными днями по категориям.",
+    publishedAt: new Date("2026-07-08"),
   },
   {
-    titleRu: "Открылся ряд фермерских продуктов",
-    bodyRu: "Новый ряд Д: мёд, молочка и зелень напрямую от хозяйств области.",
-    publishedAt: new Date("2026-06-10"),
+    titleRu: "Больше 40 магазинов в каталоге",
+    bodyRu: "Продуктовый и два вещевых павильона: мясо, овощи, сладости, одежда, обувь, детское и не только.",
+    publishedAt: new Date("2026-07-05"),
   },
 ];
 
@@ -354,37 +183,23 @@ async function main() {
     catId[c.slug] = created.id;
   }
 
-  for (const s of shops) {
+  for (const t of tenants) {
+    if (!catId[t.category]) throw new Error(`Нет категории ${t.category} для ${t.slug}`);
     await prisma.shop.create({
       data: {
-        slug: s.slug,
-        nameRu: s.nameRu,
-        nameKz: s.nameKz,
-        descRu: s.descRu,
-        categoryId: catId[s.category],
-        cover: s.cover,
-        phone: s.phone,
-        whatsapp: s.whatsapp,
-        instagram: s.instagram,
-        row: s.row,
-        pavilion: s.pavilion,
-        landmark: s.landmark,
-        rating: s.rating,
-        metaTitle: s.metaTitle,
-        metaDesc: s.metaDesc,
-        layout: JSON.stringify(s.layout),
+        slug: t.slug,
+        nameRu: t.nameRu,
+        nameKz: t.nameRu, // KZ-названия брендов = как есть; вычитать носителю
+        descRu: t.desc,
+        categoryId: catId[t.category],
+        phone: t.phone ?? null,
+        whatsapp: t.phone ? t.phone.replace(/[^\d]/g, "") : null,
+        instagram: t.ig,
+        pavilion: t.pav ?? null,
+        row: t.booth ?? null,
+        hours: HOURS,
+        layout: t.layout ? JSON.stringify(t.layout) : null,
         status: "published",
-        products: {
-          create: s.products.map((p, i) => ({
-            nameRu: p.nameRu,
-            descRu: p.descRu,
-            price: p.price,
-            oldPrice: p.oldPrice,
-            unit: p.unit,
-            image: p.image,
-            order: i,
-          })),
-        },
       },
     });
   }
@@ -393,14 +208,15 @@ async function main() {
     await prisma.newsPost.create({ data: n });
   }
 
-  const dastarkhan = await prisma.shop.findUnique({ where: { slug: "dastarkhan" } });
-  if (dastarkhan) {
+  // Демо-доступ арендатора — привязан к AYAN ET (Виктор может переназначить).
+  const ayan = await prisma.shop.findUnique({ where: { slug: "ayan-et" } });
+  if (ayan) {
     await prisma.account.create({
       data: {
-        login: "dastarkhan",
+        login: "ayanet",
         passwordHash: bcrypt.hashSync("demo2026", 10),
         role: "tenant",
-        shopId: dastarkhan.id,
+        shopId: ayan.id,
       },
     });
   }
@@ -416,13 +232,12 @@ async function main() {
   const counts = {
     categories: await prisma.category.count(),
     shops: await prisma.shop.count(),
-    products: await prisma.product.count(),
     news: await prisma.newsPost.count(),
     accounts: await prisma.account.count(),
   };
   console.log("Seeded:", counts);
-  console.log("Тестовый кабинет: логин dastarkhan · пароль demo2026");
-  console.log("Тестовый админ:   логин admin · пароль admin2026");
+  console.log("Демо-кабинет: логин ayanet · пароль demo2026 (магазин AYAN ET)");
+  console.log("Админ:        логин admin · пароль admin2026");
 }
 
 main()

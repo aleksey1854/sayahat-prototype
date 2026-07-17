@@ -107,8 +107,8 @@ async function saveShop(formData: FormData) {
       whatsapp: normalizeWhatsapp(str(formData, "whatsapp")),
       instagram: str(formData, "instagram").replace(/^@/, "").trim() || null,
       kaspiUrl: cleanUrl(str(formData, "kaspiUrl")),
-      row: (opt("row") ?? "").toUpperCase() || null,
-      pavilion: opt("pavilion"),
+      row: opt("row"), // номер бутика
+      pavilion: opt("pavilion"), // павильон
       landmark: opt("landmark"),
       hours: opt("hours"),
       layout: JSON.stringify(layout),
@@ -402,20 +402,26 @@ export default async function CabinetPage({
               <h3 style={{ margin: 0 }}>Место и часы</h3>
               <div className="grid2">
                 <div className="field">
-                  <label htmlFor="row">Ряд</label>
-                  <input className="input" id="row" name="row" defaultValue={shop.row ?? ""} placeholder="Б" />
+                  <label htmlFor="pavilion">Павильон</label>
+                  <select className="input" id="pavilion" name="pavilion" defaultValue={shop.pavilion ?? ""}>
+                    <option value="">— не выбрано —</option>
+                    <option value="Продуктовый">Продуктовый</option>
+                    <option value="Вещевой №1">Вещевой павильон №1</option>
+                    <option value="Вещевой №2">Вещевой павильон №2</option>
+                    <option value="Ярмарка Art Bazar">Ярмарка Art Bazar</option>
+                  </select>
                 </div>
                 <div className="field">
-                  <label htmlFor="pavilion">Павильон</label>
-                  <input className="input" id="pavilion" name="pavilion" defaultValue={shop.pavilion ?? ""} placeholder="14" />
+                  <label htmlFor="row">Бутик №</label>
+                  <input className="input" id="row" name="row" defaultValue={shop.row ?? ""} placeholder="37" />
                 </div>
                 <div className="field">
                   <label htmlFor="landmark">Ориентир</label>
-                  <input className="input" id="landmark" name="landmark" defaultValue={shop.landmark ?? ""} placeholder="напротив главного входа" />
+                  <input className="input" id="landmark" name="landmark" defaultValue={shop.landmark ?? ""} placeholder="напротив входа" />
                 </div>
                 <div className="field">
                   <label htmlFor="hours">Часы работы</label>
-                  <input className="input" id="hours" name="hours" defaultValue={shop.hours ?? ""} />
+                  <input className="input" id="hours" name="hours" defaultValue={shop.hours ?? ""} placeholder="Вт–Вс, 10:00–19:00" />
                 </div>
               </div>
             </div>

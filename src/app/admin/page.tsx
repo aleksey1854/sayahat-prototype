@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import { makeSlug } from "@/lib/slug";
 import { removeUpload } from "@/lib/img";
 import { newsDate } from "@/lib/format";
+import { site } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 
@@ -52,6 +53,7 @@ async function createShop(formData: FormData) {
       nameRu,
       nameKz: str(formData, "nameKz") || nameRu,
       categoryId,
+      hours: site.hours,
       status: "draft",
     },
   });
