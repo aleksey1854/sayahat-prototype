@@ -4,7 +4,9 @@ export function CallBar({ phone, whatsapp }: { phone?: string | null; whatsapp?:
   if (!phone && !whatsapp) return null;
   const tel = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : undefined;
   return (
-    <div className="callbar">
+    <>
+      <div className="callbar__spacer" aria-hidden="true" />
+      <div className="callbar">
       {tel && (
         <a className="btn btn--primary" href={tel}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 18, height: 18 }}>
@@ -21,6 +23,7 @@ export function CallBar({ phone, whatsapp }: { phone?: string | null; whatsapp?:
           WhatsApp
         </a>
       )}
-    </div>
+      </div>
+    </>
   );
 }

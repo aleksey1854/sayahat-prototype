@@ -2,10 +2,11 @@ type MapLang = "ru" | "kz";
 
 // Реальная структура здания: Продуктовый + два Вещевых павильона + зоны.
 // highlight — ключ павильона: "prod" | "v1" | "v2".
+// Раскладка на CSS Grid, а не SVG: фиксированный viewBox не умеет
+// перестраиваться в колонку, и на телефоне карта уезжала вбок.
 const PAVILIONS = [
   {
     key: "prod",
-    x: 40, y: 44, w: 418, h: 196,
     dot: "#C0552F",
     ru: "Продуктовый павильон", kz: "Азық-түлік павильоны",
     subRu: "мясо · овощи · хлеб · молочка · рыба", subKz: "ет · көкөніс · нан · сүт · балық",
@@ -13,7 +14,6 @@ const PAVILIONS = [
   },
   {
     key: "v1",
-    x: 478, y: 44, w: 382, h: 92,
     dot: "#1C5C6B",
     ru: "Вещевой павильон №1", kz: "№1 киім павильоны",
     subRu: "одежда · обувь · оптика · текстиль", subKz: "киім · аяқ киім · оптика · тоқыма",
@@ -21,7 +21,6 @@ const PAVILIONS = [
   },
   {
     key: "v2",
-    x: 478, y: 148, w: 382, h: 92,
     dot: "#5A6B85",
     ru: "Вещевой павильон №2", kz: "№2 киім павильоны",
     subRu: "одежда · обувь · сумки · детское", subKz: "киім · аяқ киім · сөмке · балалар",
@@ -30,68 +29,56 @@ const PAVILIONS = [
 ];
 
 const ZONES = [
-  { x: 40, w: 200, ru: "Ярмарка Art Bazar", kz: "Art Bazar жәрмеңкесі" },
-  { x: 256, w: 196, ru: "Автостанция", kz: "Автостанция" },
-  { x: 468, w: 180, ru: "Кафе «Тандыр»", kz: "«Тандыр» кафесі" },
-  { x: 664, w: 196, ru: "Baby Park", kz: "Baby Park" },
+  { ru: "Ярмарка Art Bazar", kz: "Art Bazar жәрмеңкесі" },
+  { ru: "Автостанция", kz: "Автостанция" },
+  { ru: "Кафе «Тандыр»", kz: "«Тандыр» кафесі" },
+  { ru: "Baby Park", kz: "Baby Park" },
 ];
 
 export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highlight?: string }) {
   const t = (ru: string, kz: string) => (lang === "kz" ? kz : ru);
 
+  const pav = (p: (typeof PAVILIONS)[number]) => {
+    const on = highlight === p.key;
+    return (
+      <div className={`bmap__pav${on ? " bmap__pav--on" : ""}`} key={p.key}>
+        <div className="bmap__head">
+          <span className="bmap__dot" style={on ? undefined : { background: p.dot }} />
+          <b>{t(p.ru, p.kz)}</b>
+          <i className="bmap__hint">{t(p.hintRu, p.hintKz)}</i>
+        </div>
+        <span className="bmap__sub">{t(p.subRu, p.subKz)}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="bazaar-map">
-      <svg viewBox="0 0 900 420" fill="none" fontFamily="Manrope">
-        <rect x="12" y="12" width="876" height="396" rx="18" fill="#FBF7EF" stroke="#DCCFB9" />
+      <div className="bmap">
+        <div className="bmap__pavs">
+          {pav(PAVILIONS[0])}
+          <div className="bmap__col">
+            {pav(PAVILIONS[1])}
+            {pav(PAVILIONS[2])}
+          </div>
+        </div>
 
-        {PAVILIONS.map((p) => {
-          const on = highlight === p.key;
-          const tx = p.x + 24;
-          // Подпись центрируется по высоте блока: у Продуктового блок выше
-          // (он крупнее физически), и текст по верху оставлял пустоту снизу.
-          const ty = p.y + (p.h - 44) / 2;
-          return (
-            <g key={p.key}>
-              <rect
-                x={p.x} y={p.y} width={p.w} height={p.h} rx={14}
-                fill={on ? "#1C6B57" : "#fff"}
-                stroke={on ? "#1C6B57" : "#EBE2D3"}
-                strokeWidth={on ? 2 : 1}
-              />
-              <circle cx={tx + 5} cy={ty + 8} r={6} fill={on ? "#fff" : p.dot} />
-              <text x={tx + 20} y={ty + 13} fill={on ? "#fff" : "#241F1B"} fontSize="17" fontWeight={700}>
-                {t(p.ru, p.kz)}
-              </text>
-              <text x={tx} y={ty + 38} fill={on ? "rgba(255,255,255,.85)" : "#6E655A"} fontSize="13.5" fontWeight={500}>
-                {t(p.subRu, p.subKz)}
-              </text>
-              <text x={p.x + p.w - 20} y={ty + 13} textAnchor="end" fill={on ? "#DE9627" : "#AE6E10"} fontSize="12.5" fontWeight={700}>
-                {t(p.hintRu, p.hintKz)}
-              </text>
-              {on && <circle cx={p.x + p.w - 22} cy={p.y + p.h - 22} r={7} fill="#DE9627" stroke="#fff" strokeWidth={2.5} />}
-            </g>
-          );
-        })}
-
-        <g fontSize="13" fontWeight={600}>
+        <div className="bmap__zones">
           {ZONES.map((z) => (
-            <g key={z.ru}>
-              <rect x={z.x} y={264} width={z.w} height={58} rx={12} fill="#F4ECDE" stroke="#EBE2D3" />
-              <text x={z.x + z.w / 2} y={298} textAnchor="middle" fill="#463E36">
-                {t(z.ru, z.kz)}
-              </text>
-            </g>
+            <span className="bmap__zone" key={z.ru}>
+              {t(z.ru, z.kz)}
+            </span>
           ))}
-        </g>
+        </div>
 
-        {/* Вход: коробка внутри контура здания, снизу отступ 16, стрелка растёт от неё вверх */}
-        <path d="M450 358 V344" stroke="#DE9627" strokeWidth={2.5} />
-        <path d="M443 351 L450 342 L457 351" stroke="#DE9627" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-        <rect x="352" y="358" width="196" height="34" rx="11" fill="#FBF1DD" stroke="#EAD9B0" />
-        <text x="450" y="380" fill="#B5741A" fontSize="14.5" fontWeight={700} textAnchor="middle">
-          {t("Главный вход", "Басты кіреберіс")}
-        </text>
-      </svg>
+        <div className="bmap__entry">
+          <svg viewBox="0 0 16 18" fill="none" stroke="#BE7B13" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M8 17 V3" />
+            <path d="M2 9 L8 2 L14 9" />
+          </svg>
+          <span className="bmap__entry-label">{t("Главный вход", "Басты кіреберіс")}</span>
+        </div>
+      </div>
     </div>
   );
 }
