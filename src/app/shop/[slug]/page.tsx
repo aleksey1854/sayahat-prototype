@@ -200,18 +200,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
             </div>
             <h1>{name}</h1>
             {layout.tagline && <p className="hero__tag">{layout.tagline}</p>}
-            {layout.trust && layout.trust.length > 0 && (
-              <div className="hero__chips">
-                {layout.trust.slice(0, 3).map((t, i) => (
-                  <span className="chip" key={i}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M5 12l5 5L20 7" />
-                    </svg>
-                    {t.title} · {t.sub}
-                  </span>
-                ))}
-              </div>
-            )}
             <div className="hero__cta">
               {shop.phone && (
                 <a className="btn btn--primary btn--lg" href={telHref(shop.phone)}>

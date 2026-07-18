@@ -41,12 +41,15 @@ export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highligh
 
   return (
     <div className="bazaar-map">
-      <svg viewBox="0 0 900 400" fill="none" fontFamily="Manrope">
-        <rect x="12" y="12" width="876" height="376" rx="18" fill="#FBF7EF" stroke="#DCCFB9" />
+      <svg viewBox="0 0 900 420" fill="none" fontFamily="Manrope">
+        <rect x="12" y="12" width="876" height="396" rx="18" fill="#FBF7EF" stroke="#DCCFB9" />
 
         {PAVILIONS.map((p) => {
           const on = highlight === p.key;
           const tx = p.x + 24;
+          // Подпись центрируется по высоте блока: у Продуктового блок выше
+          // (он крупнее физически), и текст по верху оставлял пустоту снизу.
+          const ty = p.y + (p.h - 44) / 2;
           return (
             <g key={p.key}>
               <rect
@@ -55,14 +58,14 @@ export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highligh
                 stroke={on ? "#1C6B57" : "#EBE2D3"}
                 strokeWidth={on ? 2 : 1}
               />
-              <circle cx={tx + 5} cy={p.y + 30} r={6} fill={on ? "#fff" : p.dot} />
-              <text x={tx + 20} y={p.y + 35} fill={on ? "#fff" : "#241F1B"} fontSize="17" fontWeight={700}>
+              <circle cx={tx + 5} cy={ty + 8} r={6} fill={on ? "#fff" : p.dot} />
+              <text x={tx + 20} y={ty + 13} fill={on ? "#fff" : "#241F1B"} fontSize="17" fontWeight={700}>
                 {t(p.ru, p.kz)}
               </text>
-              <text x={tx} y={p.y + 60} fill={on ? "rgba(255,255,255,.85)" : "#6E655A"} fontSize="13.5" fontWeight={500}>
+              <text x={tx} y={ty + 38} fill={on ? "rgba(255,255,255,.85)" : "#6E655A"} fontSize="13.5" fontWeight={500}>
                 {t(p.subRu, p.subKz)}
               </text>
-              <text x={p.x + p.w - 20} y={p.y + 35} textAnchor="end" fill={on ? "#DE9627" : "#AE6E10"} fontSize="12.5" fontWeight={700}>
+              <text x={p.x + p.w - 20} y={ty + 13} textAnchor="end" fill={on ? "#DE9627" : "#AE6E10"} fontSize="12.5" fontWeight={700}>
                 {t(p.hintRu, p.hintKz)}
               </text>
               {on && <circle cx={p.x + p.w - 22} cy={p.y + p.h - 22} r={7} fill="#DE9627" stroke="#fff" strokeWidth={2.5} />}
@@ -81,10 +84,11 @@ export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highligh
           ))}
         </g>
 
-        <path d="M450 356 V342" stroke="#DE9627" strokeWidth={2.5} />
-        <path d="M443 349 L450 340 L457 349" stroke="#DE9627" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-        <rect x="352" y="356" width="196" height="34" rx="11" fill="#FBF1DD" stroke="#EAD9B0" />
-        <text x="450" y="378" fill="#B5741A" fontSize="14.5" fontWeight={700} textAnchor="middle">
+        {/* Вход: коробка внутри контура здания, снизу отступ 16, стрелка растёт от неё вверх */}
+        <path d="M450 358 V344" stroke="#DE9627" strokeWidth={2.5} />
+        <path d="M443 351 L450 342 L457 351" stroke="#DE9627" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="352" y="358" width="196" height="34" rx="11" fill="#FBF1DD" stroke="#EAD9B0" />
+        <text x="450" y="380" fill="#B5741A" fontSize="14.5" fontWeight={700} textAnchor="middle">
           {t("Главный вход", "Басты кіреберіс")}
         </text>
       </svg>

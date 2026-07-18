@@ -85,13 +85,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .btn svg { width: 18px; height: 18px; flex: none; }
 .btn--lg svg { width: 19px; height: 19px; }
 
-.chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
-  background: var(--surface); border: 1px solid var(--line);
-  padding: 7px 13px; border-radius: 999px;
-}
-.chip svg { width: 15px; height: 15px; color: var(--brand); }
 .badge {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12px; font-weight: 700; letter-spacing: .02em;
@@ -152,7 +145,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .hero h1 { font-size: clamp(40px, 6vw, 66px); color: var(--ink); }
 .hero__tag { margin: 18px 0 26px; font-size: 19px; color: var(--ink-soft); max-width: 30ch; }
-.hero__chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero__art {
   position: relative; aspect-ratio: 4/5; border-radius: var(--radius-xl);
@@ -239,7 +231,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .pricelist td.name { font-weight: 600; }
 .pricelist td.cost { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--brand-700); }
 
-.contact__inner { display: grid; grid-template-columns: 1fr 1.05fr; gap: 30px; }
+.contact__inner { display: grid; grid-template-columns: 1fr 1.05fr; gap: 30px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 30px 32px; box-shadow: var(--shadow-sm); }
 .panel h3 { font-family: var(--font-body); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 18px; }
 .contact-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
@@ -305,9 +297,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .stats { display: flex; justify-content: center; gap: 40px; margin-top: 26px; flex-wrap: wrap; }
 .stats b { font-family: var(--font-display); font-size: 30px; color: var(--brand-700); display: block; }
 .stats span { font-size: 14px; color: var(--muted); }
-.catalog-grid-section { padding-top: 44px; }
-
-.catbar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.catbar { display: flex; gap: 10px; flex-wrap: wrap; }
 .cat-chip {
   font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer;
   padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line-strong);
@@ -547,6 +537,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 
 /* Как добраться */
 .getthere { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.getthere .panel { display: flex; flex-direction: column; justify-content: space-between; }
 .getthere__row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
 .getthere__row:first-child { border-top: 0; padding-top: 0; }
 .getthere__row svg { width: 20px; height: 20px; color: var(--brand); flex: none; margin-top: 2px; }
