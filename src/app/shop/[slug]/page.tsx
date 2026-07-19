@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
-import { site, waLink } from "@/lib/site";
+import { site, waLink, pavilionKey } from "@/lib/site";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -41,15 +41,6 @@ function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): s
 }
 
 // Ключ павильона для подсветки на схеме.
-function pavilionKey(pavilion?: string | null): string | undefined {
-  if (!pavilion) return undefined;
-  const p = pavilion.toLowerCase();
-  if (p.includes("продукт")) return "prod";
-  if (p.includes("№2")) return "v2";
-  if (p.includes("№1")) return "v1";
-  return undefined;
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const shop = await db.shop.findUnique({
     where: { slug: params.slug },
@@ -105,6 +96,16 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
   const mapHighlight = pavilionKey(shop.pavilion);
+
+  // Соседи по павильону: перелинковка каталога и подсказка «кто рядом».
+  const neighbors = shop.pavilion
+    ? await db.shop.findMany({
+        where: { pavilion: shop.pavilion, status: "published", NOT: { id: shop.id } },
+        select: { slug: true, nameRu: true, nameKz: true, row: true, category: { select: { nameRu: true, nameKz: true } } },
+        orderBy: { nameRu: "asc" },
+        take: 6,
+      })
+    : [];
 
   const shopUrl = absUrl(`/shop/${shop.slug}`);
 
@@ -408,7 +409,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         </section>
       )}
 
-      <section className="section section--tight reveal" id="kaspi" style={{ background: "var(--surface-2)" }}>
+      <section className="section section--tight reveal" id="contacts" style={{ background: "var(--surface-2)" }}>
         <div className="wrap">
           <div className="section-head">
             <h2>{pick(lang, "Как нас найти", "Бізді қалай табуға болады")}</h2>
@@ -490,6 +491,25 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div style={{ marginTop: 18 }}>
             <BazaarMap lang={lang} highlight={mapHighlight} />
           </div>
+
+          {neighbors.length > 0 && (
+            <div className="neighbors">
+              <h3>
+                {pick(lang, `Рядом в этом павильоне — ${shop.pavilion}`, `Осы павильонда қатарда — ${shop.pavilion}`)}
+              </h3>
+              <div className="neighbors__list">
+                {neighbors.map((n) => (
+                  <a className="neighbor" href={`/shop/${n.slug}`} key={n.slug}>
+                    <b>{pick(lang, n.nameRu, n.nameKz)}</b>
+                    <span>
+                      {pick(lang, n.category.nameRu, n.category.nameKz)}
+                      {n.row ? pick(lang, ` · бутик №${n.row}`, ` · №${n.row} бутик`) : ""}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

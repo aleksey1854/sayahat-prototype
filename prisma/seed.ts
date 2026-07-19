@@ -71,17 +71,22 @@ const tenants: Tenant[] = [
   { slug: "bravo", nameRu: "Bravo", category: "meat", ig: "bravo_company.kz", phone: "+7 707 773 06 55", pav: P_PROD, desc: "Мясные деликатесы и колбасы." },
   { slug: "chicken-kostanay", nameRu: "Chicken Kostanay", category: "meat", ig: "chicken.kostanay", pav: P_PROD, desc: "Курица и яйца от местных производителей." },
 
+  { slug: "adal-et", nameRu: "Адал Ет", category: "meat", ig: "_adal_et_10", pav: P_PROD, desc: "Мясо и мясные изделия." },
+  { slug: "keremet-et", nameRu: "Керемет Ет", category: "meat", ig: "keremet_et_10kst", pav: P_PROD, desc: "Мясная точка в продуктовом павильоне." },
+  { slug: "tarana", nameRu: "Тарана", category: "meat", ig: "tarana.abdullaeva81", pav: P_PROD, booth: "витрина 3", desc: "Свинина." },
   // ОВОЩИ И ФРУКТЫ
   { slug: "fruktovyy-ray", nameRu: "Фруктовый рай", category: "veg", ig: "fruktovyy_ray_kst", pav: P_PROD, desc: "Свежие фрукты и овощи каждый день." },
   { slug: "vitaminka", nameRu: "Витаминка", category: "veg", ig: "vitaminka.kst", pav: P_PROD, desc: "Овощи, фрукты и зелень от проверенных хозяйств." },
   { slug: "frutto", nameRu: "Frutto", category: "veg", ig: "frutto.kz", pav: P_PROD, desc: "Фрукты и овощи, свежий завоз." },
 
+  { slug: "tashkent", nameRu: "Ташкент", category: "veg", ig: "tashkent_kst", pav: P_PROD, desc: "Овощи и фрукты." },
   // СЛАДОСТИ, ХЛЕБ, БАКАЛЕЯ
   { slug: "pekarnya-rudny", nameRu: "Пекарня Рудный", category: "sweets", ig: "pekarnya.rud", pav: P_PROD, desc: "Свежий хлеб и выпечка из Рудного." },
   { slug: "sladkoejka", nameRu: "Сладкоежка", category: "sweets", ig: "sladkoejka.kostanay", pav: P_PROD, desc: "Сладости, конфеты и десерты на развес." },
   { slug: "candyshop", nameRu: "CandyShop", category: "sweets", ig: "candyshop_kst", pav: P_PROD, desc: "Всё для кондитеров: посыпки, начинки, декор." },
   { slug: "belorussprodukt", nameRu: "Белорусские продукты", category: "sweets", ig: "kst_belorussprodukt", pav: P_PROD, desc: "Бакалея и продукты из Беларуси." },
 
+  { slug: "armangul", nameRu: "Армангуль", category: "sweets", ig: "armangul_1980", pav: P_PROD, desc: "Сладости, хлеб и бакалея." },
   // ЧАЙ И МАСЛА
   { slug: "mindalka", nameRu: "Миндалка", category: "tea", ig: "mindalka_kostanay", pav: P_PROD, desc: "Чай, кофе и орехи на развес." },
   { slug: "amber-oil", nameRu: "Amber Oil", category: "tea", ig: "amber.oil", pav: P_PROD, desc: "Натуральные масла холодного отжима." },
@@ -98,6 +103,10 @@ const tenants: Tenant[] = [
   { slug: "kupalniki-tanja", nameRu: "Купальники (Таня)", category: "cloth", ig: "kupalniki_kostanai_tanja", pav: P_V1, booth: "79", desc: "Купальники и пляжная одежда." },
   { slug: "shock-price", nameRu: "Shock Price", category: "cloth", ig: "shock_price_kst", pav: P_V2, desc: "Одежда и товары по фиксированной цене — от 500 ₸." },
 
+  { slug: "ema-fashion", nameRu: "Ema Fashion", category: "cloth", ig: "ema_fashion.kz", desc: "Женская одежда, размеры 36–60." },
+  { slug: "palto-kostanay", nameRu: "Пальто Костанай", category: "cloth", ig: "palto_kostanay", desc: "Пальто и верхняя одежда." },
+  { slug: "rudny-kst", nameRu: "Rudny KST", category: "cloth", ig: "rudny_kst", pav: P_V1, booth: "47", desc: "Одежда." },
+  { slug: "zimnyaya-skazka", nameRu: "Зимняя сказка", category: "cloth", ig: "zimnyya_skazka", desc: "Эко-шубы и верхняя одежда." },
   // ОБУВЬ
   { slug: "obuv-oleg", nameRu: "Обувь от Олега", category: "shoe", ig: "obuv_by_oleg", desc: "Обувь для всей семьи." },
   { slug: "obuv-muslim", nameRu: "Обувь Muslim", category: "shoe", ig: "obuv_kostanay.muslim", pav: P_V2, desc: "Мужская и женская обувь." },

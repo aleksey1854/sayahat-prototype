@@ -68,3 +68,23 @@ export function googleMapsUrl() {
   const { lat, lng } = site.geo;
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 }
+
+// ── Павильоны: общий справочник для карты, фильтра каталога и страницы магазина ──
+export type PavKey = "prod" | "v1" | "v2";
+
+export const PAVILION_LIST: { key: PavKey; ru: string; kz: string; shortRu: string; shortKz: string }[] = [
+  { key: "prod", ru: "Продуктовый павильон", kz: "Азық-түлік павильоны", shortRu: "Продуктовый", shortKz: "Азық-түлік" },
+  { key: "v1", ru: "Вещевой павильон №1", kz: "№1 киім павильоны", shortRu: "Вещевой №1", shortKz: "№1 киім" },
+  { key: "v2", ru: "Вещевой павильон №2", kz: "№2 киім павильоны", shortRu: "Вещевой №2", shortKz: "№2 киім" },
+];
+
+// Из значения поля pavilion в БД («Продуктовый», «Вещевой №1»…) — в ключ.
+// Держим в одном месте: раньше эта логика жила отдельно на странице магазина.
+export function pavilionKey(pavilion?: string | null): PavKey | undefined {
+  if (!pavilion) return undefined;
+  const p = pavilion.toLowerCase();
+  if (p.includes("продукт") || p.includes("азық")) return "prod";
+  if (p.includes("№2") || p.includes("no2")) return "v2";
+  if (p.includes("№1") || p.includes("no1")) return "v1";
+  return undefined;
+}

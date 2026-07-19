@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from "react";
 import { buildIndex, searchShops, type RawField, type SearchMode } from "@/lib/search";
+import type { PavKey } from "@/lib/site";
 
 export type CardProduct = { name: string; price: number | null; unit: string | null };
 
@@ -12,6 +13,7 @@ export type CardShop = {
   categoryName: string;
   cover: string | null;
   location: string;
+  pavKey?: PavKey;
   fields: RawField[];
   products: CardProduct[];
 };
@@ -23,9 +25,14 @@ type Ctx = {
   setQuery: (v: string) => void;
   hits: SearchHit[];
   mode: SearchMode;
+  // Фильтр по павильону: им управляют и чипы каталога, и клик по карте.
+  pav: PavKey | null;
+  setPav: (v: PavKey | null) => void;
 };
 
-const CatalogSearchCtx = createContext<Ctx>({ query: "", setQuery: () => {}, hits: [], mode: "all" });
+const CatalogSearchCtx = createContext<Ctx>({
+  query: "", setQuery: () => {}, hits: [], mode: "all", pav: null, setPav: () => {},
+});
 
 export function useCatalogSearch() {
   return useContext(CatalogSearchCtx);
@@ -35,6 +42,7 @@ export function useCatalogSearch() {
 // результаты и герою, и поиску в шапке (для выпадающих подсказок).
 export function CatalogProvider({ shops, children }: { shops: CardShop[]; children: React.ReactNode }) {
   const [query, setQuery] = useState("");
+  const [pav, setPav] = useState<PavKey | null>(null);
   const index = useMemo(() => buildIndex(shops.map((s) => s.fields)), [shops]);
   const q = query.trim();
 
@@ -52,5 +60,5 @@ export function CatalogProvider({ shops, children }: { shops: CardShop[]; childr
     };
   }, [index, shops, q]);
 
-  return <CatalogSearchCtx.Provider value={{ query, setQuery, hits, mode }}>{children}</CatalogSearchCtx.Provider>;
+  return <CatalogSearchCtx.Provider value={{ query, setQuery, hits, mode, pav, setPav }}>{children}</CatalogSearchCtx.Provider>;
 }

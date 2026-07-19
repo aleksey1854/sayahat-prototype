@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { getLang, pick } from "@/lib/i18n";
 import { newsDate, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
-import { site } from "@/lib/site";
+import { site, pavilionKey } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BazaarMap } from "@/components/BazaarMap";
@@ -59,6 +59,7 @@ export default async function HomePage() {
       categoryName: pick(lang, s.category.nameRu, s.category.nameKz),
       cover: photoUrl(s.cover),
       location: shopLocation(lang, s.pavilion, s.row),
+      pavKey: pavilionKey(s.pavilion),
       fields,
       products: s.products.map((p) => ({
         name: pick(lang, p.nameRu, p.nameKz),
@@ -171,7 +172,7 @@ export default async function HomePage() {
                 )}
               </p>
             </div>
-            <BazaarMap lang={lang} />
+            <BazaarMap lang={lang} interactive />
           </div>
         </section>
       </Reveal>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { PAVILION_LIST, type PavKey } from "@/lib/site";
 import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
 
@@ -43,13 +44,24 @@ function tintFor(slug: string) {
 }
 
 export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
-  const { query, setQuery, hits, mode } = useCatalogSearch();
+  const { query, setQuery, hits, mode, pav, setPav } = useCatalogSearch();
   const [cat, setCat] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
   const q = query.trim();
-  const shown = hits.filter((m) => cat === "all" || m.shop.categorySlug === cat);
+  const t = (ru: string, kz: string) => (lang === "kz" ? kz : ru);
+
+  // Два независимых фильтра: категория и павильон.
+  // Счётчики у павильонов считаем до применения фильтра павильона,
+  // иначе при выборе одного остальные схлопнулись бы в ноль.
+  const byCat = hits.filter((m) => cat === "all" || m.shop.categorySlug === cat);
+  const shown = byCat.filter((m) => !pav || m.shop.pavKey === pav);
+  const pavCount = (k: PavKey) => byCat.filter((m) => m.shop.pavKey === k).length;
+  // Если павильоны в данных не заполнены вообще — фильтр не показываем,
+  // иначе ряд неактивных чипов выглядит как поломка.
+  const hasPav = hits.some((m) => m.shop.pavKey);
+  const noPavCount = byCat.filter((m) => !m.shop.pavKey).length;
 
   // Стаггер карточек: каждая появляется, когда входит в вьюпорт.
   // Состояние в Set (React-controlled) — переживает ре-рендер при фильтрации без мигания.
@@ -97,7 +109,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
         <div className="wrap">
           <h1 className="sr-only">{catalogTitle}</h1>
 
-          <div className="catbar" style={{ marginBottom: 32 }}>
+          <div className="catbar" style={{ marginBottom: 14 }}>
             <button className={cat === "all" ? "cat-chip on" : "cat-chip"} onClick={() => setCat("all")}>
               {ui.all}
             </button>
@@ -111,6 +123,37 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
               </button>
             ))}
           </div>
+
+          {hasPav && (
+          <div className="pavbar">
+            <button className={!pav ? "pav-chip on" : "pav-chip"} onClick={() => setPav(null)}>
+              {t("Все павильоны", "Барлық павильондар")}
+            </button>
+            {PAVILION_LIST.map((p) => {
+              const n = pavCount(p.key);
+              return (
+                <button
+                  key={p.key}
+                  className={pav === p.key ? "pav-chip on" : "pav-chip"}
+                  onClick={() => setPav(pav === p.key ? null : p.key)}
+                  disabled={n === 0}
+                >
+                  {t(p.shortRu, p.shortKz)}
+                  <span className="pav-chip__n">{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          )}
+
+          {hasPav && pav && noPavCount > 0 && (
+            <p className="pav-note">
+              {t(
+                `Ещё ${noPavCount} — павильон уточняется, они видны во «Все павильоны».`,
+                `Тағы ${noPavCount} — павильоны нақтыланып жатыр, «Барлық павильондар» бөлімінде көрінеді.`,
+              )}
+            </p>
+          )}
 
           {countLine && (
             <div className="search-meta">

@@ -1,3 +1,8 @@
+"use client";
+
+import { useCatalogSearch } from "@/components/CatalogProvider";
+import type { PavKey } from "@/lib/site";
+
 type MapLang = "ru" | "kz";
 
 // Реальная структура здания: Продуктовый + два Вещевых павильона + зоны.
@@ -35,19 +40,50 @@ const ZONES = [
   { ru: "Baby Park", kz: "Baby Park" },
 ];
 
-export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highlight?: string }) {
+export function BazaarMap({
+  lang = "ru",
+  highlight,
+  interactive = false,
+}: {
+  lang?: MapLang;
+  highlight?: string;
+  interactive?: boolean;
+}) {
   const t = (ru: string, kz: string) => (lang === "kz" ? kz : ru);
+  // На главной карта управляет фильтром каталога. На странице магазина
+  // контекста нет — там работает дефолт, и карта остаётся некликабельной.
+  const { pav, setPav } = useCatalogSearch();
+  const active = interactive ? pav : highlight;
 
-  const pav = (p: (typeof PAVILIONS)[number]) => {
-    const on = highlight === p.key;
-    return (
-      <div className={`bmap__pav${on ? " bmap__pav--on" : ""}`} key={p.key}>
+  const pick = (key: string) => {
+    const k = key as PavKey;
+    setPav(pav === k ? null : k);
+    const el = document.getElementById("catalog");
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  };
+
+  const card = (p: (typeof PAVILIONS)[number]) => {
+    const on = active === p.key;
+    const inner = (
+      <>
         <div className="bmap__head">
           <span className="bmap__dot" style={on ? undefined : { background: p.dot }} />
           <b>{t(p.ru, p.kz)}</b>
           <i className="bmap__hint">{t(p.hintRu, p.hintKz)}</i>
         </div>
         <span className="bmap__sub">{t(p.subRu, p.subKz)}</span>
+      </>
+    );
+    const cls = `bmap__pav${on ? " bmap__pav--on" : ""}${interactive ? " bmap__pav--btn" : ""}`;
+    return interactive ? (
+      <button type="button" className={cls} key={p.key} onClick={() => pick(p.key)} aria-pressed={on}>
+        {inner}
+      </button>
+    ) : (
+      <div className={cls} key={p.key}>
+        {inner}
       </div>
     );
   };
@@ -56,10 +92,10 @@ export function BazaarMap({ lang = "ru", highlight }: { lang?: MapLang; highligh
     <div className="bazaar-map">
       <div className="bmap">
         <div className="bmap__pavs">
-          {pav(PAVILIONS[0])}
+          {card(PAVILIONS[0])}
           <div className="bmap__col">
-            {pav(PAVILIONS[1])}
-            {pav(PAVILIONS[2])}
+            {card(PAVILIONS[1])}
+            {card(PAVILIONS[2])}
           </div>
         </div>
 
