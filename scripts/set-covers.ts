@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { DEMO_PHOTOS, FALLBACK_PHOTO } from "../prisma/demo-photos";
+import { coverFor } from "../prisma/demo-photos";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +12,7 @@ async function main() {
   const all = process.argv.includes("--all");
 
   const shops = await prisma.shop.findMany({
-    select: { id: true, nameRu: true, cover: true, category: { select: { slug: true } } },
+    select: { id: true, slug: true, nameRu: true, cover: true, category: { select: { slug: true } } },
     orderBy: { nameRu: "asc" },
   });
 
@@ -21,7 +21,6 @@ async function main() {
     return;
   }
 
-  const turn: Record<string, number> = {};
   let set = 0;
   let skipped = 0;
 
@@ -30,14 +29,9 @@ async function main() {
       skipped++;
       continue;
     }
-    const cat = s.category?.slug ?? "";
-    const pool = DEMO_PHOTOS[cat] ?? [FALLBACK_PHOTO];
-    const i = turn[cat] ?? 0;
-    turn[cat] = i + 1;
-
     await prisma.shop.update({
       where: { id: s.id },
-      data: { cover: pool[i % pool.length] },
+      data: { cover: coverFor(s.slug, s.category?.slug ?? "") },
     });
     set++;
   }

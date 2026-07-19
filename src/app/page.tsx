@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { getLang, pick } from "@/lib/i18n";
 import { newsDate, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
-import { site, pavilionKey } from "@/lib/site";
+import { site, pavilionKey, boothLabel } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BazaarMap } from "@/components/BazaarMap";
@@ -15,8 +15,8 @@ import { CatalogProvider, type CardShop } from "@/components/CatalogProvider";
 // Адрес точки: «Павильон · бутик №N». pavilion = павильон, row = номер бутика.
 function shopLocation(lang: "ru" | "kz", pavilion?: string | null, booth?: string | null): string {
   if (!pavilion) return "";
-  const boothLabel = booth ? pick(lang, ` · бутик №${booth}`, ` · №${booth} бутик`) : "";
-  return `${pavilion}${boothLabel}`;
+  const boothPart = boothLabel(lang, booth);
+  return `${pavilion}${boothPart}`;
 }
 
 export default async function HomePage() {

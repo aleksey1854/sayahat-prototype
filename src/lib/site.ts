@@ -88,3 +88,18 @@ export function pavilionKey(pavilion?: string | null): PavKey | undefined {
   if (p.includes("№1") || p.includes("no1")) return "v1";
   return undefined;
 }
+
+export function igUrl(handle: string) {
+  return `https://instagram.com/${handle.replace(/^@/, "")}`;
+}
+
+// В данных бутик хранится и числом («14»), и уже подписанным значением
+// («витрина 13»). Во втором случае префикс «бутик №» давал «бутик №витрина 13».
+export function boothLabel(lang: "ru" | "kz", booth?: string | null): string {
+  if (!booth) return "";
+  const b = String(booth).trim();
+  if (!b) return "";
+  const alreadyNamed = /[А-Яа-яЁёA-Za-z]/.test(b);
+  if (alreadyNamed) return ` · ${b}`;
+  return lang === "kz" ? ` · №${b} бутик` : ` · бутик №${b}`;
+}

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
-import { site, waLink, pavilionKey } from "@/lib/site";
+import { site, waLink, igUrl, pavilionKey, boothLabel } from "@/lib/site";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -36,7 +36,7 @@ function telHref(phone: string) {
 // Адрес точки: pavilion = павильон, row = номер бутика.
 function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): string {
   if (!pavilion) return "";
-  const b = booth ? pick(lang, ` · бутик №${booth}`, ` · №${booth} бутик`) : "";
+  const b = boothLabel(lang, booth);
   return `${pavilion}${b}`;
 }
 
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const bits: string[] = [];
   if (shop.descRu) bits.push(shop.descRu.replace(/\.\s*$/, ""));
   if (goods) bits.push(`В наличии: ${goods}`);
-  if (shop.pavilion) bits.push(shop.row ? `${shop.pavilion}, бутик №${shop.row}` : shop.pavilion);
+  if (shop.pavilion) bits.push(shop.row ? `${shop.pavilion}${boothLabel("ru", shop.row)}` : shop.pavilion);
   const description =
     shop.metaDesc ??
     (bits.length > 0
@@ -93,6 +93,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const layout = parseLayout(shop.layout);
   const name = pick(lang, shop.nameRu, shop.nameKz);
   const mono = shop.nameRu.trim().charAt(0).toUpperCase();
+  // У блока «о магазине» своё фото; если его нет — берём обложку.
+  // Раньше при отсутствии обоих показывалась заглушка на пол-экрана.
+  const aboutPic = photoUrl(layout.about?.image ?? shop.cover);
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
   const mapHighlight = pavilionKey(shop.pavilion);
@@ -275,12 +278,12 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 <p key={i}>{p}</p>
               ))}
             </div>
-            <div
-              className={layout.about.image ? "about__pic" : "about__pic about__pic--empty"}
-              style={layout.about.image ? { background: `url('${photoUrl(layout.about.image)}') center/cover` } : undefined}
-            >
-              {!layout.about.image && <span>{name}</span>}
-            </div>
+            {aboutPic && (
+              <div
+                className="about__pic"
+                style={{ background: `url('${aboutPic}') center/cover` }}
+              />
+            )}
           </div>
         </section>
       )}
@@ -423,7 +426,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                     <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
                   </svg>
                   <div>
-                    <b>{shop.phone}</b>
+                    <a className="contact-link" href={telHref(shop.phone)}>
+                      {shop.phone}
+                    </a>
                     <span>{pick(lang, "звонок и WhatsApp", "қоңырау және WhatsApp")}</span>
                   </div>
                 </div>
@@ -436,7 +441,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                     <circle cx="17.5" cy="6.5" r="1" />
                   </svg>
                   <div>
-                    <b>@{shop.instagram}</b>
+                    <a className="contact-link" href={igUrl(shop.instagram)} target="_blank" rel="noopener">
+                      @{shop.instagram}
+                    </a>
                     <span>Instagram</span>
                   </div>
                 </div>
@@ -503,7 +510,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                     <b>{pick(lang, n.nameRu, n.nameKz)}</b>
                     <span>
                       {pick(lang, n.category.nameRu, n.category.nameKz)}
-                      {n.row ? pick(lang, ` · бутик №${n.row}`, ` · №${n.row} бутик`) : ""}
+                      {boothLabel(lang, n.row)}
                     </span>
                   </a>
                 ))}

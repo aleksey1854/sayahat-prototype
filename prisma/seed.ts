@@ -186,7 +186,7 @@ const news = [
   },
 ];
 
-import { DEMO_PHOTOS, FALLBACK_PHOTO } from "./demo-photos";
+import { coverFor } from "./demo-photos";
 
 async function main() {
   await prisma.account.deleteMany();
@@ -201,17 +201,11 @@ async function main() {
     catId[c.slug] = created.id;
   }
 
-  const photoTurn: Record<string, number> = {};
-
   for (const t of tenants) {
     if (!catId[t.category]) throw new Error(`Нет категории ${t.category} для ${t.slug}`);
-    const pool = DEMO_PHOTOS[t.category] ?? [FALLBACK_PHOTO];
-    const turn = photoTurn[t.category] ?? 0;
-    photoTurn[t.category] = turn + 1;
-
     await prisma.shop.create({
       data: {
-        cover: pool[turn % pool.length],
+        cover: coverFor(t.slug, t.category),
         slug: t.slug,
         nameRu: t.nameRu,
         nameKz: t.nameRu, // KZ-названия брендов = как есть; вычитать носителю
