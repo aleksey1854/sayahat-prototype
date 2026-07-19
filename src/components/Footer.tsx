@@ -35,7 +35,7 @@ export function Footer() {
       <div className="wrap">
         <div className="foot-cols">
           <div>
-            <img src="/logo.png" alt="Рынок Саяхат — Костанай" style={{ height: 84, width: "auto", marginBottom: 14 }} />
+            <img src="/logo.png" alt={t("Рынок Саяхат — Костанай", "«Саяхат» базары — Қостанай")} style={{ height: 84, width: "auto", marginBottom: 14 }} />
             <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: 15, maxWidth: "34ch" }}>
               {t(site.slogan, site.sloganKz)}
             </p>

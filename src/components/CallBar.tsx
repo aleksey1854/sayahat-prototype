@@ -1,6 +1,7 @@
 import { waLink } from "@/lib/site";
+import { pick, type Lang } from "@/lib/i18n";
 
-export function CallBar({ phone, whatsapp }: { phone?: string | null; whatsapp?: string | null }) {
+export function CallBar({ phone, whatsapp, lang = "ru" }: { phone?: string | null; whatsapp?: string | null; lang?: Lang }) {
   if (!phone && !whatsapp) return null;
   const tel = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : undefined;
   return (
@@ -12,7 +13,7 @@ export function CallBar({ phone, whatsapp }: { phone?: string | null; whatsapp?:
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 18, height: 18 }}>
             <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
           </svg>
-          Позвонить
+          {pick(lang, "Позвонить", "Қоңырау шалу")}
         </a>
       )}
       {whatsapp && (

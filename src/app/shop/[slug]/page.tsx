@@ -557,7 +557,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       </footer>
 
       <RevealOnScroll />
-      <CallBar phone={shop.phone} whatsapp={shop.whatsapp} />
+      <CallBar phone={shop.phone} whatsapp={shop.whatsapp} lang={lang} />
     </>
   );
 }

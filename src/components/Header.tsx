@@ -10,8 +10,8 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
     <header className="topbar">
       <div className="wrap topbar__inner">
         <div className="topbar__left">
-          <Link className="brand" href="/" aria-label="Базары Саяхат — на главную">
-            <img src="/logo-mark.png" alt="Базары Саяхат" className="brand__logo" />
+          <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
+            <img src="/logo-mark.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
           </Link>
           {variant === "shop" && (
             <Link className="topbar__back" href="/">

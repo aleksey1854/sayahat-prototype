@@ -269,7 +269,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .topbar__back { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .brand__logo { height: 36px; }
   .topbar__search { order: 0; flex: 1 1 auto; max-width: none; margin: 0; min-width: 0; }
-  .lang button { padding: 6px 9px; font-size: 12.5px; }
+  .lang button { padding: 6px 8px; font-size: 12.5px; min-width: 46px; }
   .brand__sub { display: none; }
   .t-hide-sm { display: none; }
   .grid-cards { grid-template-columns: 1fr; }
@@ -278,11 +278,28 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 
 .lang {
+  position: relative;
   display: inline-flex; border: 1px solid var(--line); border-radius: 999px;
   overflow: hidden; background: var(--surface); font-size: 13px; font-weight: 700;
 }
-.lang button { border: 0; background: transparent; padding: 7px 13px; cursor: pointer; color: var(--muted); font-family: var(--font-body); font-weight: 700; }
-.lang button.on { background: var(--brand); color: #fff; }
+/* Заливку активного языка даёт едущая «пилюля», а не смена фона кнопки:
+   раньше переключение происходило рывком, без всякого перехода. */
+.lang__pill {
+  position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px);
+  background: var(--brand); border-radius: 999px;
+  transition: transform .32s var(--ease-out-quint), opacity .2s ease;
+}
+.lang[data-active="kz"] .lang__pill { transform: translateX(100%); }
+.lang--pending .lang__pill { opacity: .72; }
+.lang button {
+  position: relative; z-index: 1; min-width: 54px; text-align: center;
+  border: 0; background: transparent; padding: 7px 10px; cursor: pointer;
+  color: var(--muted); font-family: var(--font-body); font-weight: 700;
+  transition: color .24s ease;
+}
+.lang button.on { color: #fff; }
+.lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .lang__pill { transition: none; } }
 
 .cat-hero {
   background:
