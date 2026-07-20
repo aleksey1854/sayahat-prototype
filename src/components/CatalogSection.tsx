@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PAVILION_LIST, type PavKey } from "@/lib/site";
+import { CategoryIcon, SHORT_CAT } from "./CategoryIcon";
 import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
 
@@ -109,19 +110,35 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
         <div className="wrap">
           <h1 className="sr-only">{catalogTitle}</h1>
 
-          <div className="catbar" style={{ marginBottom: 14 }}>
-            <button className={cat === "all" ? "cat-chip on" : "cat-chip"} onClick={() => setCat("all")}>
-              {ui.all}
+          <div className="catbar">
+            <button className={cat === "all" ? "cat on" : "cat"} onClick={() => setCat("all")} aria-pressed={cat === "all"}>
+              <span className="cat__ico cat__ico--all">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3.2" y="3.2" width="7.6" height="7.6" rx="2" />
+                  <rect x="13.2" y="3.2" width="7.6" height="7.6" rx="2" />
+                  <rect x="3.2" y="13.2" width="7.6" height="7.6" rx="2" />
+                  <rect x="13.2" y="13.2" width="7.6" height="7.6" rx="2" />
+                </svg>
+              </span>
+              <span className="cat__label">{ui.all}</span>
             </button>
-            {categories.map((c) => (
-              <button
-                key={c.slug}
-                className={cat === c.slug ? "cat-chip on" : "cat-chip"}
-                onClick={() => setCat(c.slug)}
-              >
-                {c.name}
-              </button>
-            ))}
+            {categories.map((c) => {
+              const short = SHORT_CAT[c.slug];
+              return (
+                <button
+                  key={c.slug}
+                  className={cat === c.slug ? "cat on" : "cat"}
+                  onClick={() => setCat(c.slug)}
+                  aria-pressed={cat === c.slug}
+                  title={c.name}
+                >
+                  <span className={`cat__ico tile--${c.slug}`}>
+                    <CategoryIcon slug={c.slug} />
+                  </span>
+                  <span className="cat__label">{short ? t(short.ru, short.kz) : c.name}</span>
+                </button>
+              );
+            })}
           </div>
 
           {hasPav && (
