@@ -272,7 +272,10 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   /* Поиск был на второй строке (flex: 1 0 100%), а высота шапки жёстко 64px:
      он не помещался и торчал за фон, из-за чего контент проезжал под ним.
      Собираем в одну строку и уменьшаем логотип, чтобы всё влезло. */
-  .topbar__inner { gap: 8px; height: 60px; flex-wrap: nowrap; }
+  /* Было: элементы разной высоты (38 / 36 / 29px) с отступом 8px — отсюда
+     ощущение сжатости. Приводим к одной высоте 40px, отступы 12px по сетке,
+     области касания 44px как требует HIG. */
+  .topbar__inner { gap: 12px; height: 64px; flex-wrap: nowrap; }
   .topbar__left { flex: 0 1 auto; min-width: 0; }
   .topbar__right { flex: none; }
   .topbar__back { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -474,10 +477,11 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .brand__square { display: none; }
 @media (max-width: 560px) {
   .brand__logo { display: none; }
-  .brand__square { display: block; width: 38px; height: 38px; flex: none; border-radius: 9px; }
+  .brand__square { display: block; width: 40px; height: 40px; flex: none; border-radius: 11px; }
   /* область касания логотипа — 44px, как требуют рекомендации по доступности */
   .brand { min-height: 44px; min-width: 44px; justify-content: center; }
-  .lang button { min-width: 42px; font-size: 12px; padding: 6px 7px; }
+  .lang { height: 40px; }
+  .lang button { min-width: 44px; height: 100%; font-size: 12.5px; padding: 0 10px; }
 }
 
 :where(a, button, input, [tabindex]):focus-visible {
@@ -603,7 +607,9 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .arenda__price span { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.75); font-weight: 700; }
 .arenda__price b { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: #fff; }
 .arenda__cta { position: relative; display: flex; flex-direction: column; gap: 12px; flex: none; min-width: 240px; }
-.arenda__cta .btn--ghost { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.4); }
+/* Полупрозрачная рамка давала контраст 1.98 при норме 3.0 — кнопка читалась
+   как выключенная. Рамка сплошная белая, фон чуть плотнее. */
+.arenda__cta .btn--ghost { background: rgba(255,255,255,.16); color: #fff; border-color: #fff; }
 .arenda__cta .btn--ghost:hover { background: rgba(255,255,255,.2); border-color: #fff; color: #fff; }
 
 /* Как добраться */
@@ -798,7 +804,7 @@ h2 { letter-spacing: -0.018em; }
    Из-за этого поиск в липкой шапке «прыгал» при тапе. */
 @media (max-width: 640px) {
   .topbar__search input { font-size: 16px; }
-  .topbar__search { padding: 7px 13px; }
+  .topbar__search { padding: 9px 15px; }
   /* поле уже — ужимаем подсказки, чтобы не давились */
   .topbar__search .suggest__item { padding: 9px 11px; gap: 10px; }
   .topbar__search .suggest__thumb { width: 36px; height: 36px; }
@@ -901,5 +907,16 @@ h2 { letter-spacing: -0.018em; }
 @media (prefers-reduced-motion: reduce) {
   .cat:hover .cat__ico, .cat:active .cat__ico { transform: none; }
 }
+
+
+/* Заглушка под фото: силуэт категории вместо пустого места.
+   Лежит под картинкой, поэтому проявляется, если фото не загрузилось. */
+.ph-fb { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.ph-fb svg {
+  width: 34%; max-width: 92px; height: auto;
+  color: rgba(255,255,255,.62); stroke-width: 1.3;
+}
+.store__pic .ph-fb svg { max-width: 76px; }
+.hero__art .ph-fb svg { max-width: 110px; color: rgba(255,255,255,.72); }
 
 @tailwind utilities;

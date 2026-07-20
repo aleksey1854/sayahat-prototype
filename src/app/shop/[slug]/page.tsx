@@ -10,6 +10,7 @@ import { Header } from "@/components/Header";
 import { CallBar } from "@/components/CallBar";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { BazaarMap } from "@/components/BazaarMap";
+import { PhotoFallback, SafeImg } from "@/components/PhotoFallback";
 import { GoalTracker } from "@/components/GoalTracker";
 
 type ShopLayout = {
@@ -244,7 +245,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
             className="hero__art"
             style={shop.cover ? { background: `url('${photoUrl(shop.cover)}') center/cover` } : undefined}
           >
-            {!shop.cover && <span>{name}</span>}
+            {!shop.cover && <PhotoFallback category={shop.category?.slug ?? ""} />}
           </div>
         </div>
       </section>
@@ -300,18 +301,16 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 const emptyClass = "card__pic card__pic--empty" + (i % 4 ? ` tile-g${i % 4}` : "");
                 return (
                   <article className="card" key={p.id}>
-                    <div className={p.image ? "card__pic" : emptyClass}>
-                      {p.image ? (
-                        <img
+                    <div className={emptyClass}>
+                      <PhotoFallback category={shop.category?.slug ?? ""} />
+                      {p.image && (
+                        <SafeImg
                           className="card__img"
                           src={srcSetFor(photoUrl(p.image))!.src}
                           srcSet={srcSetFor(photoUrl(p.image))!.srcSet}
                           sizes="(max-width: 640px) 92vw, 300px"
                           alt={p.nameRu}
-                          loading="lazy"
                         />
-                      ) : (
-                        <span className="tile-mono">{p.nameRu.trim().charAt(0).toUpperCase()}</span>
                       )}
                       {disc > 0 ? (
                         <span className="badge badge--hot">−{disc}%</span>

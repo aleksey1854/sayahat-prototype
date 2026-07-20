@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PAVILION_LIST, type PavKey } from "@/lib/site";
 import { CategoryIcon, SHORT_CAT } from "./CategoryIcon";
+import { PhotoFallback, SafeImg } from "./PhotoFallback";
 import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
 
@@ -188,23 +189,16 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                 data-slug={s.slug}
                 style={{ transitionDelay: `${(i % 3) * 45}ms` }}
               >
-                <div className={s.cover ? "store__pic" : `store__pic card__pic--empty ${tintFor(s.categorySlug)}`}>
-                  {s.cover ? (
-                    <img
+                <div className={`store__pic card__pic--empty ${tintFor(s.categorySlug)}`}>
+                  <PhotoFallback category={s.categorySlug} />
+                  {s.cover && (
+                    <SafeImg
                       className="store__img"
                       src={srcSetFor(s.cover)!.src}
                       srcSet={srcSetFor(s.cover)!.srcSet}
                       sizes="(max-width: 560px) 92vw, 340px"
                       alt={s.name}
-                      loading="lazy"
                     />
-                  ) : (
-                    <span
-                      className="tile-mono"
-                      style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}
-                    >
-                      {s.name.trim().charAt(0).toUpperCase()}
-                    </span>
                   )}
                   <span className="store__tag">{s.categoryName}</span>
                 </div>

@@ -187,6 +187,7 @@ const news = [
 ];
 
 import { coverFor } from "./demo-photos";
+import { DEMO_CONTENT } from "./demo-content";
 
 async function main() {
   await prisma.account.deleteMany();
@@ -203,7 +204,25 @@ async function main() {
 
   for (const t of tenants) {
     if (!catId[t.category]) throw new Error(`Нет категории ${t.category} для ${t.slug}`);
-    await prisma.shop.create({
+    // Витрина: у флагманов свой layout, остальным собираем из тестового
+    // контента по категории. Окно выбора товаров и лёгкий сдвиг цен зависят
+    // от slug — чтобы соседние точки одной категории не выглядели копиями.
+    const content = DEMO_CONTENT[t.category];
+    const seedNum = [...t.slug].reduce((a, c) => a + c.charCodeAt(0), 0);
+    const layout =
+      t.layout ??
+      (content
+        ? {
+            tagline: content.tagline,
+            about: {
+              title: content.aboutTitle,
+              paragraphs: content.aboutBody.map((x) => x.replace(/\{name\}/g, t.nameRu)),
+            },
+            trust: content.trust.slice(0, 4),
+          }
+        : undefined);
+
+    const shop = await prisma.shop.create({
       data: {
         cover: coverFor(t.slug, t.category),
         slug: t.slug,
@@ -217,10 +236,32 @@ async function main() {
         pavilion: t.pav ?? null,
         row: t.booth ?? null,
         hours: HOURS,
-        layout: t.layout ? JSON.stringify(t.layout) : null,
+        layout: layout ? JSON.stringify(layout) : null,
         status: "published",
       },
     });
+
+    if (content?.products.length) {
+      const pool = content.products;
+      const take = Math.min(pool.length, 6 + (seedNum % 3)); // 6–8 позиций
+      const from = seedNum % pool.length;
+      const picked = Array.from({ length: take }, (_, i) => pool[(from + i) % pool.length]);
+      await prisma.product.createMany({
+        data: picked.map((pr, i) => {
+          // цена гуляет в пределах ±6%, округляем до полусотни
+          const shift = ((seedNum + i * 7) % 13) - 6;
+          const price = Math.round((pr.price * (100 + shift)) / 100 / 50) * 50;
+          return {
+            shopId: shop.id,
+            nameRu: pr.name,
+            descRu: pr.desc,
+            price,
+            unit: pr.unit,
+            order: i,
+          };
+        }),
+      });
+    }
   }
 
   for (const n of news) {
