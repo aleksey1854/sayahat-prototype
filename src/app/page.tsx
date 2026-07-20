@@ -114,6 +114,32 @@ export default async function HomePage() {
       <CatalogProvider shops={cards}>
       <Header variant="catalog" />
 
+      {news.length > 0 && (
+        <Reveal>
+          <section className="section section--tight news-section" id="news">
+            <div className="wrap">
+              <div className="section-head">
+                <h2>{pick(lang, "Новости рынка", "Базар жаңалықтары")}</h2>
+              </div>
+              {/* Мозаика рассчитана на три новости: главная слева на всю высоту.
+                  Если их меньше — обычная сетка, иначе колонка справа пустует. */}
+              <div className={news.length >= 3 ? "news-grid news-grid--mosaic" : "news-grid"}>
+                {news.map((n, i) => (
+                  <article
+                    className={news.length >= 3 && i === 0 ? "news-card news-card--lead" : "news-card"}
+                    key={n.id}
+                  >
+                    <time>{newsDate(n.publishedAt)}</time>
+                    <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
+                    {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       <CatalogSection
         catalogTitle={pick(lang, "Все магазины рынка «Саяхат» — Костанай", "«Саяхат» базарының барлық дүкендері — Қостанай")}
         categories={catList}
@@ -137,27 +163,6 @@ export default async function HomePage() {
         }}
       />
       </CatalogProvider>
-
-      {news.length > 0 && (
-        <Reveal>
-          <section className="section section--tight" style={{ background: "var(--surface-2)" }}>
-            <div className="wrap">
-              <div className="section-head">
-                <h2>{pick(lang, "Новости рынка", "Базар жаңалықтары")}</h2>
-              </div>
-              <div className="news-grid">
-                {news.map((n) => (
-                  <article className="news-card" key={n.id}>
-                    <time>{newsDate(n.publishedAt)}</time>
-                    <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
-                    {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      )}
 
       <Reveal>
         <section className="section">
