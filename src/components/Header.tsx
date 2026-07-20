@@ -26,6 +26,7 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
         {variant === "catalog" && (
           <HeaderSearch
             placeholder={pick(lang, "Что ищете? Орехи, платок, обувь…", "Не іздейсіз? Жаңғақ, орамал, аяқ киім…")}
+            placeholderShort={pick(lang, "Поиск по рынку", "Базар бойынша іздеу")}
             clearLabel={pick(lang, "Очистить", "Тазалау")}
             showAllLabel={pick(lang, "Показать все", "Барлығын көрсету")}
             emptyLabel={pick(lang, "Ничего не нашлось", "Ештеңе табылмады")}

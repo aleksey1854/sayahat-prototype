@@ -816,4 +816,36 @@ h2 { letter-spacing: -0.018em; }
   .callbar { background: #fff; }
 }
 
+
+/* Шапка магазина на телефоне: отступы оставались десктопными (78/84px),
+   из-за чего над названием висела почти сотня пустых пикселей. */
+@media (max-width: 720px) {
+  .hero__inner { padding-top: 28px; padding-bottom: 34px; gap: 24px; }
+  .hero__mono { width: 52px; height: 52px; border-radius: 15px; font-size: 25px; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(30px, 8.5vw, 44px); }
+  .hero__tag { margin: 12px 0 20px; font-size: 16.5px; }
+  .hero__art { max-width: 100%; aspect-ratio: 16/10; }
+  .trust__inner { padding: 26px 0; gap: 18px 22px; }
+  .about__inner { padding-top: 40px; padding-bottom: 40px; }
+}
+@media (max-width: 560px) {
+  .hero__inner { padding-top: 22px; padding-bottom: 28px; }
+  .hero h1 { font-size: clamp(28px, 9vw, 38px); }
+}
+
+
+/* Поиск на телефоне: в покое компактный, при вводе занимает всю строку —
+   логотип и переключатель языка на это время убираются. */
+@media (max-width: 640px) {
+  .topbar__left, .topbar__right { transition: opacity .18s ease; }
+  .topbar__inner.is-searching .topbar__left,
+  .topbar__inner.is-searching .topbar__right { display: none; }
+  .topbar__inner.is-searching .topbar__search { flex: 1 1 100%; }
+  /* развернувшись, поле даёт нормальную ширину и выпадающим подсказкам */
+  .topbar__inner.is-searching .suggest { left: 0; right: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar__left, .topbar__right { transition: none; }
+}
+
 @tailwind utilities;

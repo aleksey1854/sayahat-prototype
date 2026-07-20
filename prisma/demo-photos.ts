@@ -1,13 +1,6 @@
 // Демо-обложки каталога: каждому магазину свой кадр, повторов нет.
-//
-// Взять 50 разных стоковых фото было неоткуда, поэтому кадры нарезаны из
-// 15 исходников в public/photos — разные ракурсы и планы одной сцены.
-// Отбирались автоматически по резкости, насыщенности и экспозиции, размер
-// подогнан под слот карточки (16:10, 760px). Сцена может повторяться в
-// разных ракурсах — уникальны именно кадры, не съёмки.
-//
-// Это витрина для показа. Как только арендаторы зальют свои фото через
-// /cabinet, демо перекроется: скрипт covers без --all чужие обложки не трогает.
+// Кадры нарезаны из исходников в public/photos — скачать новые в песочнице
+// нельзя, внешние фотостоки закрыты. Заменяются скриптом npm run photos.
 export const DEMO_COVERS: Record<string, string> = {
   "ayan-et": "demo/meat-1.jpg",
   "tvoy-myasnoy": "demo/meat-2.jpg",
@@ -61,23 +54,88 @@ export const DEMO_COVERS: Record<string, string> = {
   "nyusha": "demo/household-12.jpg",
 };
 
-// Фолбэк для магазинов, добавленных позже и не попавших в список выше.
 export const DEMO_POOL: Record<string, string[]> = {
-  meat: ["demo/meat-1.jpg"],
-  sweets: ["demo/lukum-1.jpg"],
-  veg: ["demo/veg-1.jpg"],
-  cloth: ["demo/textile-1.jpg"],
-  shoe: ["demo/shoes-1.jpg"],
-  bags: ["demo/shoes-3.jpg"],
-  tea: ["demo/spices-1.jpg"],
-  tech: ["demo/electronics-1.jpg"],
-  home: ["demo/household-6.jpg"],
-  kids: ["demo/household-7.jpg"],
-  beauty: ["demo/household-9.jpg"],
-  optics: ["demo/household-11.jpg"],
-  pets: ["demo/household-12.jpg"],
-  flowers: ["demo/veg-5.jpg"],
-  handmade: ["demo/prilavok-1.jpg"],
+  "meat": [
+    "demo/meat-1.jpg",
+    "demo/meat-2.jpg",
+    "demo/meat-3.jpg",
+    "demo/meat-4.jpg",
+    "demo/meat-5.jpg",
+    "demo/meat-6.jpg",
+    "demo/meat-7.jpg",
+    "demo/meat-8.jpg",
+    "demo/meat-9.jpg",
+    "demo/meat-10.jpg"
+  ],
+  "sweets": [
+    "demo/kuraga-1.jpg",
+    "demo/chernosliv-1.jpg",
+    "demo/finiki-1.jpg",
+    "demo/fistashki-1.jpg",
+    "demo/oreh-1.jpg",
+    "demo/lukum-1.jpg"
+  ],
+  "veg": [
+    "demo/veg-1.jpg",
+    "demo/veg-2.jpg",
+    "demo/veg-3.jpg",
+    "demo/veg-4.jpg"
+  ],
+  "flowers": [
+    "demo/veg-5.jpg"
+  ],
+  "cloth": [
+    "demo/textile-1.jpg",
+    "demo/textile-2.jpg",
+    "demo/textile-3.jpg",
+    "demo/textile-4.jpg",
+    "demo/textile-5.jpg",
+    "demo/textile-6.jpg",
+    "demo/textile-7.jpg",
+    "demo/textile-8.jpg",
+    "demo/textile-9.jpg",
+    "demo/household-1.jpg",
+    "demo/household-2.jpg",
+    "demo/household-3.jpg",
+    "demo/household-4.jpg",
+    "demo/household-5.jpg"
+  ],
+  "shoe": [
+    "demo/shoes-1.jpg",
+    "demo/shoes-2.jpg"
+  ],
+  "bags": [
+    "demo/shoes-3.jpg"
+  ],
+  "home": [
+    "demo/household-6.jpg",
+    "demo/electronics-2.jpg"
+  ],
+  "kids": [
+    "demo/household-7.jpg",
+    "demo/household-8.jpg"
+  ],
+  "beauty": [
+    "demo/household-9.jpg",
+    "demo/household-10.jpg"
+  ],
+  "optics": [
+    "demo/household-11.jpg"
+  ],
+  "pets": [
+    "demo/household-12.jpg"
+  ],
+  "tech": [
+    "demo/electronics-1.jpg"
+  ],
+  "tea": [
+    "demo/spices-1.jpg",
+    "demo/spices-2.jpg"
+  ],
+  "handmade": [
+    "demo/prilavok-1.jpg",
+    "demo/cover-1.jpg"
+  ]
 };
 
 export const FALLBACK_PHOTO = "demo/cover-1.jpg";

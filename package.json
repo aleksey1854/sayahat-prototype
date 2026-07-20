@@ -14,7 +14,8 @@
     "test:search": "tsx scripts/test-search.ts",
     "test:images": "tsx scripts/test-images.ts",
     "db:deploy": "prisma db push",
-    "covers": "tsx scripts/set-covers.ts"
+    "covers": "tsx scripts/set-covers.ts",
+    "photos": "tsx scripts/import-photos.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

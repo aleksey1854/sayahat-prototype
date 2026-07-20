@@ -22,7 +22,7 @@ export const site = {
   openingHoursSchema: "Tu-Su 10:00-19:00", // для микроразметки
 
   rating: 4.8,
-  ratingCount: 150,
+  ratingCount: 151,
   geo: { lat: 53.170639, lng: 63.592403 },
 
   // Администрация рынка
@@ -43,8 +43,8 @@ export const site = {
   station: {
     name: "Автовокзал «Саяхат»",
     nameKz: "«Саяхат» автовокзалы",
-    hours: "кассы 8:00–20:00, без выходных",
-    hoursKz: "кассалар 8:00–20:00, демалыссыз",
+    hours: "ежедневно 6:00–24:00",
+    hoursKz: "күн сайын 6:00–24:00",
     site: "https://sayahat-kst.kz",
   },
 };
