@@ -513,8 +513,10 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .brand { min-height: 44px; min-width: 44px; justify-content: center; }
   /* переключатель шириной с логотип — тогда поиск встаёт ровно посередине */
   .lang { height: 40px; width: 44px; border-radius: 12px; }
-  .lang button, .lang__pill { display: none; }
-  .lang__compact {
+  /* :not() обязателен — компактная кнопка тоже <button> внутри .lang,
+     и правило «.lang button» перебивало её по специфичности */
+  .lang button:not(.lang__compact), .lang__pill { display: none; }
+  .lang button.lang__compact {
     display: grid; place-items: center; width: 100%; height: 100%;
     border: 0; background: var(--brand); color: #fff; cursor: pointer;
     font-family: var(--font-body); font-size: 12px; font-weight: 700;
