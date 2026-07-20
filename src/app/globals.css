@@ -269,6 +269,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 @media (max-width: 560px) {
   .section { padding: 52px 0; }
+  .news-section { padding: 34px 0; }
   /* Поиск был на второй строке (flex: 1 0 100%), а высота шапки жёстко 64px:
      он не помещался и торчал за фон, из-за чего контент проезжал под ним.
      Собираем в одну строку и уменьшаем логотип, чтобы всё влезло. */
@@ -375,7 +376,11 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .news-card:hover { transform: translateY(-3px); }
 .news-card time { font-size: 13px; font-weight: 700; color: var(--accent-700); }
 .news-card h3 { font-family: var(--font-body); font-size: 18px; font-weight: 700; color: var(--ink); margin: 8px 0 10px; line-height: 1.3; }
-.news-card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.news-card p {
+  margin: 0; color: var(--muted); font-size: 14.5px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden;
+}
+.news-card--lead p { -webkit-line-clamp: 5; }
 
 .bazaar-map { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
 .bmap { background: #FBF7EF; border: 1px solid var(--line-strong); border-radius: 18px; padding: 28px; }
@@ -434,9 +439,23 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 
 @media (max-width: 920px) {
   .stores { grid-template-columns: repeat(2, 1fr); }
-  .news-grid, .news-grid--mosaic { grid-template-columns: 1fr; grid-auto-rows: auto; }
-  .news-card--lead { grid-row: auto; padding: 26px 28px; }
-  .news-card--lead h3 { font-size: 22px; }
+  /* Три карточки в колонку занимали 84% экрана телефона. Ставим их лентой:
+     высота одной карточки вместо трёх, следующая торчит краем и показывает,
+     что можно листать. Для трёх второстепенных блоков это уместно —
+     в отличие от категорий, где нужен обзор всех сразу. */
+  .news-grid, .news-grid--mosaic {
+    display: flex; grid-template-columns: none; grid-auto-rows: auto;
+    gap: 12px; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -ms-overflow-style: none;
+    padding-bottom: 2px;
+  }
+  .news-grid::-webkit-scrollbar { display: none; }
+  .news-card { flex: 0 0 84%; scroll-snap-align: start; padding: 18px 20px; }
+  .news-card--lead { grid-row: auto; padding: 18px 20px; }
+  .news-card--lead h3 { font-family: var(--font-body); font-size: 18px; }
+  .news-card--lead p { font-size: 14.5px; -webkit-line-clamp: 4; }
+  .news-card:last-child { margin-right: 14px; }
   .stats { gap: 28px; }
 }
 @media (max-width: 560px) {
