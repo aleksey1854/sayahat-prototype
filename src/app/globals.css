@@ -310,6 +310,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .lang button.on { color: #fff; }
 .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 999px; }
+.lang__compact { display: none; }
 @media (prefers-reduced-motion: reduce) { .lang__pill { transition: none; } }
 
 .cat-hero {
@@ -480,8 +481,16 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .brand__square { display: block; width: 40px; height: 40px; flex: none; border-radius: 11px; }
   /* область касания логотипа — 44px, как требуют рекомендации по доступности */
   .brand { min-height: 44px; min-width: 44px; justify-content: center; }
-  .lang { height: 40px; }
-  .lang button { min-width: 44px; height: 100%; font-size: 12.5px; padding: 0 10px; }
+  /* переключатель шириной с логотип — тогда поиск встаёт ровно посередине */
+  .lang { height: 40px; width: 44px; border-radius: 12px; }
+  .lang button, .lang__pill { display: none; }
+  .lang__compact {
+    display: grid; place-items: center; width: 100%; height: 100%;
+    border: 0; background: var(--brand); color: #fff; cursor: pointer;
+    font-family: var(--font-body); font-size: 12px; font-weight: 700;
+    border-radius: 11px;
+  }
+  .lang--pending .lang__compact { opacity: .72; }
 }
 
 :where(a, button, input, [tabindex]):focus-visible {
@@ -851,14 +860,18 @@ h2 { letter-spacing: -0.018em; }
 }
 
 
-/* ── категории: иконка в фирменном цвете + короткая подпись ──
-   Раньше это был ряд текстовых чипов: 15 длинных названий вроде
-   «Сладости, хлеб, бакалея» переносились в три ряда и читались тяжело. */
-.catbar { display: flex; flex-wrap: wrap; gap: 16px 14px; margin-bottom: 26px; }
+/* ── категории: сетка иконок, как на главной у маркетплейсов ──
+   Лента с прокруткой не подошла: на телефоне помещалось три с половиной
+   штуки, остальное приходилось угадывать. Сетка показывает восемь сразу,
+   остальные — по кнопке. Никакого горизонтального скролла. */
+.catbar {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 18px 10px;
+  margin-bottom: 18px;
+}
 .cat {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
-  width: 78px; padding: 0; border: 0; background: transparent; cursor: pointer;
-  font-family: var(--font-body);
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+  font-family: var(--font-body); min-width: 0;
 }
 .cat__ico {
   width: 54px; height: 54px; border-radius: 17px; color: #fff;
@@ -871,41 +884,45 @@ h2 { letter-spacing: -0.018em; }
 .cat__label {
   font-size: 12.5px; font-weight: 600; line-height: 1.25; color: var(--ink-soft);
   text-align: center; transition: color .18s ease;
+  overflow-wrap: anywhere;
 }
 .cat:hover .cat__ico { transform: translateY(-3px); box-shadow: var(--shadow); }
 .cat:active .cat__ico { transform: translateY(0) scale(.95); }
 .cat:focus-visible .cat__ico { outline: 2px solid var(--brand); outline-offset: 3px; }
-/* выбранная категория: кольцо в брендовом цвете и плотная подпись */
 .cat.on .cat__ico { box-shadow: 0 0 0 2.5px var(--bg), 0 0 0 5px var(--brand); }
 .cat.on .cat__label { color: var(--brand-700); font-weight: 700; }
 
-@media (max-width: 640px) {
-  /* 16 категорий в перенос дали бы четыре ряда — прокручиваем в один.
-     padding обязателен: прокрутка обрезает всё за границами, а у активной
-     категории кольцо выступает на 5px и иконка приподнимается при нажатии.
-     Затухание справа показывает, что ряд продолжается. */
-  .catbar {
-    gap: 14px 12px; margin-bottom: 14px; padding: 8px 0 4px;
-    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;
-    scroll-padding-left: 4px;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 30px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 30px), transparent);
-  }
-  .catbar::-webkit-scrollbar { display: none; }
-  .cat { flex: none; scroll-snap-align: start; }
-  /* последняя не должна упираться в край, иначе не докрутить */
-  .cat:last-child { margin-right: 22px; }
-  /* Ширина считается от экрана так, чтобы в ряд помещалось ~3.5 штуки:
-     половина следующей иконки всегда торчит и показывает, что ряд листается.
-     С фиксированной шириной на одних экранах край было видно, на других нет. */
-  .cat { width: clamp(64px, calc((100vw - 84px) / 3.6), 92px); gap: 7px; }
-  .cat__ico { width: 50px; height: 50px; border-radius: 16px; }
-  .cat__ico svg { width: 25px; height: 25px; }
-  .cat__label { font-size: 11.5px; }
+/* кнопка «Ещё N категорий» */
+.cat-more {
+  display: none; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; margin: -4px 0 20px; padding: 11px 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--ink-soft); cursor: pointer;
+  transition: border-color .18s ease, color .18s ease;
 }
+.cat-more:hover { border-color: var(--brand); color: var(--brand-700); }
+.cat-more svg { width: 16px; height: 16px; transition: transform .24s var(--ease-out-quint); }
+.catbar--open + .cat-more svg { transform: rotate(180deg); }
+
+@media (max-width: 900px) { .catbar { grid-template-columns: repeat(6, 1fr); } }
+
+@media (max-width: 640px) {
+  /* четыре в ряд — привычная сетка категорий на телефоне */
+  .catbar { grid-template-columns: repeat(4, 1fr); gap: 16px 8px; margin-bottom: 14px; }
+  .cat { gap: 7px; }
+  .cat__ico { width: 52px; height: 52px; border-radius: 16px; }
+  .cat__ico svg { width: 26px; height: 26px; }
+  .cat__label { font-size: 11.5px; }
+  /* видно два ряда, остальное раскрывается кнопкой */
+  .cat--extra { display: none; }
+  .catbar--open .cat--extra { display: flex; }
+  .cat-more { display: inline-flex; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cat:hover .cat__ico, .cat:active .cat__ico { transform: none; }
+  .cat-more svg { transition: none; }
 }
 
 

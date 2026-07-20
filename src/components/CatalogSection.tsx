@@ -48,6 +48,7 @@ function tintFor(slug: string) {
 export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode, pav, setPav } = useCatalogSearch();
   const [cat, setCat] = useState("all");
+  const [allCats, setAllCats] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
@@ -111,7 +112,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
         <div className="wrap">
           <h1 className="sr-only">{catalogTitle}</h1>
 
-          <div className="catbar">
+          <div className={allCats ? "catbar catbar--open" : "catbar"}>
             <button className={cat === "all" ? "cat on" : "cat"} onClick={() => setCat("all")} aria-pressed={cat === "all"}>
               <span className="cat__ico cat__ico--all">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -123,12 +124,13 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
               </span>
               <span className="cat__label">{ui.all}</span>
             </button>
-            {categories.map((c) => {
+            {categories.map((c, ci) => {
               const short = SHORT_CAT[c.slug];
+              const extra = ci >= 7 ? " cat--extra" : "";
               return (
                 <button
                   key={c.slug}
-                  className={cat === c.slug ? "cat on" : "cat"}
+                  className={(cat === c.slug ? "cat on" : "cat") + extra}
                   onClick={() => setCat(c.slug)}
                   aria-pressed={cat === c.slug}
                   title={c.name}
@@ -141,6 +143,17 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
               );
             })}
           </div>
+
+          {categories.length > 7 && (
+            <button className="cat-more" onClick={() => setAllCats((v) => !v)} aria-expanded={allCats}>
+              {allCats
+                ? t("Свернуть", "Жию")
+                : t(`Ещё ${categories.length - 7} категорий`, `Тағы ${categories.length - 7} санат`)}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          )}
 
           {hasPav && (
           <div className="pavbar">
