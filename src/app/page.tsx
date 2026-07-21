@@ -125,7 +125,7 @@ export default async function HomePage() {
                   и высота. Так вёрстка не ломается при любом их количестве. */}
               <div className="news-grid">
                 {news.map((n) => {
-                  const d = newsDateParts(n.publishedAt);
+                  const d = newsDateParts(n.publishedAt, lang);
                   return (
                     <article className="news-card" key={n.id}>
                       <div className="news-card__head">

@@ -47,8 +47,20 @@ export function ruPlural(n: number, one: string, few: string, many: string) {
 }
 
 // Дата новости по частям — для блока-якоря в карточке: число крупно, месяц под ним.
-export function newsDateParts(date: Date) {
+// Месяц в родительном падеже, потому что читается как единая дата: «10 июля».
+const MONTHS_RU = [
+  "января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря",
+];
+const MONTHS_KZ = [
+  "қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым",
+  "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан",
+];
+
+export function newsDateParts(date: Date, lang: "ru" | "kz" = "ru") {
   const d = new Date(date);
-  const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-  return { day: String(d.getDate()), month: months[d.getMonth()] };
+  return {
+    day: String(d.getDate()),
+    month: (lang === "kz" ? MONTHS_KZ : MONTHS_RU)[d.getMonth()],
+  };
 }

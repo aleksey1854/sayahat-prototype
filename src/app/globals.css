@@ -53,15 +53,19 @@ a { color: inherit; text-decoration: none; }
 h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; line-height: 1.12; }
 
 .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
-.section { padding: 76px 0; }
-.section--tight { padding: 52px 0; }
+/* Между двумя соседними секциями складываются оба отступа: при 60px
+   разрыв выходил 120px. 44px дают 88px — секции читаются раздельно,
+   но без провалов. */
+.section { padding: 44px 0; }
+.section--tight { padding: 38px 0; }
 
 .eyebrow {
   font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--accent-700);
 }
 .lead { color: var(--muted); font-size: 18px; max-width: 60ch; }
-.section-head { margin-bottom: 38px; }
+/* 38px под заголовком отрывали его от содержимого секции */
+.section-head { margin-bottom: 24px; }
 .section-head h1, .section-head h2 { font-size: clamp(28px, 4vw, 40px); color: var(--ink); }
 .section-head p { margin: 12px 0 0; color: var(--muted); font-size: 17px; max-width: 58ch; }
 
@@ -191,10 +195,13 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .trust__item b { display: block; font-size: 15.5px; font-weight: 700; line-height: 1.25; }
 .trust__item span { display: block; margin-top: 3px; font-size: 13px; line-height: 1.35; color: rgba(255,255,255,.88); }
 
-.about__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: center; }
+.about__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
 .about__text p { color: var(--ink-soft); font-size: 17px; }
 .about__pic {
-  aspect-ratio: 5/4; border-radius: var(--radius-lg); overflow: hidden;
+  /* было 5:4 — фото выходило на 433px при тексте в 262px, и разница
+     превращалась в пустоту сверху и снизу. Плюс потолок по высоте,
+     чтобы на широких экранах фото не разрасталось. */
+  aspect-ratio: 16/9; max-height: 340px; border-radius: var(--radius-lg); overflow: hidden;
   background: linear-gradient(150deg, #2E8068 0%, #1C6B57 60%, #14513F 100%);
   box-shadow: var(--shadow); display: grid; place-items: center;
 }
@@ -405,7 +412,8 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
    блок выглядел пустым текстом. Число крупно, месяц под ним. */
 .news-card__head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; }
 .news-date {
-  flex: none; width: 48px; padding: 7px 0 8px; text-align: center;
+  /* ширина под самое длинное название месяца («сентября», «желтоқсан») */
+  flex: none; width: 60px; padding: 7px 4px 8px; text-align: center;
   background: var(--accent-soft, rgba(222,150,39,.14)); border-radius: 12px;
   line-height: 1;
 }
@@ -413,7 +421,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   display: block; font-family: var(--font-display); font-size: 21px;
   font-weight: 700; color: var(--accent-700); margin-bottom: 3px;
 }
-.news-date span { font-size: 11px; font-weight: 700; color: var(--accent-700); opacity: .8; text-transform: lowercase; }
+.news-date span { font-size: 10.5px; font-weight: 700; color: var(--accent-700); opacity: .8; text-transform: lowercase; }
 
 .news-section { background: var(--surface-2); padding: 24px 0 26px; }
 .news-section .section-head { margin-bottom: 14px; }
