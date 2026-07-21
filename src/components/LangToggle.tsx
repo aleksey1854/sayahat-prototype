@@ -22,37 +22,37 @@ export function LangToggle({ lang }: { lang: Lang }) {
   }
 
   return (
-    <div
-      className={`lang${pending ? " lang--pending" : ""}`}
-      data-active={shown}
-    >
-      <span className="lang__pill" aria-hidden="true" />
+    <>
+      <div className={`lang${pending ? " lang--pending" : ""}`} data-active={shown}>
+        <span className="lang__pill" aria-hidden="true" />
+        <button
+          className={shown === "ru" ? "on" : undefined}
+          onClick={() => set("ru")}
+          aria-pressed={shown === "ru"}
+          lang="ru"
+        >
+          РУС
+        </button>
+        <button
+          className={shown === "kz" ? "on" : undefined}
+          onClick={() => set("kz")}
+          aria-pressed={shown === "kz"}
+          lang="kk"
+        >
+          ҚАЗ
+        </button>
+      </div>
+
+      {/* Отдельная кнопка, а не спрятанная внутри .lang: там она наследовала
+          min-width и padding от общих правил переключателя и не помещалась
+          в контейнер — текст уезжал вбок. Здесь у неё свои размеры. */}
       <button
-        className={shown === "ru" ? "on" : undefined}
-        onClick={() => set("ru")}
-        aria-pressed={shown === "ru"}
-        lang="ru"
-      >
-        РУС
-      </button>
-      <button
-        className={shown === "kz" ? "on" : undefined}
-        onClick={() => set("kz")}
-        aria-pressed={shown === "kz"}
-        lang="kk"
-      >
-        ҚАЗ
-      </button>
-      {/* На телефоне переключатель из двух кнопок вдвое шире логотипа, из-за чего
-          поиск съезжал влево от центра. Там показываем одну кнопку той же ширины:
-          на ней текущий язык, нажатие переключает на другой. */}
-      <button
-        className="lang__compact"
+        className={`lang-mini${pending ? " is-pending" : ""}`}
         onClick={() => set(shown === "ru" ? "kz" : "ru")}
         aria-label={shown === "ru" ? "Тілді ауыстыру: қазақша" : "Сменить язык: русский"}
       >
         {shown === "ru" ? "РУС" : "ҚАЗ"}
       </button>
-    </div>
+    </>
   );
 }

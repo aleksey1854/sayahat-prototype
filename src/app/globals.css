@@ -313,7 +313,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .lang button.on { color: #fff; }
 .lang button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 999px; }
-.lang__compact { display: none; }
 @media (prefers-reduced-motion: reduce) { .lang__pill { transition: none; } }
 
 .cat-hero {
@@ -529,19 +528,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   /* область касания логотипа — 44px, как требуют рекомендации по доступности */
   .brand { min-height: 44px; min-width: 44px; justify-content: center; }
   /* переключатель шириной с логотип — тогда поиск встаёт ровно посередине */
-  /* высота и радиус — как у поиска и марки, иначе три элемента выглядят
-     собранными из разных наборов */
-  .lang { height: 42px; width: 44px; border-radius: 13px; }
-  /* :not() обязателен — компактная кнопка тоже <button> внутри .lang,
-     и правило «.lang button» перебивало её по специфичности */
-  .lang button:not(.lang__compact), .lang__pill { display: none; }
-  .lang button.lang__compact {
-    display: grid; place-items: center; border-radius: 12px; width: 100%; height: 100%;
-    border: 0; background: var(--brand); color: #fff; cursor: pointer;
-    font-family: var(--font-body); font-size: 12px; font-weight: 700;
-    border-radius: 11px;
-  }
-  .lang--pending .lang__compact { opacity: .72; }
 }
 
 :where(a, button, input, [tabindex]):focus-visible {
@@ -870,7 +856,6 @@ h2 { letter-spacing: -0.018em; }
   /* .topbar перед селектором — чтобы базовое правило с radius 999px
      гарантированно не перебило форму поля на телефоне */
   .topbar .topbar__search { padding: 0 15px; height: 42px; border-radius: 13px; }
-  .topbar .lang { height: 42px; width: 44px; border-radius: 13px; }
   .topbar .brand__square { width: 42px; height: 42px; border-radius: 13px; }
   /* поле уже — ужимаем подсказки, чтобы не давились */
   .topbar__search .suggest__item { padding: 9px 11px; gap: 10px; }
@@ -994,5 +979,28 @@ h2 { letter-spacing: -0.018em; }
 }
 .store__pic .ph-fb svg { max-width: 76px; }
 .hero__art .ph-fb svg { max-width: 110px; color: rgba(255,255,255,.72); }
+
+
+/* Компактный переключатель языка для телефона. Отдельный элемент со своими
+   размерами — внутри .lang он подхватывал min-width и padding от общих
+   правил и не влезал в контейнер, из-за чего текст съезжал вбок. */
+.lang-mini { display: none; }
+@media (max-width: 560px) {
+  .lang { display: none; }
+  .topbar .lang-mini {
+    display: inline-flex; align-items: center; justify-content: center;
+    box-sizing: border-box; width: 46px; height: 42px; min-width: 0;
+    margin: 0; padding: 0; border: 0; border-radius: 13px;
+    background: var(--brand); color: #fff; cursor: pointer;
+    font-family: var(--font-body); font-size: 12px; font-weight: 700;
+    line-height: 1; text-align: center; letter-spacing: .01em;
+    white-space: nowrap; overflow: hidden;
+    transition: opacity .18s ease, transform .16s var(--ease-out-quint);
+  }
+  .topbar .lang-mini.is-pending { opacity: .72; }
+  .topbar .lang-mini:active { transform: scale(.96); }
+  .topbar .lang-mini:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+}
+@media (prefers-reduced-motion: reduce) { .topbar .lang-mini:active { transform: none; } }
 
 @tailwind utilities;
