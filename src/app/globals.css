@@ -288,7 +288,13 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .t-hide-sm { display: none; }
   .grid-cards { grid-template-columns: 1fr; }
   .promo { flex-direction: column; align-items: flex-start; text-align: left; }
-  .trust__inner { grid-template-columns: 1fr 1fr; }
+  /* Пунктов обычно три, и в двух колонках последний висел слева с пустотой
+     справа. Одна колонка + группа по центру блока: поля симметричны,
+     длинный текст не упирается в край. */
+  .trust__inner {
+    grid-template-columns: 1fr; gap: 13px;
+    width: fit-content; max-width: min(320px, 100%); margin-inline: auto;
+  }
 }
 
 .lang {
@@ -880,7 +886,7 @@ h2 { letter-spacing: -0.018em; }
   .hero__tag { margin: 12px 0 20px; font-size: 16.5px; }
   .hero__art { max-width: 100%; aspect-ratio: 16/10; }
   /* только вертикальные — боковые приходят из .wrap */
-  .trust__inner { padding-top: 24px; padding-bottom: 24px; gap: 16px 20px; }
+  .trust__inner { padding-top: 22px; padding-bottom: 22px; }
   .about__inner { padding-top: 40px; padding-bottom: 40px; }
 }
 @media (max-width: 560px) {
@@ -983,23 +989,28 @@ h2 { letter-spacing: -0.018em; }
 
 /* Компактный переключатель языка для телефона. Отдельный элемент со своими
    размерами — внутри .lang он подхватывал min-width и padding от общих
-   правил и не влезал в контейнер, из-за чего текст съезжал вбок. */
+   правил и не влезал в контейнер, из-за чего текст съезжал вбок.
+   Оформлен как поле поиска: светлый фон и рамка. Тогда в шапке один
+   акцент (зелёная марка), а два соседних элемента читаются одинаково. */
 .lang-mini { display: none; }
 @media (max-width: 560px) {
   .lang { display: none; }
   .topbar .lang-mini {
-    display: inline-flex; align-items: center; justify-content: center;
-    box-sizing: border-box; width: 46px; height: 42px; min-width: 0;
-    margin: 0; padding: 0; border: 0; border-radius: 13px;
-    background: var(--brand); color: #fff; cursor: pointer;
-    font-family: var(--font-body); font-size: 12px; font-weight: 700;
-    line-height: 1; text-align: center; letter-spacing: .01em;
-    white-space: nowrap; overflow: hidden;
-    transition: opacity .18s ease, transform .16s var(--ease-out-quint);
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    box-sizing: border-box; width: 56px; height: 42px; min-width: 0;
+    margin: 0; padding: 0; border-radius: 13px;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--ink-soft); cursor: pointer;
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    line-height: 1; letter-spacing: .01em; white-space: nowrap; overflow: hidden;
+    transition: border-color .18s ease, opacity .18s ease, transform .16s var(--ease-out-quint);
   }
-  .topbar .lang-mini.is-pending { opacity: .72; }
+  .topbar .lang-mini svg { width: 14px; height: 14px; color: var(--brand); flex: none; }
+  .topbar .lang-mini span { display: block; }
+  .topbar .lang-mini:hover { border-color: var(--brand); }
+  .topbar .lang-mini.is-pending { opacity: .68; }
   .topbar .lang-mini:active { transform: scale(.96); }
-  .topbar .lang-mini:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .topbar .lang-mini:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 }
 @media (prefers-reduced-motion: reduce) { .topbar .lang-mini:active { transform: none; } }
 

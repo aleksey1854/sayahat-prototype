@@ -51,7 +51,12 @@ export function LangToggle({ lang }: { lang: Lang }) {
         onClick={() => set(shown === "ru" ? "kz" : "ru")}
         aria-label={shown === "ru" ? "Тілді ауыстыру: қазақша" : "Сменить язык: русский"}
       >
-        {shown === "ru" ? "РУС" : "ҚАЗ"}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3.3 9h17.4M3.3 15h17.4" />
+          <path d="M12 3.2c2.4 2.6 2.4 15 0 17.6M12 3.2c-2.4 2.6-2.4 15 0 17.6" />
+        </svg>
+        <span>{shown === "ru" ? "РУС" : "ҚАЗ"}</span>
       </button>
     </>
   );

@@ -1,4 +1,5 @@
 import { site, waLink, telHref } from "@/lib/site";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import type { Lang } from "@/lib/i18n";
 
 // «Свободные места» — блок аренды. Данные: аренда от ~7000 ₸/м², отдельный номер.
@@ -34,9 +35,7 @@ export function FreeSpaces({ lang }: { lang: Lang }) {
               {site.rentPhone}
             </a>
             <a className="btn btn--ghost btn--lg" href={waLink(site.rentWhatsapp, waText)} target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.3A8.5 8.5 0 1 1 21 11.5z" />
-              </svg>
+              <WhatsAppIcon />
               {t("Написать в WhatsApp", "WhatsApp-қа жазу")}
             </a>
           </div>

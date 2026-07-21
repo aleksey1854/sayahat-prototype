@@ -1,4 +1,5 @@
 import { waLink } from "@/lib/site";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { pick, type Lang } from "@/lib/i18n";
 
 export function CallBar({ phone, whatsapp, lang = "ru" }: { phone?: string | null; whatsapp?: string | null; lang?: Lang }) {
@@ -18,9 +19,7 @@ export function CallBar({ phone, whatsapp, lang = "ru" }: { phone?: string | nul
       )}
       {whatsapp && (
         <a className="btn btn--accent" href={waLink(whatsapp)}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 18, height: 18 }}>
-            <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.3A8.5 8.5 0 1 1 21 11.5z" />
-          </svg>
+          <WhatsAppIcon size={18} />
           WhatsApp
         </a>
       )}
