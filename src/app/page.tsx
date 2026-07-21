@@ -121,16 +121,13 @@ export default async function HomePage() {
               <div className="section-head">
                 <h2>{pick(lang, "Новости рынка", "Базар жаңалықтары")}</h2>
               </div>
-              {/* Мозаика рассчитана на три новости: главная слева на всю высоту.
-                  Если их меньше — обычная сетка, иначе колонка справа пустует. */}
-              <div className={news.length >= 3 ? "news-grid news-grid--mosaic" : "news-grid"}>
-                {news.map((n, i) => {
+              {/* Новости — модульные блоки одного шаблона: одинаковая ширина
+                  и высота. Так вёрстка не ломается при любом их количестве. */}
+              <div className="news-grid">
+                {news.map((n) => {
                   const d = newsDateParts(n.publishedAt);
                   return (
-                    <article
-                      className={news.length >= 3 && i === 0 ? "news-card news-card--lead" : "news-card"}
-                      key={n.id}
-                    >
+                    <article className="news-card" key={n.id}>
                       <div className="news-card__head">
                         {/* Дата работает визуальным якорем вместо картинки:
                             без неё карточка выглядела пустым текстовым блоком. */}
