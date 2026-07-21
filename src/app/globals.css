@@ -136,7 +136,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
     linear-gradient(180deg, #FBF6ED 0%, #F6EEDF 100%);
   border-bottom: 1px solid var(--line);
 }
-.hero__inner { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; padding-top: 78px; padding-bottom: 84px; }
+.hero__inner { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; padding-top: 52px; padding-bottom: 58px; }
 .hero__mono {
   width: 64px; height: 64px; border-radius: 18px; margin-bottom: 22px;
   background: linear-gradient(135deg, var(--brand), var(--brand-700));
@@ -148,7 +148,9 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .hero__tag { margin: 18px 0 26px; font-size: 19px; color: var(--ink-soft); max-width: 30ch; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .hero__art {
-  position: relative; aspect-ratio: 4/5; border-radius: var(--radius-xl);
+  /* было 4:5 — фото выходило на 574px при тексте в 320px, и разница в 254px
+     превращалась в пустоту сверху и снизу при выравнивании по центру */
+  position: relative; aspect-ratio: 3/2; border-radius: var(--radius-xl);
   background: linear-gradient(150deg, #E8A23C 0%, #C9692B 55%, #9A4123 100%);
   box-shadow: var(--shadow-lg);
   display: grid; place-items: center; overflow: hidden;
@@ -164,7 +166,15 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 
 .trust { background: var(--brand); color: #fff; }
-.trust__inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding-top: 30px; padding-bottom: 30px; }
+/* Сетка подстраивается под количество пунктов: три займут треть ширины,
+   четыре — четверть, пять перенесутся во второй ряд. Раньше колонок было
+   жёстко четыре, и при трёх пунктах справа зияла пустая ячейка. */
+.trust__inner {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px; padding-top: 26px; padding-bottom: 26px;
+}
+/* единственный пункт не должен растягиваться на всю ширину экрана */
+.trust__item:only-child { max-width: 460px; }
 /* Пункт — плашка с галочкой в кружке. Раньше галочка висела сбоку сама по
    себе, и блок читался как случайный список строк. */
 .trust__item {
@@ -275,7 +285,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 @media (max-width: 920px) {
   .hero__inner, .about__inner, .contact__inner { grid-template-columns: 1fr; gap: 36px; }
   .hero__art { max-width: 360px; margin-inline: auto; }
-  .trust__inner { grid-template-columns: repeat(2, 1fr); }
   .grid-cards { grid-template-columns: repeat(2, 1fr); }
   .gallery { grid-template-columns: repeat(2, 1fr); }
 }
@@ -299,15 +308,12 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   .t-hide-sm { display: none; }
   .grid-cards { grid-template-columns: 1fr; }
   .promo { flex-direction: column; align-items: flex-start; text-align: left; }
-  /* Плашки — модули, поэтому занимают всю ширину, а не жмутся в узкую
-     колонку по центру. Сетка сама решает, сколько влезет: на обычном
-     телефоне две в ряд, на узком — одна. Если последняя остаётся без пары,
-     она растягивается на всю строку, чтобы не висела пустая ячейка. */
-  .trust__inner {
-    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
-    gap: 10px; width: auto; max-width: none; margin-inline: 0;
-  }
+  /* на телефоне порог меньше — влезают две в ряд */
+  .trust__inner { grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 10px; }
+  /* при трёх пунктах последний остаётся без пары — растягиваем на всю строку,
+     чтобы рядом не висела пустая ячейка */
   .trust__item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .trust__item:only-child { max-width: none; }
   .trust__item { padding: 12px 14px; gap: 10px; }
   .trust__item svg { width: 28px; height: 28px; padding: 6px; }
   .trust__item b { font-size: 14.5px; }
