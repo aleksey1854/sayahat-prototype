@@ -272,7 +272,6 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   /* было 52px сверху и снизу — на телефоне между блоками зияла пропасть */
   .section { padding: 38px 0; }
   .section--tight { padding: 32px 0; }
-  .news-section { padding: 30px 0; }
   /* Поиск был на второй строке (flex: 1 0 100%), а высота шапки жёстко 64px:
      он не помещался и торчал за фон, из-за чего контент проезжал под ним.
      Собираем в одну строку и уменьшаем логотип, чтобы всё влезло. */
@@ -369,8 +368,16 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 /* Мозаика новостей: главная крупным блоком слева, остальные — рядом.
    Раскладка по эскизу Виктора. */
 .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-.news-grid--mosaic { grid-template-columns: 1.35fr 1fr; grid-auto-rows: 1fr; }
-.news-card--lead { grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; padding: 26px 28px; }
+.news-grid--mosaic { grid-template-columns: 1.7fr 1fr 1fr; }
+/* На планшете три в ряд становятся слишком узкими: лид уходит на всю ширину,
+   остальные встают под ним парой. */
+@media (max-width: 900px) {
+  .news-grid--mosaic { grid-template-columns: 1fr 1fr; }
+  .news-card--lead { grid-column: 1 / -1; }
+}
+/* Лид шире соседей, но той же высоты. Раньше он тянулся на два ряда,
+   контент болтался по центру, и блок занимал полэкрана. */
+.news-card--lead { padding: 20px 24px; }
 .news-card--lead h3 { font-size: 21px; line-height: 1.25; }
 .news-card--lead p { font-size: 15px; -webkit-line-clamp: 4; }
 
@@ -388,7 +395,10 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .news-date span { font-size: 11px; font-weight: 700; color: var(--accent-700); opacity: .8; text-transform: lowercase; }
 
-.news-section { background: var(--surface-2); }
+.news-section { background: var(--surface-2); padding: 34px 0; }
+.news-section .section-head { margin-bottom: 18px; }
+.news-section .section-head h2 { font-size: 27px; margin: 0; }
+@media (max-width: 640px) { .news-section { padding: 26px 0; } .news-section .section-head h2 { font-size: 23px; } .news-section .section-head { margin-bottom: 14px; } }
 #news { scroll-margin-top: 92px; }
 .news-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: none; transition: border-color .2s ease, transform .2s ease; }
 .news-card:hover { border-color: var(--brand); }
@@ -868,7 +878,11 @@ h2 { letter-spacing: -0.018em; }
    Из-за этого поиск в липкой шапке «прыгал» при тапе. */
 @media (max-width: 640px) {
   .topbar__search input { font-size: 16px; }
-  .topbar__search { padding: 0 15px; height: 42px; border-radius: 13px; }
+  /* .topbar перед селектором — чтобы базовое правило с radius 999px
+     гарантированно не перебило форму поля на телефоне */
+  .topbar .topbar__search { padding: 0 15px; height: 42px; border-radius: 13px; }
+  .topbar .lang { height: 42px; width: 44px; border-radius: 13px; }
+  .topbar .brand__square { width: 42px; height: 42px; border-radius: 13px; }
   /* поле уже — ужимаем подсказки, чтобы не давились */
   .topbar__search .suggest__item { padding: 9px 11px; gap: 10px; }
   .topbar__search .suggest__thumb { width: 36px; height: 36px; }
