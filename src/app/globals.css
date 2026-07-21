@@ -395,10 +395,10 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 }
 .news-date span { font-size: 11px; font-weight: 700; color: var(--accent-700); opacity: .8; text-transform: lowercase; }
 
-.news-section { background: var(--surface-2); padding: 34px 0; }
-.news-section .section-head { margin-bottom: 18px; }
+.news-section { background: var(--surface-2); padding: 24px 0 26px; }
+.news-section .section-head { margin-bottom: 14px; }
 .news-section .section-head h2 { font-size: 27px; margin: 0; }
-@media (max-width: 640px) { .news-section { padding: 26px 0; } .news-section .section-head h2 { font-size: 23px; } .news-section .section-head { margin-bottom: 14px; } }
+@media (max-width: 640px) { .news-section { padding: 20px 0 22px; } .news-section .section-head h2 { font-size: 23px; } .news-section .section-head { margin-bottom: 14px; } }
 #news { scroll-margin-top: 92px; }
 .news-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: none; transition: border-color .2s ease, transform .2s ease; }
 .news-card:hover { border-color: var(--brand); }
@@ -616,7 +616,8 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   cursor: pointer; font-size: 15px; text-decoration: underline; padding: 4px;
 }
 
-.catalog-grid-section { padding-top: 36px; }
+/* блок новостей уже даёт отступ снизу — 36px сверху здесь давали разрыв */
+.catalog-grid-section { padding-top: 22px; }
 
 /* выпадающие подсказки поиска */
 .suggest {
