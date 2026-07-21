@@ -45,3 +45,10 @@ export function ruPlural(n: number, one: string, few: string, many: string) {
   if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
   return many;
 }
+
+// Дата новости по частям — для блока-якоря в карточке: число крупно, месяц под ним.
+export function newsDateParts(date: Date) {
+  const d = new Date(date);
+  const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  return { day: String(d.getDate()), month: months[d.getMonth()] };
+}

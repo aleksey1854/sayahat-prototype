@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { getLang, pick } from "@/lib/i18n";
-import { newsDate, photoUrl } from "@/lib/format";
+import { newsDateParts, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { site, pavilionKey, boothLabel } from "@/lib/site";
 import { Header } from "@/components/Header";
@@ -124,16 +124,26 @@ export default async function HomePage() {
               {/* Мозаика рассчитана на три новости: главная слева на всю высоту.
                   Если их меньше — обычная сетка, иначе колонка справа пустует. */}
               <div className={news.length >= 3 ? "news-grid news-grid--mosaic" : "news-grid"}>
-                {news.map((n, i) => (
-                  <article
-                    className={news.length >= 3 && i === 0 ? "news-card news-card--lead" : "news-card"}
-                    key={n.id}
-                  >
-                    <time>{newsDate(n.publishedAt)}</time>
-                    <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
-                    {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
-                  </article>
-                ))}
+                {news.map((n, i) => {
+                  const d = newsDateParts(n.publishedAt);
+                  return (
+                    <article
+                      className={news.length >= 3 && i === 0 ? "news-card news-card--lead" : "news-card"}
+                      key={n.id}
+                    >
+                      <div className="news-card__head">
+                        {/* Дата работает визуальным якорем вместо картинки:
+                            без неё карточка выглядела пустым текстовым блоком. */}
+                        <time className="news-date" dateTime={n.publishedAt.toISOString()}>
+                          <b>{d.day}</b>
+                          <span>{d.month}</span>
+                        </time>
+                        <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
+                      </div>
+                      {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
+                    </article>
+                  );
+                })}
               </div>
             </div>
           </section>

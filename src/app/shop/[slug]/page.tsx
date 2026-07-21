@@ -7,6 +7,8 @@ import { site, waLink, igUrl, pavilionKey, boothLabel } from "@/lib/site";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
+import { CatalogProvider } from "@/components/CatalogProvider";
+import { loadCatalogCards } from "@/lib/catalog";
 import { CallBar } from "@/components/CallBar";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { BazaarMap } from "@/components/BazaarMap";
@@ -100,6 +102,8 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
   const mapHighlight = pavilionKey(shop.pavilion);
+  // данные для поиска в шапке — те же, что у каталога на главной
+  const searchCards = await loadCatalogCards(lang);
 
   // Соседи по павильону: перелинковка каталога и подсказка «кто рядом».
   const neighbors = shop.pavilion
@@ -186,7 +190,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <GoalTracker shop={shop.slug} />
-      <Header variant="shop" />
+      <CatalogProvider shops={searchCards}>
+        <Header variant="shop" />
+      </CatalogProvider>
 
       {draftPreview && (
         <div className="wrap" style={{ paddingTop: 14 }}>

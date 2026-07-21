@@ -19,17 +19,9 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
               <path d="M9 25V15a7 7 0 0 1 14 0v10h-3.4V15a3.6 3.6 0 0 0-7.2 0v10z" fill="#fff" />
             </svg>
           </Link>
-          {variant === "shop" && (
-            <Link className="topbar__back" href="/">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-              {pick(lang, "Все магазины", "Барлық дүкендер")}
-            </Link>
-          )}
-        </div>
+                  </div>
 
-        {variant === "catalog" && (
+        {(
           <HeaderSearch
             placeholder={pick(lang, "Что ищете? Орехи, платок, обувь…", "Не іздейсіз? Жаңғақ, орамал, аяқ киім…")}
             placeholderShort={pick(lang, "Поиск по рынку", "Базар бойынша іздеу")}
