@@ -35,7 +35,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       orderBy: { createdAt: "asc" },
     }),
     db.newsPost.findMany({
-      orderBy: [{ pinned: "desc" }, { sortOrder: "asc" }, { publishedAt: "desc" }],
+      orderBy: [{ pinned: "desc" }, { sortOrder: "desc" }, { publishedAt: "desc" }],
       take: 3,
     }),
   ]);

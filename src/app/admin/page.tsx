@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { makeSlug } from "@/lib/slug";
 import { removeUpload } from "@/lib/img";
-import { newsDate } from "@/lib/format";
 import { site } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -221,34 +220,6 @@ async function deleteCategory(formData: FormData) {
   redirect("/admin?ok=1");
 }
 
-async function addNews(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const titleRu = str(formData, "titleRu");
-  if (!titleRu) redirect("/admin?err=name");
-
-  await db.newsPost.create({
-    data: {
-      titleRu,
-      titleKz: str(formData, "titleKz") || null,
-      bodyRu: str(formData, "bodyRu") || null,
-      bodyKz: str(formData, "bodyKz") || null,
-    },
-  });
-
-  revalidatePath("/");
-  redirect("/admin?ok=1");
-}
-
-async function deleteNews(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-  await db.newsPost.deleteMany({ where: { id } });
-  revalidatePath("/");
-  redirect("/admin?ok=1");
-}
-
 async function logout() {
   "use server";
   const session = await getSession();
@@ -263,13 +234,12 @@ export default async function AdminPage({
 }) {
   await requireAdmin();
 
-  const [shops, categories, news] = await Promise.all([
+  const [shops, categories] = await Promise.all([
     db.shop.findMany({
       include: { category: true, account: true, _count: { select: { products: true } } },
       orderBy: { createdAt: "asc" },
     }),
     db.category.findMany({ include: { _count: { select: { shops: true } } }, orderBy: { order: "asc" } }),
-    db.newsPost.findMany({ orderBy: { publishedAt: "desc" } }),
   ]);
 
   const err = searchParams.err;
@@ -457,56 +427,16 @@ export default async function AdminPage({
             </form>
           </div>
 
-          <div className="cab__top" style={{ marginTop: 40 }}>
+          <div className="panel" style={{ marginTop: 40, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
             <div>
-              <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Новости ({news.length})</h2>
+              <strong>Новости рынка</strong>
+              <div style={{ color: "var(--muted)", fontSize: 14 }}>
+                Добавление, текст, закрепление, порядок и ссылки на Instagram.
+              </div>
             </div>
-          </div>
-
-          <div className="form-grid">
-            <form action={addNews} className="panel form-grid">
-              <h3 style={{ margin: 0 }}>Добавить новость</h3>
-              <div className="grid2">
-                <div className="field">
-                  <label htmlFor="n-titleRu">Заголовок (русский)</label>
-                  <input className="input" id="n-titleRu" name="titleRu" required />
-                </div>
-                <div className="field">
-                  <label htmlFor="n-titleKz">Заголовок (қазақша)</label>
-                  <input className="input" id="n-titleKz" name="titleKz" />
-                </div>
-              </div>
-              <div className="field">
-                <label htmlFor="n-bodyRu">Текст (русский)</label>
-                <textarea className="textarea" id="n-bodyRu" name="bodyRu" style={{ minHeight: 80 }} />
-              </div>
-              <div className="field">
-                <label htmlFor="n-bodyKz">Текст (қазақша)</label>
-                <textarea className="textarea" id="n-bodyKz" name="bodyKz" style={{ minHeight: 80 }} />
-              </div>
-              <SubmitButton className="btn btn--accent" pendingText="Публикую…" style={{ justifySelf: "start" }}>
-                Опубликовать новость
-              </SubmitButton>
-            </form>
-
-            {news.map((n) => (
-              <div
-                className="panel"
-                key={n.id}
-                style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}
-              >
-                <div>
-                  <strong>{n.titleRu}</strong>
-                  <div style={{ color: "var(--muted)", fontSize: 14 }}>{newsDate(n.publishedAt)}</div>
-                </div>
-                <form action={deleteNews}>
-                  <input type="hidden" name="id" value={n.id} />
-                  <button className="btn btn--ghost btn--danger" type="submit">
-                    Удалить
-                  </button>
-                </form>
-              </div>
-            ))}
+            <Link href="/admin/news" className="btn btn--accent">
+              Управление новостями →
+            </Link>
           </div>
         </div>
       </section>

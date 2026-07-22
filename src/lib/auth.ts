@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export type SessionData = {
   accountId?: string;
-  role?: "tenant" | "admin";
+  role?: "tenant" | "admin" | "editor";
   shopId?: string | null;
 };
 

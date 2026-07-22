@@ -36,17 +36,34 @@ async function login(formData: FormData) {
 
   const session = await getSession();
   session.accountId = account!.id;
-  session.role = account!.role === "admin" ? "admin" : "tenant";
+  session.role =
+    account!.role === "admin" ? "admin" : account!.role === "editor" ? "editor" : "tenant";
   session.shopId = account!.shopId;
   await session.save();
 
-  redirect(session.role === "admin" ? "/admin" : account!.shopId ? "/cabinet" : "/");
+  redirect(
+    session.role === "admin"
+      ? "/admin"
+      : session.role === "editor"
+        ? "/admin/news"
+        : account!.shopId
+          ? "/cabinet"
+          : "/",
+  );
 }
 
 export default async function LoginPage({ searchParams }: { searchParams: { e?: string } }) {
   const session = await getSession();
   if (session.accountId) {
-    redirect(session.role === "admin" ? "/admin" : session.shopId ? "/cabinet" : "/");
+    redirect(
+      session.role === "admin"
+        ? "/admin"
+        : session.role === "editor"
+          ? "/admin/news"
+          : session.shopId
+            ? "/cabinet"
+            : "/",
+    );
   }
 
   return (
