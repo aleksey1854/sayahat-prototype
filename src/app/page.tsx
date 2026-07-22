@@ -34,7 +34,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       },
       orderBy: { createdAt: "asc" },
     }),
-    db.newsPost.findMany({ orderBy: { publishedAt: "desc" }, take: 3 }),
+    db.newsPost.findMany({
+      orderBy: [{ pinned: "desc" }, { sortOrder: "asc" }, { publishedAt: "desc" }],
+      take: 3,
+    }),
   ]);
 
   const cards: CardShop[] = shops.map((s) => {
@@ -128,8 +131,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <div className="news-grid">
                 {news.map((n) => {
                   const d = newsDateParts(n.publishedAt, lang);
-                  return (
-                    <article className="news-card" key={n.id}>
+                  const inner = (
+                    <>
                       <div className="news-card__head">
                         {/* Дата работает визуальным якорем вместо картинки:
                             без неё карточка выглядела пустым текстовым блоком. */}
@@ -138,8 +141,40 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           <span>{d.month}</span>
                         </time>
                         <h3>{pick(lang, n.titleRu, n.titleKz)}</h3>
+                        {n.pinned && (
+                          <span className="news-pin" title={pick(lang, "Закреплено", "Бекітілген")}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <line x1="12" y1="17" x2="12" y2="22" />
+                              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+                            </svg>
+                          </span>
+                        )}
                       </div>
                       {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
+                      {n.link && (
+                        <span className="news-card__more">
+                          {pick(lang, "Подробнее в Instagram", "Instagram-да толығырақ")}
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <line x1="7" y1="17" x2="17" y2="7" />
+                            <polyline points="7 7 17 7 17 17" />
+                          </svg>
+                        </span>
+                      )}
+                    </>
+                  );
+                  return n.link ? (
+                    <a
+                      className="news-card news-card--link"
+                      key={n.id}
+                      href={n.link}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      {inner}
+                    </a>
+                  ) : (
+                    <article className="news-card" key={n.id}>
+                      {inner}
                     </article>
                   );
                 })}

@@ -449,6 +449,10 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.5;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }
+.news-card--link { display: block; text-decoration: none; color: inherit; cursor: pointer; }
+.news-pin { margin-left: auto; flex: none; display: inline-flex; align-items: center; color: var(--accent-700); }
+.news-card__more { display: inline-flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 13.5px; font-weight: 700; color: var(--brand); }
+.news-card--link:hover .news-card__more { text-decoration: underline; text-underline-offset: 3px; }
 
 
 .bazaar-map { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
@@ -1040,22 +1044,23 @@ h2 { letter-spacing: -0.018em; }
   .lang { display: none; }
   .topbar .lang-mini {
     position: relative; display: inline-flex; align-items: center;
-    box-sizing: border-box; width: 58px; height: 42px; padding: 3px;
+    box-sizing: border-box; width: 74px; height: 42px; padding: 4px;
     background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
   }
   .topbar .lang-mini button {
     position: relative; z-index: 1; flex: 1; height: 100%;
     display: grid; place-items: center; border: 0; background: transparent;
-    cursor: pointer; font-family: var(--font-body); font-size: 12px;
+    cursor: pointer; font-family: var(--font-body); font-size: 13px;
     font-weight: 700; color: var(--ink-soft); letter-spacing: .01em;
     transition: color .2s ease;
   }
   .topbar .lang-mini button.on { color: #fff; }
   /* пилюля едет под активную половину */
   .topbar .lang-mini__pill {
-    position: absolute; top: 3px; left: 3px; z-index: 0;
-    width: calc(50% - 3px); height: calc(100% - 6px);
-    background: var(--brand); border-radius: 10px;
+    position: absolute; top: 4px; left: 4px; z-index: 0;
+    width: calc(50% - 4px); height: calc(100% - 8px);
+    background: var(--brand); border-radius: 9px;
+    box-shadow: 0 1px 2px rgba(20, 81, 63, .28);
     transition: transform .24s var(--ease-out-quint);
   }
   .topbar .lang-mini[data-active="kz"] .lang-mini__pill { transform: translateX(100%); }

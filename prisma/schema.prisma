@@ -77,5 +77,8 @@ model NewsPost {
   bodyRu      String?
   bodyKz      String?
   image       String?
+  link        String?
+  pinned      Boolean  @default(false)
+  sortOrder   Int      @default(0)
   publishedAt DateTime @default(now())
 }
