@@ -17,9 +17,9 @@ import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { GoalTracker } from "@/components/GoalTracker";
 
 type ShopLayout = {
-  tagline?: string;
-  about?: { title?: string; image?: string; paragraphs?: string[] };
-  trust?: { title: string; sub: string }[];
+  tagline?: string; taglineKz?: string;
+  about?: { title?: string; titleKz?: string; image?: string; paragraphs?: string[]; paragraphsKz?: string[] };
+  trust?: { title: string; titleKz?: string; sub: string; subKz?: string }[];
   promo?: { eyebrow?: string; title?: string; text?: string };
   gallery?: string[];
 };
@@ -100,6 +100,9 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   // У блока «о магазине» своё фото; если его нет — берём обложку.
   // Раньше при отсутствии обоих показывалась заглушка на пол-экрана.
   const aboutPic = photoUrl(layout.about?.image ?? shop.cover);
+  // Витрина хранит обе версии. Если казахской нет — показываем русскую,
+  // чтобы страница не осталась с пустым местом.
+  const L = (ru?: string, kz?: string) => (lang === "kz" ? kz || ru || "" : ru || "");
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
   const mapHighlight = pavilionKey(shop.pavilion);
@@ -211,7 +214,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
               {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, shop.category.nameRu, shop.category.nameKz)}
             </div>
             <h1>{name}</h1>
-            {layout.tagline && <p className="hero__tag">{layout.tagline}</p>}
+            {layout.tagline && <p className="hero__tag">{L(layout.tagline, layout.taglineKz)}</p>}
             <div className="hero__cta">
               {shop.phone && (
                 <a className="btn btn--primary btn--lg" href={telHref(shop.phone)}>
@@ -264,8 +267,8 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                   <path d="M5 12l5 5L20 7" />
                 </svg>
                 <div>
-                  <b>{t.title}</b>
-                  <span>{t.sub}</span>
+                  <b>{L(t.title, t.titleKz)}</b>
+                  <span>{L(t.sub, t.subKz)}</span>
                 </div>
               </div>
             ))}
@@ -278,9 +281,11 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div className="wrap about__inner">
             <div className="about__text">
               {layout.about.title && (
-                <h2 style={{ fontSize: 36, color: "var(--ink)", margin: "10px 0 18px" }}>{layout.about.title}</h2>
+                <h2 style={{ fontSize: 36, color: "var(--ink)", margin: "10px 0 18px" }}>{L(layout.about.title, layout.about.titleKz)}</h2>
               )}
-              {(layout.about.paragraphs ?? []).map((p, i) => (
+              {((lang === "kz" && layout.about.paragraphsKz?.length
+                ? layout.about.paragraphsKz
+                : layout.about.paragraphs) ?? []).map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
             </div>

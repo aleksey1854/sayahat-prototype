@@ -214,9 +214,12 @@ async function main() {
       (content
         ? {
             tagline: content.tagline,
+            taglineKz: content.taglineKz,
             about: {
               title: content.aboutTitle,
+              titleKz: content.aboutTitleKz,
               paragraphs: content.aboutBody.map((x) => x.replace(/\{name\}/g, t.nameRu)),
+              paragraphsKz: content.aboutBodyKz.map((x) => x.replace(/\{name\}/g, t.nameRu)),
             },
             trust: content.trust.slice(0, 4),
           }
@@ -254,6 +257,7 @@ async function main() {
           return {
             shopId: shop.id,
             nameRu: pr.name,
+            nameKz: pr.nameKz,
             descRu: pr.desc,
             price,
             unit: pr.unit,
