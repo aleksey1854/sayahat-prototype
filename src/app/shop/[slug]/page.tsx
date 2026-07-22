@@ -15,6 +15,7 @@ import { BazaarMap } from "@/components/BazaarMap";
 import { PhotoFallback, SafeImg } from "@/components/PhotoFallback";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { GoalTracker } from "@/components/GoalTracker";
+import { DEMO_POOL } from "@/../prisma/demo-photos";
 
 type ShopLayout = {
   tagline?: string; taglineKz?: string;
@@ -99,7 +100,11 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const mono = shop.nameRu.trim().charAt(0).toUpperCase();
   // У блока «о магазине» своё фото; если его нет — берём обложку.
   // Раньше при отсутствии обоих показывалась заглушка на пол-экрана.
-  const aboutPic = photoUrl(layout.about?.image ?? shop.cover);
+  // В блоке «о магазине» показываем другой кадр из пула категории, а не
+  // повтор обложки — иначе одна и та же сцена висит дважды на странице.
+  const poolPics = DEMO_POOL[shop.category?.slug ?? ""] ?? [];
+  const altPic = poolPics.find((f) => f !== shop.cover) ?? poolPics[0];
+  const aboutPic = photoUrl(layout.about?.image ?? altPic ?? shop.cover);
   // Витрина хранит обе версии. Если казахской нет — показываем русскую,
   // чтобы страница не осталась с пустым местом.
   const L = (ru?: string, kz?: string) => (lang === "kz" ? kz || ru || "" : ru || "");
@@ -303,7 +308,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         <section className="section section--tight reveal" id="tovary" style={{ background: "var(--surface-2)" }}>
           <div className="wrap">
             <div className="section-head">
-              <h2>{pick(lang, "Что есть на прилавке", "Прилавкеде не бар")}</h2>
+              <h2>{pick(lang, "Что есть на прилавке", "Сөреде не бар")}</h2>
             </div>
             <div className="grid-cards">
               {shop.products.map((p, i) => {
@@ -375,7 +380,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         <section className="section section--tight reveal">
           <div className="wrap">
             <div className="section-head">
-              <h2>{pick(lang, "Прилавок и товар", "Прилавок пен тауар")}</h2>
+              <h2>{pick(lang, "Прилавок и товар", "Сөре мен тауар")}</h2>
             </div>
             <div className="gallery">
               {layout.gallery.map((img, i) => (

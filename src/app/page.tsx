@@ -19,7 +19,9 @@ function shopLocation(lang: "ru" | "kz", pavilion?: string | null, booth?: strin
   return `${pavilion}${boothPart}`;
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const sp = await searchParams;
+  const initialQuery = typeof sp.q === "string" ? sp.q : "";
   const lang = getLang();
 
   const [categories, shops, news] = await Promise.all([
@@ -111,7 +113,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <CatalogProvider shops={cards}>
+      <CatalogProvider shops={cards} initialQuery={initialQuery}>
       <Header variant="catalog" />
 
       {news.length > 0 && (

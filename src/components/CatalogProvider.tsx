@@ -40,8 +40,8 @@ export function useCatalogSearch() {
 
 // Владеет данными каталога и поиском: строит индекс один раз, отдаёт
 // результаты и герою, и поиску в шапке (для выпадающих подсказок).
-export function CatalogProvider({ shops, children }: { shops: CardShop[]; children: React.ReactNode }) {
-  const [query, setQuery] = useState("");
+export function CatalogProvider({ shops, children, initialQuery = "" }: { shops: CardShop[]; children: React.ReactNode; initialQuery?: string }) {
+  const [query, setQuery] = useState(initialQuery);
   const [pav, setPav] = useState<PavKey | null>(null);
   const index = useMemo(() => buildIndex(shops.map((s) => s.fields)), [shops]);
   const q = query.trim();

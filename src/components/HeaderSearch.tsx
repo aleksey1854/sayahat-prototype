@@ -49,7 +49,14 @@ export function HeaderSearch({ placeholder, placeholderShort, clearLabel, showAl
   }
   function showAll() {
     close();
-    document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+    // На главной каталог тут же, скроллим к нему. На странице магазина
+    // каталога нет — уводим на главную с запросом в адресе, там отфильтруется.
+    const catalog = document.getElementById("catalog");
+    if (catalog) {
+      catalog.scrollIntoView({ behavior: "smooth" });
+    } else {
+      router.push(`/?q=${encodeURIComponent(q)}#catalog`);
+    }
   }
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (!q) return;

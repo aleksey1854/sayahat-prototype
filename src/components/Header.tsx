@@ -15,8 +15,9 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
             {/* На телефоне широкий логотип с текстом сжимался в нечитаемую полоску —
                 там показываем квадратную марку, ту же, что и иконка сайта. */}
             <svg className="brand__square" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="7" fill="#1C6B57" />
-              <path d="M9 25V15a7 7 0 0 1 14 0v10h-3.4V15a3.6 3.6 0 0 0-7.2 0v10z" fill="#fff" />
+              <rect width="32" height="32" rx="7.5" fill="#1C6B57" />
+              <path d="M7 25V16a9 9 0 0 1 18 0v9" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" />
+              <path d="M11.5 25v-9a4.5 4.5 0 0 1 9 0v9" fill="none" stroke="#E8A23C" strokeWidth={2.4} strokeLinecap="round" />
             </svg>
           </Link>
                   </div>
