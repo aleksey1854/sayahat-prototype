@@ -262,14 +262,14 @@ export default async function AdminNewsPage({
                     <form action={moveNews}>
                       <input type="hidden" name="id" value={n.id} />
                       <input type="hidden" name="dir" value="up" />
-                      <button className="btn btn--ghost" type="submit" disabled={i === 0} title="Выше">
+                      <button className="btn btn--ghost" type="submit" disabled={i === 0 || news[i - 1].pinned !== n.pinned} title="Выше">
                         ↑
                       </button>
                     </form>
                     <form action={moveNews}>
                       <input type="hidden" name="id" value={n.id} />
                       <input type="hidden" name="dir" value="down" />
-                      <button className="btn btn--ghost" type="submit" disabled={i === news.length - 1} title="Ниже">
+                      <button className="btn btn--ghost" type="submit" disabled={i === news.length - 1 || news[i + 1].pinned !== n.pinned} title="Ниже">
                         ↓
                       </button>
                     </form>

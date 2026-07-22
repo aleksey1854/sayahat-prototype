@@ -301,6 +301,14 @@ async function main() {
     },
   });
 
+  await prisma.account.create({
+    data: {
+      login: "smm",
+      passwordHash: bcrypt.hashSync("smm2026", 10),
+      role: "editor",
+    },
+  });
+
   const counts = {
     categories: await prisma.category.count(),
     shops: await prisma.shop.count(),
@@ -310,6 +318,7 @@ async function main() {
   console.log("Seeded:", counts);
   console.log("Демо-кабинет: логин ayanet · пароль demo2026 (магазин AYAN ET)");
   console.log("Админ:        логин admin · пароль admin2026");
+  console.log("SMM (editor): логин smm · пароль smm2026 (только новости)");
 }
 
 main()
