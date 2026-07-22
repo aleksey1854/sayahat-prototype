@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
-import { site, waLink, igUrl, pavilionKey, boothLabel } from "@/lib/site";
+import { site, waLink, igUrl, pavilionKey, boothLabel, pavilionLabel } from "@/lib/site";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -41,8 +41,7 @@ function telHref(phone: string) {
 // Адрес точки: pavilion = павильон, row = номер бутика.
 function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): string {
   if (!pavilion) return "";
-  const b = boothLabel(lang, booth);
-  return `${pavilion}${b}`;
+  return `${pavilionLabel(lang, pavilion)}${boothLabel(lang, booth)}`;
 }
 
 // Ключ павильона для подсветки на схеме.

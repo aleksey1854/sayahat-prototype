@@ -95,6 +95,17 @@ export function igUrl(handle: string) {
 
 // В данных бутик хранится и числом («14»), и уже подписанным значением
 // («витрина 13»). Во втором случае префикс «бутик №» давал «бутик №витрина 13».
+// Локализованное короткое имя павильона по сырому значению из БД.
+// В базе лежит русское («Продуктовый», «Вещевой №1»), поэтому на казахской
+// версии его нужно подменить, а не показывать как есть.
+export function pavilionLabel(lang: "ru" | "kz", pavilion?: string | null): string {
+  if (!pavilion) return "";
+  const key = pavilionKey(pavilion);
+  const item = PAVILION_LIST.find((x) => x.key === key);
+  if (!item) return pavilion; // неизвестный павильон — показываем как записано
+  return lang === "kz" ? item.shortKz : item.shortRu;
+}
+
 export function boothLabel(lang: "ru" | "kz", booth?: string | null): string {
   if (!booth) return "";
   const b = String(booth).trim();

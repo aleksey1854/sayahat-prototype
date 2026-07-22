@@ -103,6 +103,11 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   background: rgba(251,244,232,.95); backdrop-filter: blur(14px) saturate(1.1);
   border-bottom: 1px solid rgba(0,0,0,.07);
 }
+/* На телефоне карточки при тапе подскролливаются вверх и подлезают под шапку.
+   Полупрозрачный фон тогда просвечивает — делаем его плотным. */
+@media (max-width: 560px) {
+  .topbar { background: rgb(251,244,232); }
+}
 .topbar__inner { display: flex; align-items: center; gap: 18px; height: 76px; }
 .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; }
 .brand__mark {
@@ -514,7 +519,9 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
     scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 2px;
   }
   .news-grid::-webkit-scrollbar { display: none; }
-  .news-card { flex: 0 0 84%; scroll-snap-align: start; padding: 18px 20px; }
+  /* scroll-margin — чтобы при тапе карточка не подскроллилась под липкую
+     шапку (высота 64 + запас). Раньше отступ был только у якоря #news. */
+  .news-card { flex: 0 0 84%; scroll-snap-align: start; scroll-margin-top: 76px; padding: 18px 20px; }
   .news-card:last-child { margin-right: 14px; }
   .stats { gap: 28px; }
 }
