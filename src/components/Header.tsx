@@ -11,7 +11,7 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
       <div className="wrap topbar__inner">
         <div className="topbar__left">
           <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
-            <img src="/logo-mark.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
+            <img src="/logo-horizontal.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
             {/* На телефоне широкий логотип с текстом сжимался в нечитаемую полоску —
                 там показываем квадратную марку, ту же, что и иконка сайта. */}
             <svg className="brand__square" viewBox="0 0 32 32" aria-hidden="true">

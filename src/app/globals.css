@@ -574,15 +574,14 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .store:hover .store__open svg { transform: translateX(3px); }
 
 .brand__logo { height: 56px; width: auto; display: block; }
-/* На телефоне вместо широкого логотипа — квадратная марка: она не сжимается
-   и освобождает поиску около 50px. */
+/* На телефоне широкий логотип тоже показываем, только мельче — вордмарк «САЯХАТ»
+   остаётся читаемым. Квадратная SVG-марка оставлена в разметке как запасной вариант. */
 .brand__square { display: none; }
 @media (max-width: 560px) {
-  .brand__logo { display: none; }
-  .brand__square { display: block; width: 42px; height: 42px; flex: none; border-radius: 13px; }
-  /* область касания логотипа — 44px, как требуют рекомендации по доступности */
-  .brand { min-height: 44px; min-width: 44px; justify-content: center; }
-  /* переключатель шириной с логотип — тогда поиск встаёт ровно посередине */
+  .brand__logo { display: block; height: 34px; }
+  .brand__square { display: none; }
+  /* область касания логотипа — минимум 44px по высоте, как требует доступность */
+  .brand { min-height: 44px; }
 }
 
 :where(a, button, input, [tabindex]):focus-visible {
