@@ -1025,31 +1025,36 @@ h2 { letter-spacing: -0.018em; }
 .hero__art .ph-fb svg { max-width: 110px; color: rgba(255,255,255,.72); }
 
 
-/* Компактный переключатель языка для телефона. Отдельный элемент со своими
-   размерами — внутри .lang он подхватывал min-width и padding от общих
-   правил и не влезал в контейнер, из-за чего текст съезжал вбок.
-   Оформлен как поле поиска: светлый фон и рамка. Тогда в шапке один
-   акцент (зелёная марка), а два соседних элемента читаются одинаково. */
+/* Компактный переключатель языка для телефона — сегмент из двух меток
+   РУ / ҚЗ с едущей пилюлей, как на десктопе, но уже. Одиночная кнопка с
+   глобусом выглядела невзрачно: две буквы в пустом поле. */
 .lang-mini { display: none; }
 @media (max-width: 560px) {
   .lang { display: none; }
   .topbar .lang-mini {
-    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-    box-sizing: border-box; width: 56px; height: 42px; min-width: 0;
-    margin: 0; padding: 0; border-radius: 13px;
-    background: var(--surface); border: 1px solid var(--line);
-    color: var(--ink-soft); cursor: pointer;
-    font-family: var(--font-body); font-size: 11px; font-weight: 700;
-    line-height: 1; letter-spacing: .01em; white-space: nowrap; overflow: hidden;
-    transition: border-color .18s ease, opacity .18s ease, transform .16s var(--ease-out-quint);
+    position: relative; display: inline-flex; align-items: center;
+    box-sizing: border-box; width: 58px; height: 42px; padding: 3px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
   }
-  .topbar .lang-mini svg { width: 14px; height: 14px; color: var(--brand); flex: none; }
-  .topbar .lang-mini span { display: block; }
-  .topbar .lang-mini:hover { border-color: var(--brand); }
-  .topbar .lang-mini.is-pending { opacity: .68; }
-  .topbar .lang-mini:active { transform: scale(.96); }
-  .topbar .lang-mini:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .topbar .lang-mini button {
+    position: relative; z-index: 1; flex: 1; height: 100%;
+    display: grid; place-items: center; border: 0; background: transparent;
+    cursor: pointer; font-family: var(--font-body); font-size: 12px;
+    font-weight: 700; color: var(--ink-soft); letter-spacing: .01em;
+    transition: color .2s ease;
+  }
+  .topbar .lang-mini button.on { color: #fff; }
+  /* пилюля едет под активную половину */
+  .topbar .lang-mini__pill {
+    position: absolute; top: 3px; left: 3px; z-index: 0;
+    width: calc(50% - 3px); height: calc(100% - 6px);
+    background: var(--brand); border-radius: 10px;
+    transition: transform .24s var(--ease-out-quint);
+  }
+  .topbar .lang-mini[data-active="kz"] .lang-mini__pill { transform: translateX(100%); }
+  .topbar .lang-mini.is-pending { opacity: .7; }
+  .topbar .lang-mini button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 10px; }
 }
-@media (prefers-reduced-motion: reduce) { .topbar .lang-mini:active { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .topbar .lang-mini__pill { transition: none; } }
 
 @tailwind utilities;
