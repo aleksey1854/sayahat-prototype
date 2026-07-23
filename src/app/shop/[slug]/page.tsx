@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
-import { site, waLink, igUrl, pavilionKey, boothLabel, pavilionLabel } from "@/lib/site";
+import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -11,7 +11,6 @@ import { CatalogProvider } from "@/components/CatalogProvider";
 import { loadCatalogCards } from "@/lib/catalog";
 import { CallBar } from "@/components/CallBar";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
-import { BazaarMap } from "@/components/BazaarMap";
 import { PhotoFallback, SafeImg } from "@/components/PhotoFallback";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { GoalTracker } from "@/components/GoalTracker";
@@ -109,7 +108,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const L = (ru?: string, kz?: string) => (lang === "kz" ? kz || ru || "" : ru || "");
   const wa = shop.whatsapp ? waLink(shop.whatsapp) : undefined;
 
-  const mapHighlight = pavilionKey(shop.pavilion);
   // данные для поиска в шапке — те же, что у каталога на главной
   const searchCards = await loadCatalogCards(lang);
 
@@ -430,9 +428,20 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div className="section-head">
             <h2>{pick(lang, "Как нас найти", "Бізді қалай табуға болады")}</h2>
           </div>
-          <div className="contact__inner">
-            <div className="panel">
-              <h3>{pick(lang, "Связаться", "Байланысу")}</h3>
+          <div className="panel" style={{ maxWidth: 640 }}>
+              <div className="contact-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <div>
+                  <b>
+                    {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, "Уточняется", "Нақтылануда")}
+                    {shop.landmark ? ` — ${shop.landmark}` : ""}
+                  </b>
+                  <span>{pick(lang, "где мы на рынке", "базардағы орнымыз")}</span>
+                </div>
+              </div>
               {shop.phone && (
                 <div className="contact-row">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -487,28 +496,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 )
               )}
             </div>
-
-            <div className="panel">
-              <h3>{pick(lang, "Где мы на рынке", "Базарда қайдамыз")}</h3>
-              <div className="locrow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg>
-                {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, "Уточняется", "Нақтылануда")}
-                {shop.landmark ? ` — ${shop.landmark}` : ""}
-              </div>
-              {mapHighlight && (
-                <p style={{ color: "var(--muted)", fontSize: 14.5, margin: "12px 0 0" }}>
-                  {pick(lang, "Павильон подсвечен на схеме ниже.", "Павильон төмендегі сызбада белгіленген.")}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 18 }}>
-            <BazaarMap lang={lang} highlight={mapHighlight} />
-          </div>
 
           {neighbors.length > 0 && (
             <div className="neighbors">
