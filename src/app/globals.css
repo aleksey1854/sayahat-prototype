@@ -935,7 +935,9 @@ h2 { letter-spacing: -0.018em; }
   .hero__art { max-width: 100%; aspect-ratio: 16/10; }
   /* только вертикальные — боковые приходят из .wrap */
   .trust__inner { padding-top: 22px; padding-bottom: 22px; }
-  .about__inner { padding-top: 40px; padding-bottom: 40px; }
+  /* Вертикальные отступы этому блоку даёт сама .section — здесь они
+     дублировались, и стык с зелёной полосой раздувало почти до 100px. */
+  .about__inner { padding-top: 0; padding-bottom: 0; }
 }
 @media (max-width: 560px) {
   .hero__inner { padding-top: 22px; padding-bottom: 28px; }
@@ -1222,3 +1224,39 @@ a.news-card__more:active { transform: scale(.97); }
    размер, в котором жили «Новости рынка» и который читался спокойно.
    40px был масштабом промо-лендинга и смотрелся громоздко. */
 :root { --text-section: clamp(23px, 3.2vw, 28px); }
+
+/* ── «Как нас найти»: панель во всю ширину ──────────────────────────────
+   После слияния двух панелей в одну она осталась шириной 640 и жалась
+   влево — справа висело полконтейнера пустоты. На широком экране
+   раскладываем контакты по колонкам: панель заполняет строку целиком,
+   при этом ничего не растягивается по горизонтали. */
+@media (min-width: 721px) {
+  .panel.findus {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 4px 36px;
+    align-items: start;
+  }
+  /* Колонки разделяет пробел — горизонтальные линии здесь лишние. */
+  .panel.findus .contact-row { border-top: 0; padding: 10px 0; }
+  /* Кнопка занимает свою строку, но не растягивается на всю ширину. */
+  .panel.findus .btn { grid-column: 1 / -1; justify-self: start; width: auto; min-width: 260px; }
+}
+
+/* ── Мобильный локап: эмблема + название ────────────────────────────────
+   Символ без имени работает только у зрелых брендов. «Саяхат» онлайн —
+   новый, верблюда пока никто не знает, а рекламная кампания Виктора идёт
+   под словом «Саяхат»: имя должно читаться. Вордмарк вырезан из того же
+   логотипа, что стоит на десктопе, поэтому гарнитура совпадает везде. */
+.brand__word { display: none; }
+@media (max-width: 560px) {
+  .brand { gap: 9px; justify-content: flex-start; min-width: 0; }
+  .topbar .brand__square { width: 40px; height: 40px; }
+  .brand__word { display: block; height: 17px; width: auto; flex: none; }
+}
+/* Узкие экраны (≤360px): имени места уже нет — оставляем эмблему,
+   иначе локап начнёт давить на язык и поиск. */
+@media (max-width: 360px) {
+  .brand__word { display: none; }
+  .topbar .brand__square { width: 46px; height: 46px; }
+}

@@ -97,6 +97,31 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   // вывалить сразу 40+ карточек — значит снова похоронить подвал.
   const showMore = () => setMore((v) => v + 1);
 
+  // Защита от случайных переходов при листании. Палец касается карточки
+  // во время прокрутки, браузер засчитывает это тапом — человек улетает
+  // в магазин, не собираясь туда. Клик считаем настоящим, только если
+  // палец не ехал и страница в этот момент не прокручивалась.
+  // Мышь не трогаем: курсором при скролле не промахнёшься.
+  const press = useRef<{ x: number; y: number; touch: boolean } | null>(null);
+  const scrolledAt = useRef(0);
+
+  const onCardPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    press.current = { x: e.clientX, y: e.clientY, touch: e.pointerType !== "mouse" };
+  };
+
+  const onCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const p = press.current;
+    press.current = null;
+    if (!p || !p.touch) return;
+    const moved = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+    const justScrolled = Date.now() - scrolledAt.current < 140;
+    if (justScrolled || moved > 10) {
+      // Перехват в фазе погружения: до того, как ссылка узнает о клике.
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const collapse = () => {
     setMore(0);
     // Возврат к началу сетки; вычитаем реальную высоту липкой шапки
@@ -108,6 +133,12 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: window.scrollY + top - headerH - 12, behavior: reduced ? "auto" : "smooth" });
   };
+
+  useEffect(() => {
+    const onScroll = () => { scrolledAt.current = Date.now(); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 560px)");
@@ -287,7 +318,12 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
             </div>
           )}
 
-          <div className="stores" ref={gridRef}>
+          <div
+            className="stores"
+            ref={gridRef}
+            onPointerDownCapture={onCardPointerDown}
+            onClickCapture={onCardClick}
+          >
             {visible.map(({ shop: s, product: m }, i) => (
               <Link
                 className={`store reveal ${revealed.has(s.slug) ? "reveal--in" : ""}`}

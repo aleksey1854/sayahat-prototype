@@ -22,6 +22,11 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
                 Квадрат с надписью при 48px превращался в кашу, поэтому здесь
                 только верблюд — эмблема без текста читается в любом размере. */}
             <img src="/logo-camel.webp" alt="" aria-hidden="true" className="brand__square" />
+            {/* Название рядом с эмблемой на телефоне: бренд молодой,
+                верблюда пока никто не знает, а реклама идёт под словом
+                «Саяхат». Вырезано из того же логотипа, что на десктопе —
+                гарнитура совпадает. */}
+            <img src="/logo-wordmark.webp" alt="" aria-hidden="true" className="brand__word" />
           </Link>
                   </div>
 

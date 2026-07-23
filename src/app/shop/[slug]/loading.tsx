@@ -8,8 +8,11 @@ export default function Loading() {
           <div className="topbar__left">
             <div className="sk" style={{ width: 46, height: 46, borderRadius: 999, flex: "none" }} />
           </div>
-          <div className="topbar__search" style={{ flex: 1, minWidth: 0 }}>
-            <div className="sk" style={{ height: 46, borderRadius: 999 }} />
+          {/* Класс контейнера оставляем живой — он сам пилюля с рамкой и
+              нужной высотой на каждом брейкпоинте. Внутрь только полоску
+              вместо текста плейсхолдера, иначе выходит пилюля в пилюле. */}
+          <div className="topbar__search">
+            <div className="sk sk-line" style={{ width: 210, height: 20 }} />
           </div>
           <div className="topbar__right" style={{ display: "flex", gap: 10 }}>
             <div className="sk" style={{ width: 38, height: 38, borderRadius: 999, flex: "none" }} />

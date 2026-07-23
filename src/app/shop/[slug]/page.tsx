@@ -270,7 +270,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div className="wrap about__inner">
             <div className="about__text">
               {layout.about.title && (
-                <h2 style={{ fontSize: "var(--text-section)", color: "var(--ink)", margin: "10px 0 18px" }}>{L(layout.about.title, layout.about.titleKz)}</h2>
+                <h2 style={{ fontSize: "var(--text-section)", color: "var(--ink)", margin: "0 0 18px" }}>{L(layout.about.title, layout.about.titleKz)}</h2>
               )}
               {((lang === "kz" && layout.about.paragraphsKz?.length
                 ? layout.about.paragraphsKz
@@ -415,7 +415,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div className="section-head">
             <h2>{pick(lang, "Как нас найти", "Бізді қалай табуға болады")}</h2>
           </div>
-          <div className="panel" style={{ maxWidth: 640 }}>
+          <div className="panel findus">
               <div className="contact-row">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
