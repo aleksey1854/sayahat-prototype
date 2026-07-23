@@ -1131,3 +1131,18 @@ h2 { letter-spacing: -0.018em; }
 @media (max-width: 560px) {
   .topbar .lang-mini button::before { content: ""; position: absolute; inset: -6px 0; }
 }
+
+/* ── Мобильная шапка и карточки: воздух вместо тесноты ──────────────────
+   На телефоне соцкнопки из шапки убираем целиком: они душили поиск.
+   WhatsApp остаётся в подвале, в блоке аренды и в CallBar магазина. */
+@media (max-width: 560px) {
+  .topbar__social { display: none; }
+
+  /* Карточка магазина занимала ~40% экрана — ужимаем до ~трети:
+     фото ниже (2:1 вместо 16:10), тело плотнее, зазор меньше. */
+  .stores { gap: 16px; }
+  .store__pic { aspect-ratio: 2 / 1; }
+  .store__body { padding: 13px 15px 15px; }
+  .store__body h3 { font-size: 17px; }
+  .store__loc { margin: 5px 0 11px; }
+}

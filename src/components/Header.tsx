@@ -18,9 +18,10 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
         <div className="topbar__left">
           <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
             <img src="/logo-horizontal.webp" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
-            {/* На телефоне широкий вордмарк сжимался в нечитаемую полоску —
-                там показываем квадратный логотип с верблюдом. */}
-            <img src="/logo-square.webp" alt="" aria-hidden="true" className="brand__square" />
+            {/* На телефоне широкий вордмарк сжимался в нечитаемую полоску.
+                Квадрат с надписью при 48px превращался в кашу, поэтому здесь
+                только верблюд — эмблема без текста читается в любом размере. */}
+            <img src="/logo-camel.webp" alt="" aria-hidden="true" className="brand__square" />
           </Link>
                   </div>
 

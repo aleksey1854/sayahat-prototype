@@ -47,13 +47,16 @@ function tintFor(slug: string) {
 
 // Сколько карточек показываем до нажатия «Показать ещё».
 // 9 = ровно 3 ряда на десктопе (3 колонки), поэтому последний ряд не рваный.
-const STEP = 9;
+
 
 export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode, pav, setPav } = useCatalogSearch();
   const [cat, setCat] = useState("all");
   const [allCats, setAllCats] = useState(false);
   const [more, setMore] = useState(0); // число раскрытых пачек «Показать ещё»
+  // Размер пачки: Виктор просил «по три» — на телефоне так и есть (1 колонка),
+  // на десктопе 6 (две строки по три), иначе сетка выглядит куце.
+  const [step, setStep] = useState(6);
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
@@ -64,14 +67,13 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   // выбранное терялось при переходе в магазин и возврате назад, и ссылку
   // нельзя было никому отправить. Пишем через history.replaceState: адрес
   // меняется без перезагрузки и без лишних записей в истории браузера.
-  const syncUrl = (nextCat: string, nextPav: PavKey | null, nextMore: number) => {
+  const syncUrl = (nextCat: string, nextPav: PavKey | null) => {
     const sp = new URLSearchParams(window.location.search);
     if (nextCat && nextCat !== "all") sp.set("cat", nextCat);
     else sp.delete("cat");
     if (nextPav) sp.set("pav", nextPav);
     else sp.delete("pav");
-    if (nextMore > 0) sp.set("more", String(nextMore));
-    else sp.delete("more");
+    sp.delete("more"); // разворот в адресе не храним; чистим из старых ссылок
     const qs = sp.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
   };
@@ -82,26 +84,21 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const chooseCat = (next: string) => {
     setCat(next);
     setMore(0);
-    syncUrl(next, pav, 0);
+    syncUrl(next, pav);
   };
 
   const choosePav = (next: PavKey | null) => {
     setPav(next);
     setMore(0);
-    syncUrl(cat, next, 0);
+    syncUrl(cat, next);
   };
 
-  // «Показать ещё» раскрывает следующую пачку STEP, а не весь список:
+  // «Показать ещё» раскрывает следующую пачку step, а не весь список:
   // вывалить сразу 40+ карточек — значит снова похоронить подвал.
-  const showMore = () => {
-    const next = more + 1;
-    setMore(next);
-    syncUrl(cat, pav, next);
-  };
+  const showMore = () => setMore((v) => v + 1);
 
   const collapse = () => {
     setMore(0);
-    syncUrl(cat, pav, 0);
     // Возврат к началу сетки; вычитаем высоту липкой шапки,
     // иначе первый ряд карточек уезжает под неё. Плавность — только если
     // пользователь не просил систему убрать анимации.
@@ -109,6 +106,14 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: window.scrollY + top - 100, behavior: reduced ? "auto" : "smooth" });
   };
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 560px)");
+    const upd = () => setStep(mq.matches ? 3 : 6);
+    upd();
+    mq.addEventListener("change", upd);
+    return () => mq.removeEventListener("change", upd);
+  }, []);
 
   // Восстанавливаем состояние из адреса при заходе на страницу.
   // Читаем в эффекте, а не в useState: иначе разметка сервера и браузера
@@ -120,8 +125,6 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
     if (c && categories.some((x) => x.slug === c)) setCat(c);
     const p = sp.get("pav");
     if (p && PAVILION_LIST.some((x) => x.key === p)) setPav(p as PavKey);
-    const m = parseInt(sp.get("more") ?? "0", 10);
-    if (Number.isFinite(m) && m > 0) setMore(Math.min(m, 50));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -136,11 +139,11 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const hasPav = hits.some((m) => m.shop.pavKey);
   const noPavCount = byCat.filter((m) => !m.shop.pavKey).length;
 
-  // Сетку показываем частями: сначала STEP карточек, остальное — по кнопке.
+  // Сетку показываем частями: сначала step карточек, остальное — по кнопке.
   // Так подвал и «свободные места» достижимы за пару скроллов.
-  const visible = shown.slice(0, STEP * (1 + more));
+  const visible = shown.slice(0, step * (1 + more));
   const rest = shown.length - visible.length;
-  const nextBatch = Math.min(STEP, rest);
+  const nextBatch = Math.min(step, rest);
 
   // Смена поискового запроса тоже даёт другой список — сворачиваем сетку.
   // Первый проход пропускаем: иначе сброс затрёт разворот,
