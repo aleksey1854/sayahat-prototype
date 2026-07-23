@@ -7,6 +7,19 @@ import { getSession } from "@/lib/auth";
 import { newsDate } from "@/lib/format";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
+import { FormButton } from "@/components/FormButton";
+
+// Лимиты длины: карточки новостей на главной — блоки одинаковой высоты,
+// длинный текст ломает сетку. maxLength в форме подсказывает,
+// обрезка на сервере страхует (в браузере атрибут можно обойти).
+const TITLE_MAX = 70;
+const BODY_MAX = 220;
+const LINK_MAX = 300;
+
+function cut(value: string, max: number) {
+  return value.length > max ? value.slice(0, max).trim() : value;
+}
 
 export const metadata: Metadata = {
   title: "Новости рынка — управление",
@@ -45,11 +58,11 @@ async function addNews(formData: FormData) {
 
   await db.newsPost.create({
     data: {
-      titleRu,
-      titleKz: str(formData, "titleKz") || null,
-      bodyRu: str(formData, "bodyRu") || null,
-      bodyKz: str(formData, "bodyKz") || null,
-      link: str(formData, "link") || null,
+      titleRu: cut(titleRu, TITLE_MAX),
+      titleKz: cut(str(formData, "titleKz"), TITLE_MAX) || null,
+      bodyRu: cut(str(formData, "bodyRu"), BODY_MAX) || null,
+      bodyKz: cut(str(formData, "bodyKz"), BODY_MAX) || null,
+      link: cut(str(formData, "link"), LINK_MAX) || null,
       pinned: str(formData, "pinned") === "on",
       sortOrder: (top?.sortOrder ?? 0) + 1,
       publishedAt: parseDate(str(formData, "publishedAt")),
@@ -70,11 +83,11 @@ async function updateNews(formData: FormData) {
   await db.newsPost.update({
     where: { id },
     data: {
-      titleRu,
-      titleKz: str(formData, "titleKz") || null,
-      bodyRu: str(formData, "bodyRu") || null,
-      bodyKz: str(formData, "bodyKz") || null,
-      link: str(formData, "link") || null,
+      titleRu: cut(titleRu, TITLE_MAX),
+      titleKz: cut(str(formData, "titleKz"), TITLE_MAX) || null,
+      bodyRu: cut(str(formData, "bodyRu"), BODY_MAX) || null,
+      bodyKz: cut(str(formData, "bodyKz"), BODY_MAX) || null,
+      link: cut(str(formData, "link"), LINK_MAX) || null,
       pinned: str(formData, "pinned") === "on",
       publishedAt: parseDate(str(formData, "publishedAt")),
     },
@@ -187,21 +200,21 @@ export default async function AdminNewsPage({
             <h3 style={{ margin: 0 }}>Добавить новость</h3>
             <div className="grid2">
               <div className="field">
-                <label htmlFor="n-titleRu">Заголовок (русский)</label>
-                <input className="input" id="n-titleRu" name="titleRu" required />
+                <label htmlFor="n-titleRu">Заголовок (русский) · до {TITLE_MAX} знаков</label>
+                <input className="input" id="n-titleRu" name="titleRu" maxLength={TITLE_MAX} required />
               </div>
               <div className="field">
-                <label htmlFor="n-titleKz">Заголовок (қазақша)</label>
-                <input className="input" id="n-titleKz" name="titleKz" />
+                <label htmlFor="n-titleKz">Заголовок (қазақша) · до {TITLE_MAX} знаков</label>
+                <input className="input" id="n-titleKz" name="titleKz" maxLength={TITLE_MAX} />
               </div>
             </div>
             <div className="field">
-              <label htmlFor="n-bodyRu">Текст (русский)</label>
-              <textarea className="textarea" id="n-bodyRu" name="bodyRu" style={{ minHeight: 80 }} />
+              <label htmlFor="n-bodyRu">Текст (русский) · до {BODY_MAX} знаков</label>
+              <textarea className="textarea" id="n-bodyRu" name="bodyRu" maxLength={BODY_MAX} style={{ minHeight: 80 }} />
             </div>
             <div className="field">
-              <label htmlFor="n-bodyKz">Текст (қазақша)</label>
-              <textarea className="textarea" id="n-bodyKz" name="bodyKz" style={{ minHeight: 80 }} />
+              <label htmlFor="n-bodyKz">Текст (қазақша) · до {BODY_MAX} знаков</label>
+              <textarea className="textarea" id="n-bodyKz" name="bodyKz" maxLength={BODY_MAX} style={{ minHeight: 80 }} />
             </div>
             <div className="grid2">
               <div className="field">
@@ -211,6 +224,7 @@ export default async function AdminNewsPage({
                   id="n-link"
                   name="link"
                   type="url"
+                  maxLength={LINK_MAX}
                   placeholder="https://instagram.com/p/..."
                 />
               </div>
@@ -262,22 +276,22 @@ export default async function AdminNewsPage({
                     <form action={moveNews}>
                       <input type="hidden" name="id" value={n.id} />
                       <input type="hidden" name="dir" value="up" />
-                      <button className="btn btn--ghost" type="submit" disabled={i === 0 || news[i - 1].pinned !== n.pinned} title="Выше">
+                      <FormButton disabled={i === 0 || news[i - 1].pinned !== n.pinned} title="Выше">
                         ↑
-                      </button>
+                      </FormButton>
                     </form>
                     <form action={moveNews}>
                       <input type="hidden" name="id" value={n.id} />
                       <input type="hidden" name="dir" value="down" />
-                      <button className="btn btn--ghost" type="submit" disabled={i === news.length - 1 || news[i + 1].pinned !== n.pinned} title="Ниже">
+                      <FormButton disabled={i === news.length - 1 || news[i + 1].pinned !== n.pinned} title="Ниже">
                         ↓
-                      </button>
+                      </FormButton>
                     </form>
                     <form action={togglePin}>
                       <input type="hidden" name="id" value={n.id} />
-                      <button className="btn btn--ghost" type="submit">
+                      <FormButton>
                         {n.pinned ? "Открепить" : "Закрепить"}
-                      </button>
+                      </FormButton>
                     </form>
                   </div>
                 </div>
@@ -288,21 +302,21 @@ export default async function AdminNewsPage({
                     <input type="hidden" name="id" value={n.id} />
                     <div className="grid2">
                       <div className="field">
-                        <label>Заголовок (русский)</label>
-                        <input className="input" name="titleRu" defaultValue={n.titleRu} required />
+                        <label>Заголовок (русский) · до {TITLE_MAX} знаков</label>
+                        <input className="input" name="titleRu" defaultValue={n.titleRu} maxLength={TITLE_MAX} required />
                       </div>
                       <div className="field">
-                        <label>Заголовок (қазақша)</label>
-                        <input className="input" name="titleKz" defaultValue={n.titleKz ?? ""} />
+                        <label>Заголовок (қазақша) · до {TITLE_MAX} знаков</label>
+                        <input className="input" name="titleKz" defaultValue={n.titleKz ?? ""} maxLength={TITLE_MAX} />
                       </div>
                     </div>
                     <div className="field">
-                      <label>Текст (русский)</label>
-                      <textarea className="textarea" name="bodyRu" defaultValue={n.bodyRu ?? ""} style={{ minHeight: 80 }} />
+                      <label>Текст (русский) · до {BODY_MAX} знаков</label>
+                      <textarea className="textarea" name="bodyRu" defaultValue={n.bodyRu ?? ""} maxLength={BODY_MAX} style={{ minHeight: 80 }} />
                     </div>
                     <div className="field">
-                      <label>Текст (қазақша)</label>
-                      <textarea className="textarea" name="bodyKz" defaultValue={n.bodyKz ?? ""} style={{ minHeight: 80 }} />
+                      <label>Текст (қазақша) · до {BODY_MAX} знаков</label>
+                      <textarea className="textarea" name="bodyKz" defaultValue={n.bodyKz ?? ""} maxLength={BODY_MAX} style={{ minHeight: 80 }} />
                     </div>
                     <div className="grid2">
                       <div className="field">
@@ -312,6 +326,7 @@ export default async function AdminNewsPage({
                           name="link"
                           type="url"
                           defaultValue={n.link ?? ""}
+                          maxLength={LINK_MAX}
                           placeholder="https://instagram.com/p/..."
                         />
                       </div>
@@ -331,9 +346,9 @@ export default async function AdminNewsPage({
 
                 <form action={deleteNews}>
                   <input type="hidden" name="id" value={n.id} />
-                  <button className="btn btn--ghost btn--danger" type="submit">
+                  <ConfirmButton message={`Удалить новость «${n.titleRu}»? Отменить это будет нельзя.`}>
                     Удалить
-                  </button>
+                  </ConfirmButton>
                 </form>
               </div>
             ))}

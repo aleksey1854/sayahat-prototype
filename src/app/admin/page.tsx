@@ -10,6 +10,7 @@ import { removeUpload } from "@/lib/img";
 import { site } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
 
 export const metadata: Metadata = {
   title: "Админка базара",
@@ -402,9 +403,12 @@ export default async function AdminPage({
                   <button className="btn btn--ghost" formAction={moveCategory} name="dir" value="down" aria-label="Ниже">
                     ↓
                   </button>
-                  <button className="btn btn--ghost btn--danger" formAction={deleteCategory}>
+                  <ConfirmButton
+                    formAction={deleteCategory}
+                    message="Удалить категорию? Магазины из неё не удалятся, но категорию придётся создавать заново."
+                  >
                     Удалить
-                  </button>
+                  </ConfirmButton>
                 </div>
               </form>
             ))}

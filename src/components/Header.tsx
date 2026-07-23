@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { getLang, pick } from "@/lib/i18n";
+import { site, waLink } from "@/lib/site";
 import { LangToggle } from "./LangToggle";
 import { HeaderSearch } from "./HeaderSearch";
+import { InstagramIcon } from "./InstagramIcon";
+import { WhatsAppIcon } from "./WhatsAppIcon";
 
 export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }) {
   const lang = getLang();
@@ -11,14 +14,10 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
       <div className="wrap topbar__inner">
         <div className="topbar__left">
           <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
-            <img src="/logo-horizontal.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
-            {/* На телефоне широкий логотип с текстом сжимался в нечитаемую полоску —
-                там показываем квадратную марку, ту же, что и иконка сайта. */}
-            <svg className="brand__square" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="7.5" fill="#1C6B57" />
-              <path d="M7 25V16a9 9 0 0 1 18 0v9" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" />
-              <path d="M11.5 25v-9a4.5 4.5 0 0 1 9 0v9" fill="none" stroke="#E8A23C" strokeWidth={2.4} strokeLinecap="round" />
-            </svg>
+            <img src="/logo-horizontal.webp" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
+            {/* На телефоне широкий вордмарк сжимался в нечитаемую полоску —
+                там показываем квадратный логотип с верблюдом. */}
+            <img src="/logo-square.webp" alt="" aria-hidden="true" className="brand__square" />
           </Link>
                   </div>
 
@@ -33,6 +32,27 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
           />
         )}
         <div className="topbar__right">
+          <div className="topbar__social">
+            <a
+              className="topbar__ig"
+              href={site.instagramUrl}
+              target="_blank"
+              rel="noopener"
+              aria-label="Instagram"
+              title="Instagram"
+            >
+              <InstagramIcon />
+            </a>
+            <a
+              href={waLink(site.whatsapp)}
+              target="_blank"
+              rel="noopener"
+              aria-label="WhatsApp"
+              title="WhatsApp"
+            >
+              <WhatsAppIcon />
+            </a>
+          </div>
           <LangToggle lang={lang} />
         </div>
       </div>

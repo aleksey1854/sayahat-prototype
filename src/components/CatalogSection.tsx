@@ -45,15 +45,81 @@ function tintFor(slug: string) {
   return TINT[slug] ?? "tile--shop";
 }
 
+// Сколько карточек показываем до нажатия «Показать ещё».
+// 9 = ровно 3 ряда на десктопе (3 колонки), поэтому последний ряд не рваный.
+const STEP = 9;
+
 export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode, pav, setPav } = useCatalogSearch();
   const [cat, setCat] = useState("all");
   const [allCats, setAllCats] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
   const q = query.trim();
   const t = (ru: string, kz: string) => (lang === "kz" ? kz : ru);
+
+  // Фильтры и разворот сетки держим в адресе страницы. Без этого выбранное
+  // терялось при переходе в магазин и возврате назад, и ссылку нельзя было
+  // никому отправить. Пишем через history.replaceState: адрес меняется без
+  // перезагрузки страницы и без лишних записей в истории браузера.
+  const syncUrl = (nextCat: string, nextPav: PavKey | null, nextExpanded: boolean) => {
+    const sp = new URLSearchParams(window.location.search);
+    if (nextCat && nextCat !== "all") sp.set("cat", nextCat);
+    else sp.delete("cat");
+    if (nextPav) sp.set("pav", nextPav);
+    else sp.delete("pav");
+    if (nextExpanded) sp.set("more", "1");
+    else sp.delete("more");
+    const qs = sp.toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  };
+
+  // Смена фильтра даёт другой список — сворачиваем сетку обратно.
+  // Делаем это прямо здесь, а не в эффекте на [cat, pav]: эффект сработал бы
+  // и при восстановлении из адреса и сбросил бы развёрнутый вид.
+  const chooseCat = (next: string) => {
+    setCat(next);
+    setExpanded(false);
+    syncUrl(next, pav, false);
+  };
+
+  const choosePav = (next: PavKey | null) => {
+    setPav(next);
+    setExpanded(false);
+    syncUrl(cat, next, false);
+  };
+
+  const showMore = () => {
+    setExpanded(true);
+    syncUrl(cat, pav, true);
+  };
+
+  const collapse = () => {
+    setExpanded(false);
+    syncUrl(cat, pav, false);
+    // Возврат к началу сетки; вычитаем высоту липкой шапки,
+    // иначе первый ряд карточек уезжает под неё. Плавность — только если
+    // пользователь не просил систему убрать анимации.
+    const top = gridRef.current?.getBoundingClientRect().top ?? 0;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: window.scrollY + top - 100, behavior: reduced ? "auto" : "smooth" });
+  };
+
+  // Восстанавливаем состояние из адреса при заходе на страницу.
+  // Читаем в эффекте, а не в useState: иначе разметка сервера и браузера
+  // разойдутся при гидратации. Значения сверяем со справочниками —
+  // на случай устаревшей ссылки на удалённую категорию.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const c = sp.get("cat");
+    if (c && categories.some((x) => x.slug === c)) setCat(c);
+    const p = sp.get("pav");
+    if (p && PAVILION_LIST.some((x) => x.key === p)) setPav(p as PavKey);
+    if (sp.get("more") === "1") setExpanded(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Два независимых фильтра: категория и павильон.
   // Счётчики у павильонов считаем до применения фильтра павильона,
@@ -66,9 +132,28 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const hasPav = hits.some((m) => m.shop.pavKey);
   const noPavCount = byCat.filter((m) => !m.shop.pavKey).length;
 
+  // Сетку показываем частями: сначала STEP карточек, остальное — по кнопке.
+  // Так подвал и «свободные места» достижимы за пару скроллов.
+  const visible = expanded ? shown : shown.slice(0, STEP);
+  const rest = shown.length - visible.length;
+
+  // Смена поискового запроса тоже даёт другой список — сворачиваем сетку.
+  // Первый проход пропускаем: иначе сброс затрёт разворот,
+  // только что восстановленный из адреса страницы.
+  const firstQuery = useRef(true);
+  useEffect(() => {
+    if (firstQuery.current) {
+      firstQuery.current = false;
+      return;
+    }
+    setExpanded(false);
+  }, [q]);
+
   // Стаггер карточек: каждая появляется, когда входит в вьюпорт.
   // Состояние в Set (React-controlled) — переживает ре-рендер при фильтрации без мигания.
-  const shownKey = shown.map((x) => x.shop.slug).join(",");
+  // Ключ считаем по видимым карточкам: после «Показать ещё» в DOM приходят новые,
+  // и наблюдатель должен переподписаться на них, иначе они останутся прозрачными.
+  const shownKey = visible.map((x) => x.shop.slug).join(",");
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -113,7 +198,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
           <h1 className="sr-only">{catalogTitle}</h1>
 
           <div className={allCats ? "catbar catbar--open" : "catbar"}>
-            <button className={cat === "all" ? "cat on" : "cat"} onClick={() => setCat("all")} aria-pressed={cat === "all"}>
+            <button className={cat === "all" ? "cat on" : "cat"} onClick={() => chooseCat("all")} aria-pressed={cat === "all"}>
               <span className="cat__ico cat__ico--all">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="3.2" y="3.2" width="7.6" height="7.6" rx="2" />
@@ -131,7 +216,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                 <button
                   key={c.slug}
                   className={(cat === c.slug ? "cat on" : "cat") + extra}
-                  onClick={() => setCat(c.slug)}
+                  onClick={() => chooseCat(c.slug)}
                   aria-pressed={cat === c.slug}
                   title={c.name}
                 >
@@ -157,7 +242,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
 
           {hasPav && (
           <div className="pavbar">
-            <button className={!pav ? "pav-chip on" : "pav-chip"} onClick={() => setPav(null)}>
+            <button className={!pav ? "pav-chip on" : "pav-chip"} onClick={() => choosePav(null)}>
               {t("Все павильоны", "Барлық павильондар")}
             </button>
             {PAVILION_LIST.map((p) => {
@@ -166,7 +251,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                 <button
                   key={p.key}
                   className={pav === p.key ? "pav-chip on" : "pav-chip"}
-                  onClick={() => setPav(pav === p.key ? null : p.key)}
+                  onClick={() => choosePav(pav === p.key ? null : p.key)}
                   disabled={n === 0}
                 >
                   {t(p.shortRu, p.shortKz)}
@@ -194,7 +279,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
           )}
 
           <div className="stores" ref={gridRef}>
-            {shown.map(({ shop: s, product: m }, i) => (
+            {visible.map(({ shop: s, product: m }, i) => (
               <Link
                 className={`store reveal ${revealed.has(s.slug) ? "reveal--in" : ""}`}
                 href={`/shop/${s.slug}`}
@@ -242,12 +327,40 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
             ))}
           </div>
 
+          {rest > 0 && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
+              <button className="btn btn--ghost btn--lg" onClick={showMore}>
+                {t(
+                  `Показать ещё ${rest} ${ruPlural(rest, "магазин", "магазина", "магазинов")}`,
+                  `Тағы ${rest} дүкенді көрсету`,
+                )}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {expanded && shown.length > STEP && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
+              <button
+                className="btn btn--ghost"
+                onClick={collapse}
+              >
+                {t("Свернуть", "Жию")}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 15l-6-6-6 6" />
+                </svg>
+              </button>
+            </div>
+          )}
+
           {shown.length === 0 && (
             <div className="no-results" style={{ display: "block" }}>
               {ui.empty}
               {q && hits.length > 0 && (
                 <div style={{ marginTop: 12 }}>
-                  <button className="link-reset" onClick={() => setCat("all")}>
+                  <button className="link-reset" onClick={() => chooseCat("all")}>
                     {ui.showAllFound} ({hits.length})
                   </button>
                 </div>

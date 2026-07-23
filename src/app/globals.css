@@ -574,14 +574,14 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .store:hover .store__open svg { transform: translateX(3px); }
 
 .brand__logo { height: 56px; width: auto; display: block; }
-/* На телефоне широкий логотип тоже показываем, только мельче — вордмарк «САЯХАТ»
-   остаётся читаемым. Квадратная SVG-марка оставлена в разметке как запасной вариант. */
+/* На телефоне вместо широкого вордмарка — квадратный логотип с верблюдом:
+   он не сжимается и освобождает поиску около 50px. */
 .brand__square { display: none; }
 @media (max-width: 560px) {
-  .brand__logo { display: block; height: 34px; }
-  .brand__square { display: none; }
-  /* область касания логотипа — минимум 44px по высоте, как требует доступность */
-  .brand { min-height: 44px; }
+  .brand__logo { display: none; }
+  .brand__square { display: block; width: 48px; height: 48px; flex: none; }
+  /* область касания логотипа — 44px, как требуют рекомендации по доступности */
+  .brand { min-height: 44px; min-width: 44px; justify-content: center; }
 }
 
 :where(a, button, input, [tabindex]):focus-visible {
@@ -910,7 +910,7 @@ h2 { letter-spacing: -0.018em; }
   /* .topbar перед селектором — чтобы базовое правило с radius 999px
      гарантированно не перебило форму поля на телефоне */
   .topbar .topbar__search { padding: 0 15px; height: 42px; border-radius: 13px; }
-  .topbar .brand__square { width: 42px; height: 42px; border-radius: 13px; }
+  .topbar .brand__square { width: 48px; height: 48px; }
   /* поле уже — ужимаем подсказки, чтобы не давились */
   .topbar__search .suggest__item { padding: 9px 11px; gap: 10px; }
   .topbar__search .suggest__thumb { width: 36px; height: 36px; }
@@ -1069,3 +1069,36 @@ h2 { letter-spacing: -0.018em; }
 @media (prefers-reduced-motion: reduce) { .topbar .lang-mini__pill { transition: none; } }
 
 @tailwind utilities;
+
+/* ── Иконки соцсетей в шапке ────────────────────────────────────────────
+   Связь под рукой на любой странице, без плавающего пузыря поверх контента.
+   На телефоне остаётся только WhatsApp: логотип (48) + переключатель языка (74)
+   и так занимают почти всю ширину, две иконки схлопнули бы поле поиска. */
+.topbar__social { display: flex; align-items: center; gap: 6px; }
+.topbar__social a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 11px; flex: none;
+  color: var(--ink-soft); background: #fff; border: 1px solid var(--line);
+  transition: color .18s ease, border-color .18s ease, background .18s ease;
+}
+.topbar__social a:hover { color: var(--brand-700); border-color: var(--brand); }
+.topbar__social svg { width: 19px; height: 19px; }
+@media (max-width: 560px) {
+  .topbar__social { gap: 4px; }
+  .topbar__social a { width: 36px; height: 36px; border-radius: 10px; }
+  .topbar__social svg { width: 18px; height: 18px; }
+  /* Instagram остаётся в подвале и в карточках новостей */
+  .topbar__social .topbar__ig { display: none; }
+}
+
+/* ── Доводка по чеклистам (тач-таргеты, отклик, краевые случаи) ─────────
+   Область касания соцкнопок — минимум 44px (визуально остаются 38/36):
+   невидимая зона расширяется псевдоэлементом. Плюс отклик на нажатие. */
+.topbar__social a { position: relative; transition: color .18s ease, border-color .18s ease, transform .1s ease-out; }
+.topbar__social a::before { content: ""; position: absolute; inset: -3px; }
+.topbar__social a:active { transform: scale(.94); }
+@media (max-width: 560px) {
+  .topbar__social a::before { inset: -4px; }
+}
+/* Сверхдлинное слово в заголовке/тексте новости не должно рвать карточку. */
+.news-card h3, .news-card p, .cab .panel { overflow-wrap: break-word; }

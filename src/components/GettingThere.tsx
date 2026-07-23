@@ -1,4 +1,4 @@
-import { site, yandexMapsUrl, googleMapsUrl } from "@/lib/site";
+import { site, yandexMapsUrl, googleMapsUrl, yandexWidgetUrl, YANDEX_ORG_ID } from "@/lib/site";
 import type { Lang } from "@/lib/i18n";
 
 // «Как добраться»: рынок на территории автовокзала «Саяхат» (сосед по зданию).
@@ -12,10 +12,44 @@ export function GettingThere({ lang }: { lang: Lang }) {
           <h2>{t("Найти «Саяхат»", "«Саяхатты» табу")}</h2>
           <p>
             {t(
-              "Рынок — на территории автовокзала, в одном здании. Ниже адрес, координаты и ссылки на карты.",
-              "Базар — автовокзал аумағында, бір ғимаратта. Төменде мекенжай, координаттар және карта сілтемелері.",
+              "Рынок — на территории автовокзала, в одном здании. Ниже карта, адрес и ссылки на маршрут.",
+              "Базар — автовокзал аумағында, бір ғимаратта. Төменде карта, мекенжай және бағыт сілтемелері.",
             )}
           </p>
+        </div>
+
+        {/* Виджет Яндекс.Карт с карточкой рынка. loading="lazy" — чтобы тяжёлый
+            сторонний iframe не тормозил первую загрузку главной. Ссылки над ним —
+            обязательная атрибуция Яндекса, она перекрывается самой картой. */}
+        <div
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 18,
+            border: "1px solid var(--line)",
+            marginBottom: 24,
+            height: "clamp(260px, 42vw, 400px)",
+          }}
+        >
+          <a
+            href={`https://yandex.kz/maps/org/sayakhat/${YANDEX_ORG_ID}/?utm_medium=mapframe&utm_source=maps`}
+            style={{ color: "#eee", fontSize: 12, position: "absolute", top: 0 }}
+          >
+            Саяхат
+          </a>
+          <a
+            href="https://yandex.kz/maps/10295/kostanai/category/shopping_mall/184108083/?utm_medium=mapframe&utm_source=maps"
+            style={{ color: "#eee", fontSize: 12, position: "absolute", top: 14 }}
+          >
+            {t("Торговый центр в Костанае", "Қостанайдағы сауда орталығы")}
+          </a>
+          <iframe
+            src={yandexWidgetUrl()}
+            title={t("Рынок «Саяхат» на Яндекс.Картах", "«Саяхат» базары Яндекс.Карталарда")}
+            loading="lazy"
+            allowFullScreen
+            style={{ position: "relative", display: "block", width: "100%", height: "100%", border: 0 }}
+          />
         </div>
 
         <div className="getthere">
@@ -38,15 +72,6 @@ export function GettingThere({ lang }: { lang: Lang }) {
               <div>
                 <b>{t(site.hours, site.hoursKz)}</b>
                 <span>{t(site.dayOff, site.dayOffKz)}</span>
-              </div>
-            </div>
-            <div className="getthere__row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M3 11l19-9-9 19-2-8-8-2z" />
-              </svg>
-              <div>
-                <b>{site.geo.lat}, {site.geo.lng}</b>
-                <span>{t("координаты для навигатора", "навигаторға арналған координаттар")}</span>
               </div>
             </div>
           </div>

@@ -58,15 +58,22 @@ export function telHref(phone: string) {
   return `tel:${phone.replace(/[^+\d]/g, "")}`;
 }
 
-// Пин на картах по координатам рынка
+// Ссылки на карточку организации, а не просто пин по координатам:
+// так у человека сразу отзывы, часы работы и кнопка маршрута.
+export const YANDEX_ORG_ID = "46177779635";
+
 export function yandexMapsUrl() {
-  const { lat, lng } = site.geo;
-  return `https://yandex.ru/maps/?pt=${lng},${lat}&z=17&l=map`;
+  return `https://yandex.kz/maps/org/sayakhat/${YANDEX_ORG_ID}/`;
 }
 
 export function googleMapsUrl() {
+  return "https://maps.app.goo.gl/PSNBhPhFoHmBDKVA9";
+}
+
+// Встраиваемый виджет Яндекс.Карт с уже выбранной организацией.
+export function yandexWidgetUrl() {
   const { lat, lng } = site.geo;
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  return `https://yandex.kz/map-widget/v1/?ll=63.592602%2C53.170786&mode=search&oid=${YANDEX_ORG_ID}&ol=biz&pt=${lng}%2C${lat}&z=16.64`;
 }
 
 // ── Павильоны: общий справочник для карты, фильтра каталога и страницы магазина ──

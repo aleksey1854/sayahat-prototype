@@ -5,7 +5,6 @@ import { absUrl } from "@/lib/seo";
 import { site, pavilionKey, boothLabel } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { BazaarMap } from "@/components/BazaarMap";
 import { FreeSpaces } from "@/components/FreeSpaces";
 import { GettingThere } from "@/components/GettingThere";
 import { Reveal } from "@/components/Reveal";
@@ -82,7 +81,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       "@type": "ShoppingCenter",
       name: "Рынок Саяхат",
       url: absUrl("/"),
-      image: absUrl("/logo.png"),
+      image: absUrl("/logo-full.webp"),
       description: "Рынок «Саяхат» в Костанае: каталог магазинов и товаров, навигация по павильонам.",
       address: {
         "@type": "PostalAddress",
@@ -207,24 +206,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         }}
       />
       </CatalogProvider>
-
-      <Reveal>
-        <section className="section">
-          <div className="wrap">
-            <div className="section-head">
-              <h2>{pick(lang, "Карта рынка", "Базар картасы")}</h2>
-              <p>
-                {pick(
-                  lang,
-                  "Продуктовый и два вещевых павильона плюс ярмарка Art Bazar. Найдите нужный павильон заранее — и приходите сразу к бутику.",
-                  "Азық-түлік және екі киім павильоны, Art Bazar жәрмеңкесі. Қажет павильонды алдын ала табыңыз — бутикке бірден келіңіз.",
-                )}
-              </p>
-            </div>
-            <BazaarMap lang={lang} interactive />
-          </div>
-        </section>
-      </Reveal>
 
       <Reveal>
         <GettingThere lang={lang} />

@@ -9,6 +9,7 @@ import { photoUrl, srcSetFor } from "@/lib/format";
 import { normalizePhone, normalizeWhatsapp, cleanUrl } from "@/lib/normalize";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { PhotoInput } from "@/components/PhotoInput";
 
 const PHOTO_ERRORS: Record<string, string> = {
@@ -96,6 +97,12 @@ async function saveShop(formData: FormData) {
   }
 
   const opt = (name: string) => str(formData, name) || null;
+  // SEO-поля режем на сервере: maxLength в браузере обходится,
+  // а слишком длинные заголовок и описание поисковик всё равно обрежет.
+  const optCut = (name: string, max: number) => {
+    const v = str(formData, name);
+    return v ? v.slice(0, max).trim() : null;
+  };
 
   await db.shop.update({
     where: { id: shop.id },
@@ -111,6 +118,8 @@ async function saveShop(formData: FormData) {
       pavilion: opt("pavilion"), // павильон
       landmark: opt("landmark"),
       hours: opt("hours"),
+      metaTitle: optCut("metaTitle", 70),
+      metaDesc: optCut("metaDesc", 200),
       layout: JSON.stringify(layout),
     },
   });
@@ -426,6 +435,43 @@ export default async function CabinetPage({
               </div>
             </div>
 
+            <div className="panel">
+              <details>
+                <summary style={{ cursor: "pointer", fontWeight: 700, fontSize: 18 }}>
+                  SEO — как страница выглядит в поиске
+                </summary>
+                <div className="form-grid" style={{ marginTop: 16 }}>
+                  <p style={{ margin: 0, color: "var(--muted)", fontSize: 14.5, lineHeight: 1.6 }}>
+                    Можно не заполнять: тогда заголовок и описание соберутся сами — из названия,
+                    описания, товаров и номера бутика. Заполняйте, только если хотите задать текст вручную.
+                  </p>
+                  <div className="field">
+                    <label htmlFor="metaTitle">Заголовок в поиске · оптимально до 60 знаков</label>
+                    <input
+                      className="input"
+                      id="metaTitle"
+                      name="metaTitle"
+                      maxLength={70}
+                      defaultValue={shop.metaTitle ?? ""}
+                      placeholder={`${shop.nameRu} · базар Саяхат, Костанай`}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="metaDesc">Описание в поиске · оптимально до 160 знаков</label>
+                    <textarea
+                      className="textarea"
+                      id="metaDesc"
+                      name="metaDesc"
+                      maxLength={200}
+                      defaultValue={shop.metaDesc ?? ""}
+                      style={{ minHeight: 80 }}
+                      placeholder="Одно-два предложения: что продаёте и где вас найти на рынке."
+                    />
+                  </div>
+                </div>
+              </details>
+            </div>
+
             <SubmitButton className="btn btn--primary btn--lg" style={{ justifySelf: "start" }}>
               Сохранить изменения
             </SubmitButton>
@@ -490,9 +536,9 @@ export default async function CabinetPage({
                     <button className="btn btn--ghost" formAction={moveProduct} name="dir" value="down" aria-label="Ниже">
                       ↓
                     </button>
-                    <button className="btn btn--ghost btn--danger" formAction={deleteProduct}>
+                    <ConfirmButton formAction={deleteProduct} message="Удалить этот товар? Восстановить не получится.">
                       Удалить
-                    </button>
+                    </ConfirmButton>
                   </div>
                 </form>
               );
