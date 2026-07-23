@@ -1200,3 +1200,19 @@ h2 { letter-spacing: -0.018em; }
   /* Служебные страницы без поиска: одна строка, без пустого ряда. */
   .topbar__inner--plain { grid-template-areas: "brand right"; row-gap: 0; }
 }
+
+/* ── Новости: кликабельна только подпись «Подробнее в Instagram» ────────
+   Карточка больше не интерактивна — подъём на hover убран. Он же и был
+   багом: в мобильной свайп-ленте overflow срезал поднятую карточку.
+   Ссылке — своя реакция и зона касания ~44px через псевдоэлемент. */
+.news-card:hover { transform: none; border-color: var(--line); }
+a.news-card__more {
+  position: relative;
+  text-decoration: none;
+  border-radius: 8px;
+}
+a.news-card__more::before { content: ""; position: absolute; inset: -8px -6px; }
+a.news-card__more:hover { text-decoration: underline; text-underline-offset: 3px; }
+a.news-card__more svg { transition: transform .15s var(--ease-out-quint); }
+a.news-card__more:hover svg { transform: translate(1.5px, -1.5px); }
+a.news-card__more:active { transform: scale(.97); }

@@ -151,27 +151,26 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       </div>
                       {n.bodyRu && <p>{pick(lang, n.bodyRu, n.bodyKz)}</p>}
                       {n.link && (
-                        <span className="news-card__more">
+                        <a
+                          className="news-card__more"
+                          href={n.link}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                        >
                           {pick(lang, "Подробнее в Instagram", "Instagram-да толығырақ")}
                           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <line x1="7" y1="17" x2="17" y2="7" />
                             <polyline points="7 7 17 7 17 17" />
                           </svg>
-                        </span>
+                        </a>
                       )}
                     </>
                   );
-                  return n.link ? (
-                    <a
-                      className="news-card news-card--link"
-                      key={n.id}
-                      href={n.link}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      {inner}
-                    </a>
-                  ) : (
+                  // Кликабельна только подписанная ссылка, не вся плашка:
+                  // в свайп-ленте на телефоне полная кликабельность превращала
+                  // каждое неточное листание в вылет в Instagram, а карточки
+                  // без ссылки выглядели так же, но не реагировали.
+                  return (
                     <article className="news-card" key={n.id}>
                       {inner}
                     </article>
