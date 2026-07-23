@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getCatalogShopsCached } from "@/lib/cached";
 import { pick, type Lang } from "@/lib/lang";
 import { photoUrl } from "@/lib/format";
 import { pavilionKey, boothLabel, pavilionLabel } from "@/lib/site";
@@ -7,14 +7,7 @@ import type { CardShop } from "@/components/CatalogProvider";
 // Один и тот же набор нужен главной (каталог) и странице магазина (поиск в шапке).
 // Держим сборку в одном месте, чтобы поиск везде работал одинаково.
 export async function loadCatalogCards(lang: Lang): Promise<CardShop[]> {
-  const shops = await db.shop.findMany({
-    where: { status: "published" },
-    include: {
-      category: true,
-      products: { select: { nameRu: true, nameKz: true, price: true, unit: true }, orderBy: { order: "asc" } },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const shops = await getCatalogShopsCached();
 
   return shops.map((s) => {
     const fields: CardShop["fields"] = [

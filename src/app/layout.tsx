@@ -1,11 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/onest/400.css";
-import "@fontsource/onest/500.css";
 import "@fontsource/onest/600.css";
 import "@fontsource/onest/700.css";
 import "@fontsource/onest/800.css";
 import "@fontsource/manrope/400.css";
-import "@fontsource/manrope/500.css";
 import "@fontsource/manrope/600.css";
 import "@fontsource/manrope/700.css";
 import { getLang } from "@/lib/i18n";

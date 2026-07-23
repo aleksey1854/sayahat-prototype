@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getCategoriesCached, getCatalogShopsCached, getNewsCached } from "@/lib/cached";
 import { getLang, pick } from "@/lib/i18n";
 import { newsDateParts, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
@@ -24,19 +24,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const lang = getLang();
 
   const [categories, shops, news] = await Promise.all([
-    db.category.findMany({ orderBy: { order: "asc" } }),
-    db.shop.findMany({
-      where: { status: "published" },
-      include: {
-        category: true,
-        products: { select: { nameRu: true, nameKz: true, price: true, unit: true }, orderBy: { order: "asc" } },
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-    db.newsPost.findMany({
-      orderBy: [{ pinned: "desc" }, { sortOrder: "desc" }, { publishedAt: "desc" }],
-      take: 3,
-    }),
+    getCategoriesCached(),
+    getCatalogShopsCached(),
+    getNewsCached(),
   ]);
 
   const cards: CardShop[] = shops.map((s) => {

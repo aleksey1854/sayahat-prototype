@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
+import { getShopFullCached, getNeighborsCached } from "@/lib/cached";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
 import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
@@ -45,16 +45,13 @@ function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): s
 
 // Ключ павильона для подсветки на схеме.
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const shop = await db.shop.findUnique({
-    where: { slug: params.slug },
-    include: { products: { orderBy: { order: "asc" }, take: 4, select: { nameRu: true } } },
-  });
+  const shop = await getShopFullCached(params.slug);
   if (!shop) return { title: "Магазин не найден" };
   const title = shop.metaTitle ?? `${shop.nameRu} · базар Саяхат, Костанай`;
 
   // Описание для поисковой выдачи: если не задано вручную (metaDesc),
   // собирается из живых данных — товары дают ключевые слова в сниппете.
-  const goods = shop.products.map((p) => p.nameRu.toLowerCase()).join(", ");
+  const goods = shop.products.slice(0, 4).map((p) => p.nameRu.toLowerCase()).join(", ");
   const bits: string[] = [];
   if (shop.descRu) bits.push(shop.descRu.replace(/\.\s*$/, ""));
   if (goods) bits.push(`В наличии: ${goods}`);
@@ -78,10 +75,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ShopPage({ params }: { params: { slug: string } }) {
-  const shop = await db.shop.findUnique({
-    where: { slug: params.slug },
-    include: { category: true, products: { orderBy: { order: "asc" } } },
-  });
+  const shop = await getShopFullCached(params.slug);
 
   if (!shop) notFound();
 
@@ -112,14 +106,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const searchCards = await loadCatalogCards(lang);
 
   // Соседи по павильону: перелинковка каталога и подсказка «кто рядом».
-  const neighbors = shop.pavilion
-    ? await db.shop.findMany({
-        where: { pavilion: shop.pavilion, status: "published", NOT: { id: shop.id } },
-        select: { slug: true, nameRu: true, nameKz: true, row: true, category: { select: { nameRu: true, nameKz: true } } },
-        orderBy: { nameRu: "asc" },
-        take: 6,
-      })
-    : [];
+  const neighbors = shop.pavilion ? await getNeighborsCached(shop.pavilion, shop.id) : [];
 
   const shopUrl = absUrl(`/shop/${shop.slug}`);
 

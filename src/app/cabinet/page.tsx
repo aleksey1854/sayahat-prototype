@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CATALOG_TAG } from "@/lib/cached";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { saveUpload, removeUpload } from "@/lib/img";
@@ -63,6 +64,7 @@ function pickFile(formData: FormData, name: string): File | null {
 async function refresh(slug: string, flag: string, kb?: number) {
   revalidatePath(`/shop/${slug}`);
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG); // сбрасываем кеш чтений каталога
   redirect(`/cabinet?${flag}=1${kb ? `&kb=${kb}` : ""}`);
 }
 

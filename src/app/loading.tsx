@@ -1,27 +1,65 @@
-// Показывается при навигации/первой загрузке вместо пустоты.
-// Самодостаточно: поиск в реальном хедере завязан на контекст каталога,
-// поэтому здесь скелетон-топбар той же высоты (76px) — без прыжка при загрузке.
+// Скелетон первой загрузки и навигации. Повторяет актуальную разметку v3:
+// двухстрочную мобильную шапку, ленту новостей, плитки категорий, чипы
+// павильонов и сетку из 6 карточек. Использует реальные классы раскладки,
+// поэтому мобильный вид собирается тем же CSS, что и у живой страницы.
 export default function Loading() {
   return (
-    <>
+    <div aria-busy="true" aria-label="Загрузка">
       <div className="topbar" style={{ background: "var(--surface)" }}>
-        <div className="topbar__inner">
-          <div className="sk sk-line" style={{ width: 128, height: 30 }} />
-          <div className="sk sk-line" style={{ flex: 1, maxWidth: 460, height: 42, borderRadius: 999 }} />
-          <div className="sk sk-line" style={{ width: 72, height: 30, marginLeft: "auto" }} />
+        <div className="wrap topbar__inner" aria-hidden="true">
+          <div className="topbar__left">
+            <div className="sk" style={{ width: 46, height: 46, borderRadius: 999, flex: "none" }} />
+          </div>
+          <div className="topbar__search" style={{ flex: 1, minWidth: 0 }}>
+            <div className="sk" style={{ height: 46, borderRadius: 999 }} />
+          </div>
+          <div className="topbar__right" style={{ display: "flex", gap: 10 }}>
+            <div className="sk" style={{ width: 38, height: 38, borderRadius: 999, flex: "none" }} />
+            <div className="sk" style={{ width: 38, height: 38, borderRadius: 999, flex: "none" }} />
+            <div className="sk" style={{ width: 74, height: 42, borderRadius: 999, flex: "none" }} />
+          </div>
         </div>
       </div>
 
-      <section className="section catalog-grid-section">
+      {/* Новости */}
+      <section className="section" style={{ background: "var(--surface)" }} aria-hidden="true">
         <div className="wrap">
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginBottom: 40 }}>
-            <div className="sk sk-line" style={{ width: "min(200px, 55%)", height: 16, borderRadius: 999 }} />
-            <div className="sk sk-line" style={{ width: "min(460px, 84%)", height: 40 }} />
-            <div className="sk sk-line" style={{ width: "min(320px, 66%)", height: 20 }} />
+          <div className="sk sk-line" style={{ width: 190, height: 30, marginBottom: 22 }} />
+          <div className="news-grid">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div className="news-card" key={i}>
+                <div style={{ display: "flex", gap: 14, marginBottom: 12 }}>
+                  <div className="sk" style={{ width: 54, height: 58, borderRadius: 12, flex: "none" }} />
+                  <div className="sk sk-line" style={{ flex: 1, height: 20, marginTop: 6 }} />
+                </div>
+                <div className="sk sk-line" style={{ width: "92%", height: 13 }} />
+                <div className="sk sk-line" style={{ width: "78%", height: 13, marginTop: 8 }} />
+                <div className="sk sk-line" style={{ width: 150, height: 13, marginTop: 14 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Категории + павильоны + сетка магазинов */}
+      <section className="section catalog-grid-section" aria-hidden="true">
+        <div className="wrap">
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 22 }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} style={{ display: "grid", justifyItems: "center", gap: 8 }}>
+                <div className="sk" style={{ width: 62, height: 62, borderRadius: 17 }} />
+                <div className="sk sk-line" style={{ width: 44, height: 10 }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28 }}>
+            {[118, 132, 110, 96].map((w, i) => (
+              <div className="sk" key={i} style={{ width: w, height: 40, borderRadius: 12 }} />
+            ))}
           </div>
 
-          <div className="stores" aria-hidden="true">
-            {Array.from({ length: 9 }).map((_, i) => (
+          <div className="stores">
+            {Array.from({ length: 6 }).map((_, i) => (
               <div className="store store--sk" key={i}>
                 <div className="store__pic sk" />
                 <div className="store__body">
@@ -34,6 +72,6 @@ export default function Loading() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

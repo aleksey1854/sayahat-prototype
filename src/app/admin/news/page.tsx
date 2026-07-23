@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { NEWS_TAG } from "@/lib/cached";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { newsDate } from "@/lib/format";
@@ -70,6 +71,7 @@ async function addNews(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(NEWS_TAG);
   redirect("/admin/news?ok=1");
 }
 
@@ -94,6 +96,7 @@ async function updateNews(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(NEWS_TAG);
   redirect("/admin/news?ok=1");
 }
 
@@ -105,6 +108,7 @@ async function togglePin(formData: FormData) {
   if (!post) redirect("/admin/news");
   await db.newsPost.update({ where: { id }, data: { pinned: !post.pinned } });
   revalidatePath("/");
+  revalidateTag(NEWS_TAG);
   redirect("/admin/news?ok=1");
 }
 
@@ -131,6 +135,7 @@ async function moveNews(formData: FormData) {
   ]);
 
   revalidatePath("/");
+  revalidateTag(NEWS_TAG);
   redirect("/admin/news?ok=1");
 }
 
@@ -140,6 +145,7 @@ async function deleteNews(formData: FormData) {
   const id = str(formData, "id");
   await db.newsPost.deleteMany({ where: { id } });
   revalidatePath("/");
+  revalidateTag(NEWS_TAG);
   redirect("/admin/news?ok=1");
 }
 

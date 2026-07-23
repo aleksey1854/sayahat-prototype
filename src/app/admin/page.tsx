@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CATALOG_TAG } from "@/lib/cached";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -59,6 +60,7 @@ async function createShop(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
@@ -75,6 +77,7 @@ async function toggleStatus(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   revalidatePath(`/shop/${shop.slug}`);
   redirect("/admin?ok=1");
 }
@@ -138,6 +141,7 @@ async function deleteShop(formData: FormData) {
   await db.shop.delete({ where: { id: shop.id } });
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
@@ -169,6 +173,7 @@ async function addCategory(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
@@ -185,6 +190,7 @@ async function renameCategory(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
@@ -205,6 +211,7 @@ async function moveCategory(formData: FormData) {
   ]);
 
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
@@ -218,6 +225,7 @@ async function deleteCategory(formData: FormData) {
 
   await db.category.delete({ where: { id } });
   revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
   redirect("/admin?ok=1");
 }
 
