@@ -437,8 +437,8 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 
 .news-section { background: var(--surface-2); padding: 24px 0 26px; }
 .news-section .section-head { margin-bottom: 14px; }
-.news-section .section-head h2 { font-size: 27px; margin: 0; }
-@media (max-width: 640px) { .news-section { padding: 20px 0 22px; } .news-section .section-head h2 { font-size: 23px; } .news-section .section-head { margin-bottom: 14px; } }
+.news-section .section-head h2 { margin: 0; }
+@media (max-width: 640px) { .news-section { padding: 20px 0 22px; } .news-section .section-head { margin-bottom: 14px; } }
 #news { scroll-margin-top: 92px; }
 .news-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: none; transition: border-color .2s ease, transform .2s ease; }
 .news-card:hover { border-color: var(--brand); }

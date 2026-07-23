@@ -270,7 +270,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           <div className="wrap about__inner">
             <div className="about__text">
               {layout.about.title && (
-                <h2 style={{ fontSize: 36, color: "var(--ink)", margin: "10px 0 18px" }}>{L(layout.about.title, layout.about.titleKz)}</h2>
+                <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", color: "var(--ink)", margin: "10px 0 18px" }}>{L(layout.about.title, layout.about.titleKz)}</h2>
               )}
               {((lang === "kz" && layout.about.paragraphsKz?.length
                 ? layout.about.paragraphsKz
