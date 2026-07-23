@@ -145,7 +145,6 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   // Так подвал и «свободные места» достижимы за пару скроллов.
   const visible = shown.slice(0, step * (1 + more));
   const rest = shown.length - visible.length;
-  const nextBatch = Math.min(step, rest);
 
   // Смена поискового запроса тоже даёт другой список — сворачиваем сетку.
   // Первый проход пропускаем: иначе сброс затрёт разворот,
@@ -340,10 +339,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
           {rest > 0 && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
               <button className="btn btn--ghost btn--lg" onClick={showMore}>
-                {t(
-                  `Показать ещё ${nextBatch} ${ruPlural(nextBatch, "магазин", "магазина", "магазинов")}`,
-                  `Тағы ${nextBatch} дүкенді көрсету`,
-                )}
+                {t("Показать ещё", "Тағы көрсету")}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M6 9l6 6 6-6" />
                 </svg>
