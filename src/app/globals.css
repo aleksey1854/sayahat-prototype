@@ -66,7 +66,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .lead { color: var(--muted); font-size: 18px; max-width: 60ch; }
 /* 38px под заголовком отрывали его от содержимого секции */
 .section-head { margin-bottom: 24px; }
-.section-head h1, .section-head h2 { font-size: clamp(28px, 4vw, 40px); color: var(--ink); }
+.section-head h1, .section-head h2 { font-size: var(--text-section); color: var(--ink); }
 .section-head p { margin: 12px 0 0; color: var(--muted); font-size: 17px; max-width: 58ch; }
 
 .btn {
@@ -1216,3 +1216,9 @@ a.news-card__more:hover { text-decoration: underline; text-underline-offset: 3px
 a.news-card__more svg { transition: transform .15s var(--ease-out-quint); }
 a.news-card__more:hover svg { transform: translate(1.5px, -1.5px); }
 a.news-card__more:active { transform: scale(.97); }
+
+/* ── Роль «заголовок секции» — единый токен ──────────────────────────────
+   Каталожный интерфейс, шкала плотная: 28px на десктопе, 23 на телефоне —
+   размер, в котором жили «Новости рынка» и который читался спокойно.
+   40px был масштабом промо-лендинга и смотрелся громоздко. */
+:root { --text-section: clamp(23px, 3.2vw, 28px); }
