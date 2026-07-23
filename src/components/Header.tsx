@@ -17,7 +17,7 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
       <div className="wrap topbar__inner">
         <div className="topbar__left">
           <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
-            <img src="/logo-horizontal.webp" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
+            <img src="/logo-mark.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />
             {/* На телефоне широкий вордмарк сжимался в нечитаемую полоску.
                 Квадрат с надписью при 48px превращался в кашу, поэтому здесь
                 только верблюд — эмблема без текста читается в любом размере. */}

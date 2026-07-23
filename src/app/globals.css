@@ -1146,3 +1146,20 @@ h2 { letter-spacing: -0.018em; }
   .store__body h3 { font-size: 17px; }
   .store__loc { margin: 5px 0 11px; }
 }
+
+/* ── Мобильный ритм страницы магазина ───────────────────────────────────
+   Товарные карточки ужаты как магазинные (были ~350px, станет ~30% экрана),
+   вертикальные отступы вокруг зелёной полосы достоинств и секций сжаты:
+   на телефоне воздух между блоками копился в пустые экраны. */
+@media (max-width: 560px) {
+  .grid-cards { gap: 16px; }
+  .card__pic, .card__pic--empty { aspect-ratio: 2 / 1; }
+  .card__body { padding: 13px 15px 16px; }
+
+  .hero__inner { padding-top: 34px; padding-bottom: 34px; }
+  .hero__mono { margin-bottom: 16px; }
+  .trust__inner { padding-top: 16px; padding-bottom: 16px; }
+  .section { padding: 30px 0; }
+  .section--tight { padding: 26px 0; }
+  .about__inner { gap: 22px; }
+}
