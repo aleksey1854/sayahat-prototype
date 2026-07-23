@@ -14,7 +14,7 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
 
   return (
     <header className="topbar">
-      <div className="wrap topbar__inner">
+      <div className={"wrap topbar__inner" + (withSearch ? "" : " topbar__inner--plain")}>
         <div className="topbar__left">
           <Link className="brand" href="/" aria-label={pick(lang, "Рынок Саяхат — на главную", "Саяхат базары — басты бетке")}>
             <img src="/logo-mark.png" alt={pick(lang, "Рынок Саяхат", "Саяхат базары")} className="brand__logo" />

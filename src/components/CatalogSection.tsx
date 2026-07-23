@@ -99,12 +99,14 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
 
   const collapse = () => {
     setMore(0);
-    // Возврат к началу сетки; вычитаем высоту липкой шапки,
-    // иначе первый ряд карточек уезжает под неё. Плавность — только если
-    // пользователь не просил систему убрать анимации.
+    // Возврат к началу сетки; вычитаем реальную высоту липкой шапки
+    // (на телефоне она двухстрочная и выше), иначе первый ряд карточек
+    // уезжает под неё. Плавность — только если пользователь
+    // не просил систему убрать анимации.
     const top = gridRef.current?.getBoundingClientRect().top ?? 0;
+    const headerH = document.querySelector<HTMLElement>(".topbar")?.offsetHeight ?? 90;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: window.scrollY + top - 100, behavior: reduced ? "auto" : "smooth" });
+    window.scrollTo({ top: window.scrollY + top - headerH - 12, behavior: reduced ? "auto" : "smooth" });
   };
 
   useEffect(() => {

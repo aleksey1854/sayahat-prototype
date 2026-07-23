@@ -1163,3 +1163,40 @@ h2 { letter-spacing: -0.018em; }
   .section--tight { padding: 26px 0; }
   .about__inner { gap: 22px; }
 }
+
+/* ── Мобильная шапка: две строки, как у Ozon / WB / Яндекс Маркета ──────
+   Одна строка не вмещает лого + поиск + соцкнопки + язык — война была
+   проигрышной по определению. Верхняя строка: верблюд слева, Instagram,
+   WhatsApp и язык справа. Нижняя: поиск НА ВСЮ ширину — впервые ему
+   просторно. Скрывать поле в иконку нельзя: видимое поле используется
+   заметно чаще (Lyst: +13% на мобиле), а поиск — главное действие каталога. */
+@media (max-width: 640px) {
+  .topbar__inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "brand right"
+      "search search";
+    height: auto;
+    padding-top: 9px;
+    padding-bottom: 11px;
+    row-gap: 9px;
+    column-gap: 12px;
+  }
+  .topbar__left { grid-area: brand; }
+  .topbar__right { grid-area: right; justify-self: end; margin-left: 0; }
+  .topbar__search { grid-area: search; width: 100%; min-width: 0; }
+
+  /* Соцкнопки возвращаются: в верхней строке им больше не тесно. */
+  .topbar__social { display: flex; gap: 8px; }
+  .topbar__social a,
+  .topbar__social .topbar__ig { display: inline-flex; width: 40px; height: 40px; }
+
+  /* Режим «печатаю» больше не прячет соседей: поиск и так во всю ширину,
+     а исчезающая верхняя строка дёргала бы шапку по высоте. */
+  .topbar__inner.is-searching .topbar__left,
+  .topbar__inner.is-searching .topbar__right { display: flex; }
+
+  /* Служебные страницы без поиска: одна строка, без пустого ряда. */
+  .topbar__inner--plain { grid-template-areas: "brand right"; row-gap: 0; }
+}
