@@ -303,7 +303,7 @@ export default async function CabinetPage({
 
   return (
     <>
-      <Header variant="shop" />
+      <Header variant="shop" withSearch={false} />
       <section className="section">
         <div className="wrap cab">
           <div className="cab__top">

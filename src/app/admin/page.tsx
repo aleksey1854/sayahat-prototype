@@ -247,7 +247,7 @@ export default async function AdminPage({
 
   return (
     <>
-      <Header variant="shop" />
+      <Header variant="shop" withSearch={false} />
       <section className="section">
         <div className="wrap cab" style={{ maxWidth: 860 }}>
           <div className="cab__top">

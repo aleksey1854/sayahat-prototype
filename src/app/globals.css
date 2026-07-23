@@ -1102,3 +1102,32 @@ h2 { letter-spacing: -0.018em; }
 }
 /* Сверхдлинное слово в заголовке/тексте новости не должно рвать карточку. */
 .news-card h3, .news-card p, .cab .panel { overflow-wrap: break-word; }
+
+/* ── «Найти Саяхат»: карта и навигация в одном блоке ────────────────────
+   Карта слева тянется на высоту правой панели — пустых углов больше нет.
+   Правая панель не растягивается принудительно (перебиваем space-between
+   базового .getthere .panel), контент идёт сверху вниз естественно. */
+.getthere--map { grid-template-columns: 1.12fr .88fr; align-items: stretch; }
+.getthere--map .panel { justify-content: flex-start; }
+.getthere__map {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 18px;
+  min-height: 420px; height: 100%;
+  background: var(--surface);
+}
+.getthere__map iframe { position: relative; display: block; width: 100%; height: 100%; border: 0; }
+.getthere__actions {
+  display: grid; gap: 10px;
+  margin-top: 16px; padding-top: 18px; border-top: 1px solid var(--line);
+}
+@media (max-width: 920px) {
+  .getthere--map { grid-template-columns: 1fr; }
+  .getthere__map { min-height: 0; height: clamp(260px, 52vw, 360px); }
+}
+
+/* Область касания переключателя языка на телефоне: кнопки внутри пилюли
+   визуально 34px по высоте — расширяем зону только по вертикали
+   (по горизонтали они соседи, перекрытие дало бы промахи). */
+@media (max-width: 560px) {
+  .topbar .lang-mini button::before { content: ""; position: absolute; inset: -6px 0; }
+}

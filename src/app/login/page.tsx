@@ -68,7 +68,7 @@ export default async function LoginPage({ searchParams }: { searchParams: { e?: 
 
   return (
     <>
-      <Header variant="shop" />
+      <Header variant="shop" withSearch={false} />
       <section className="section">
         <div className="wrap cab" style={{ maxWidth: 440 }}>
           <div className="eyebrow">Кабинет арендатора</div>

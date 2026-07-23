@@ -6,7 +6,10 @@ import { HeaderSearch } from "./HeaderSearch";
 import { InstagramIcon } from "./InstagramIcon";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 
-export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }) {
+// withSearch: на служебных страницах (админка, кабинет, вход) каталога нет,
+// и поле поиска там было мёртвым — печатаешь, ничего не происходит.
+// Прячем его вместо того, чтобы чинить: искать там нечего.
+export function Header({ variant = "catalog", withSearch = true }: { variant?: "catalog" | "shop"; withSearch?: boolean }) {
   const lang = getLang();
 
   return (
@@ -21,7 +24,7 @@ export function Header({ variant = "catalog" }: { variant?: "catalog" | "shop" }
           </Link>
                   </div>
 
-        {(
+        {withSearch && (
           <HeaderSearch
             placeholder={pick(lang, "Что ищете? Орехи, платок, обувь…", "Не іздейсіз? Жаңғақ, орамал, аяқ киім…")}
             placeholderShort={pick(lang, "Поиск по рынку", "Базар бойынша іздеу")}

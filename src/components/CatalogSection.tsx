@@ -53,24 +53,24 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   const { query, setQuery, hits, mode, pav, setPav } = useCatalogSearch();
   const [cat, setCat] = useState("all");
   const [allCats, setAllCats] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [more, setMore] = useState(0); // число раскрытых пачек «Показать ещё»
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
 
   const q = query.trim();
   const t = (ru: string, kz: string) => (lang === "kz" ? kz : ru);
 
-  // Фильтры и разворот сетки держим в адресе страницы. Без этого выбранное
-  // терялось при переходе в магазин и возврате назад, и ссылку нельзя было
-  // никому отправить. Пишем через history.replaceState: адрес меняется без
-  // перезагрузки страницы и без лишних записей в истории браузера.
-  const syncUrl = (nextCat: string, nextPav: PavKey | null, nextExpanded: boolean) => {
+  // Фильтры и число раскрытых пачек держим в адресе страницы. Без этого
+  // выбранное терялось при переходе в магазин и возврате назад, и ссылку
+  // нельзя было никому отправить. Пишем через history.replaceState: адрес
+  // меняется без перезагрузки и без лишних записей в истории браузера.
+  const syncUrl = (nextCat: string, nextPav: PavKey | null, nextMore: number) => {
     const sp = new URLSearchParams(window.location.search);
     if (nextCat && nextCat !== "all") sp.set("cat", nextCat);
     else sp.delete("cat");
     if (nextPav) sp.set("pav", nextPav);
     else sp.delete("pav");
-    if (nextExpanded) sp.set("more", "1");
+    if (nextMore > 0) sp.set("more", String(nextMore));
     else sp.delete("more");
     const qs = sp.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
@@ -81,24 +81,27 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
   // и при восстановлении из адреса и сбросил бы развёрнутый вид.
   const chooseCat = (next: string) => {
     setCat(next);
-    setExpanded(false);
-    syncUrl(next, pav, false);
+    setMore(0);
+    syncUrl(next, pav, 0);
   };
 
   const choosePav = (next: PavKey | null) => {
     setPav(next);
-    setExpanded(false);
-    syncUrl(cat, next, false);
+    setMore(0);
+    syncUrl(cat, next, 0);
   };
 
+  // «Показать ещё» раскрывает следующую пачку STEP, а не весь список:
+  // вывалить сразу 40+ карточек — значит снова похоронить подвал.
   const showMore = () => {
-    setExpanded(true);
-    syncUrl(cat, pav, true);
+    const next = more + 1;
+    setMore(next);
+    syncUrl(cat, pav, next);
   };
 
   const collapse = () => {
-    setExpanded(false);
-    syncUrl(cat, pav, false);
+    setMore(0);
+    syncUrl(cat, pav, 0);
     // Возврат к началу сетки; вычитаем высоту липкой шапки,
     // иначе первый ряд карточек уезжает под неё. Плавность — только если
     // пользователь не просил систему убрать анимации.
@@ -117,7 +120,8 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
     if (c && categories.some((x) => x.slug === c)) setCat(c);
     const p = sp.get("pav");
     if (p && PAVILION_LIST.some((x) => x.key === p)) setPav(p as PavKey);
-    if (sp.get("more") === "1") setExpanded(true);
+    const m = parseInt(sp.get("more") ?? "0", 10);
+    if (Number.isFinite(m) && m > 0) setMore(Math.min(m, 50));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -134,8 +138,9 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
 
   // Сетку показываем частями: сначала STEP карточек, остальное — по кнопке.
   // Так подвал и «свободные места» достижимы за пару скроллов.
-  const visible = expanded ? shown : shown.slice(0, STEP);
+  const visible = shown.slice(0, STEP * (1 + more));
   const rest = shown.length - visible.length;
+  const nextBatch = Math.min(STEP, rest);
 
   // Смена поискового запроса тоже даёт другой список — сворачиваем сетку.
   // Первый проход пропускаем: иначе сброс затрёт разворот,
@@ -146,7 +151,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
       firstQuery.current = false;
       return;
     }
-    setExpanded(false);
+    setMore(0);
   }, [q]);
 
   // Стаггер карточек: каждая появляется, когда входит в вьюпорт.
@@ -331,8 +336,8 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
             <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
               <button className="btn btn--ghost btn--lg" onClick={showMore}>
                 {t(
-                  `Показать ещё ${rest} ${ruPlural(rest, "магазин", "магазина", "магазинов")}`,
-                  `Тағы ${rest} дүкенді көрсету`,
+                  `Показать ещё ${nextBatch} ${ruPlural(nextBatch, "магазин", "магазина", "магазинов")}`,
+                  `Тағы ${nextBatch} дүкенді көрсету`,
                 )}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M6 9l6 6 6-6" />
@@ -341,7 +346,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
             </div>
           )}
 
-          {expanded && shown.length > STEP && (
+          {more > 0 && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
               <button
                 className="btn btn--ghost"
