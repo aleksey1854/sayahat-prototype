@@ -1044,7 +1044,7 @@ h2 { letter-spacing: -0.018em; }
   .topbar .lang-mini {
     position: relative; display: inline-flex; align-items: center;
     box-sizing: border-box; width: 74px; height: 42px; padding: 4px;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
   }
   .topbar .lang-mini button {
     position: relative; z-index: 1; flex: 1; height: 100%;
@@ -1058,7 +1058,7 @@ h2 { letter-spacing: -0.018em; }
   .topbar .lang-mini__pill {
     position: absolute; top: 4px; left: 4px; z-index: 0;
     width: calc(50% - 4px); height: calc(100% - 8px);
-    background: var(--brand); border-radius: 9px;
+    background: var(--brand); border-radius: 999px;
     box-shadow: 0 1px 2px rgba(20, 81, 63, .28);
     transition: transform .24s var(--ease-out-quint);
   }
@@ -1077,7 +1077,7 @@ h2 { letter-spacing: -0.018em; }
 .topbar__social { display: flex; align-items: center; gap: 6px; }
 .topbar__social a {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; border-radius: 11px; flex: none;
+  width: 38px; height: 38px; border-radius: 999px; flex: none;
   color: var(--ink-soft); background: #fff; border: 1px solid var(--line);
   transition: color .18s ease, border-color .18s ease, background .18s ease;
 }
@@ -1085,7 +1085,7 @@ h2 { letter-spacing: -0.018em; }
 .topbar__social svg { width: 19px; height: 19px; }
 @media (max-width: 560px) {
   .topbar__social { gap: 4px; }
-  .topbar__social a { width: 36px; height: 36px; border-radius: 10px; }
+  .topbar__social a { width: 36px; height: 36px; border-radius: 999px; }
   .topbar__social svg { width: 18px; height: 18px; }
   /* Instagram остаётся в подвале и в карточках новостей */
   .topbar__social .topbar__ig { display: none; }
