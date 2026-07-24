@@ -486,7 +486,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 </div>
               </div>
               {shop.kaspiUrl ? (
-                <a className="btn btn--accent btn--block btn--lg" style={{ marginTop: 22 }} href={shop.kaspiUrl} data-goal="kaspi_click" target="_blank" rel="noopener">
+                <a className="btn btn--accent btn--block btn--lg" href={shop.kaspiUrl} data-goal="kaspi_click" target="_blank" rel="noopener">
                   {pick(lang, "Перейти в магазин на Kaspi", "Kaspi-де дүкенге өту")}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path d="M7 17L17 7M9 7h8v8" />
@@ -494,7 +494,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                 </a>
               ) : (
                 wa && (
-                  <a className="btn btn--accent btn--block btn--lg" style={{ marginTop: 22 }} href={wa}>
+                  <a className="btn btn--accent btn--block btn--lg" href={wa}>
                     {pick(lang, "Написать в WhatsApp", "WhatsApp-қа жазу")}
                     <WhatsAppIcon />
                   </a>
