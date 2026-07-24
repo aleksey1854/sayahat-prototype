@@ -12,6 +12,7 @@ import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { PhotoInput } from "@/components/PhotoInput";
+import { ScrollTopOnMount } from "@/components/ScrollTopOnMount";
 
 const PHOTO_ERRORS: Record<string, string> = {
   big: "Файл больше 8 МБ — выберите фото полегче или сожмите это.",
@@ -326,7 +327,7 @@ async function logout() {
 export default async function CabinetPage({
   searchParams,
 }: {
-  searchParams: { saved?: string; err?: string; perr?: string; kb?: string };
+  searchParams: { saved?: string; err?: string; perr?: string; kb?: string; from?: string };
 }) {
   const session = await requireShopSession();
   const shop = await db.shop.findUnique({
@@ -366,6 +367,8 @@ export default async function CabinetPage({
               </form>
             </div>
           </div>
+
+          {searchParams.from === "admin" && <ScrollTopOnMount />}
 
           {searchParams.saved && (
             <div className="notice notice--ok">

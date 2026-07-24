@@ -91,7 +91,9 @@ async function impersonate(formData: FormData) {
 
   session.shopId = shop.id;
   await session.save();
-  redirect("/cabinet");
+  // from=admin: кабинету нужно знать, что это переход из списка, и сбросить
+  // прокрутку. redirect() из server action её не сбрасывает сам.
+  redirect("/cabinet?from=admin");
 }
 
 async function setCredentials(formData: FormData) {
