@@ -90,6 +90,8 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   const layout = parseLayout(shop.layout);
   const name = pick(lang, shop.nameRu, shop.nameKz);
   const mono = shop.nameRu.trim().charAt(0).toUpperCase();
+  // Логотип точки, если загружен. Ложится в тот же квадрат, где иначе буква.
+  const logoSrc = photoUrl(shop.logo);
   // У блока «о магазине» своё фото; если его нет — берём обложку.
   // Раньше при отсутствии обоих показывалась заглушка на пол-экрана.
   // В блоке «о магазине» показываем другой кадр из пула категории, а не
@@ -198,7 +200,23 @@ export default async function ShopPage({ params }: { params: { slug: string } })
       <section className="hero">
         <div className="wrap hero__inner">
           <div>
-            <div className="hero__mono">{mono}</div>
+            <div className="hero__mono">
+              {logoSrc ? (
+                <img
+                  src={logoSrc}
+                  alt={name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    borderRadius: "inherit",
+                    display: "block",
+                  }}
+                />
+              ) : (
+                mono
+              )}
+            </div>
             <div className="eyebrow">
               {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, shop.category.nameRu, shop.category.nameKz)}
             </div>

@@ -152,6 +152,42 @@ async function uploadCover(formData: FormData) {
   await refresh(shop.slug, "saved", Math.round(up.bytes / 1024));
 }
 
+// Логотип точки. Тот же путь, что у обложки: сжатие в webp, поворот по EXIF,
+// чистка метаданных. Показывается квадратом в шапке страницы магазина.
+async function uploadLogo(formData: FormData) {
+  "use server";
+  const session = await requireShopSession();
+  const file = pickFile(formData, "logo");
+  if (!file) redirect("/cabinet?perr=1");
+
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  let up: Awaited<ReturnType<typeof saveUpload>> | null = null;
+  let code = "bad";
+  try {
+    up = await saveUpload(file);
+  } catch (e) {
+    code = e instanceof Error ? e.message : "bad";
+  }
+  if (!up) redirect(`/cabinet?perr=${code}`);
+
+  await removeUpload(shop.logo);
+  await db.shop.update({ where: { id: shop.id }, data: { logo: up.url } });
+  await refresh(shop.slug, "saved", Math.round(up.bytes / 1024));
+}
+
+async function removeLogo() {
+  "use server";
+  const session = await requireShopSession();
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  await removeUpload(shop.logo);
+  await db.shop.update({ where: { id: shop.id }, data: { logo: null } });
+  await refresh(shop.slug, "saved");
+}
+
 async function addProduct(formData: FormData) {
   "use server";
   const session = await requireShopSession();
@@ -302,6 +338,7 @@ export default async function CabinetPage({
   const layout = parseLayout(shop.layout);
   const aboutText = (layout.about?.paragraphs ?? []).join("\n\n");
   const cover = photoUrl(shop.cover);
+  const logo = photoUrl(shop.logo);
 
   return (
     <>
@@ -350,6 +387,34 @@ export default async function CabinetPage({
             <SubmitButton pendingText="Загружаю фото…" style={{ justifySelf: "start" }}>
               Загрузить обложку
             </SubmitButton>
+          </form>
+
+          <form action={uploadLogo} className="panel form-grid" style={{ marginBottom: 16 }}>
+            <h3 style={{ margin: 0 }}>Логотип</h3>
+            {logo && (
+              <img
+                src={srcSetFor(logo)?.src}
+                alt=""
+                width={72}
+                height={72}
+                style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 18, display: "block" }}
+              />
+            )}
+            <PhotoInput name="logo" kind="logo" label={logo ? "Заменить логотип" : "Файл логотипа"} required />
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <SubmitButton pendingText="Загружаю логотип…">
+                {logo ? "Заменить логотип" : "Загрузить логотип"}
+              </SubmitButton>
+              {logo && (
+                <ConfirmButton
+                  formAction={removeLogo}
+                  formNoValidate
+                  message="Убрать логотип? В шапке снова будет буква."
+                >
+                  Убрать
+                </ConfirmButton>
+              )}
+            </div>
           </form>
 
           <form action={saveShop} className="form-grid">

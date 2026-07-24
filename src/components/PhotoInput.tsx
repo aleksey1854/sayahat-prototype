@@ -8,6 +8,7 @@ const MAX_BYTES = 8 * 1024 * 1024;
 const HINTS: Record<PhotoKind, string> = {
   cover: "Горизонтальное, лучше 1600×1200 (4:3). До 8 МБ — сожмём сами.",
   product: "От 800 px по меньшей стороне, формат любой — квадрат ляжет идеально. До 8 МБ.",
+  logo: "Квадратный файл от 400×400. Подойдёт аватарка из Instagram. До 8 МБ.",
 };
 
 type Info = { url: string; w: number; h: number; bytes: number; warnings: string[] };

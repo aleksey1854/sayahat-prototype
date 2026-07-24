@@ -1,7 +1,7 @@
 // Анализ фото на клиенте до загрузки: соотношение сторон и подсказки.
 // Чистые функции — покрыты тестами (npm run test:images).
 
-export type PhotoKind = "cover" | "product";
+export type PhotoKind = "cover" | "product" | "logo";
 
 const COMMON: [number, number][] = [
   [1, 1], [4, 3], [3, 4], [3, 2], [2, 3], [16, 9], [9, 16], [4, 5], [5, 4], [2, 1], [1, 2],
@@ -48,6 +48,18 @@ export function photoAdvice(kind: PhotoKind, w: number, h: number): string[] {
       warnings.push(`Квадратное (${label}) — допустимо, но горизонтальное 4:3 ляжет лучше.`);
     } else if (r > 2.2) {
       warnings.push(`Панорама (${label}) — по бокам сильно обрежется.`);
+    }
+  } else if (kind === "logo") {
+    // Логотип показывается маленьким квадратом со скруглением: важны
+    // квадратность и запас по разрешению, панорамы сюда не годятся.
+    const short = Math.min(w, h);
+    if (short < 200) {
+      warnings.push(`${w}×${h} — меньше 200px сайт не примет. Нужен файл покрупнее.`);
+    } else if (short < 400) {
+      warnings.push(`${w}×${h} — мелковато, на телефоне будет мыло. Лучше от 400.`);
+    }
+    if (r < 0.8 || r > 1.25) {
+      warnings.push(`${label} — логотип показывается квадратом, края обрежутся. Лучше квадратный файл.`);
     }
   } else {
     const short = Math.min(w, h);

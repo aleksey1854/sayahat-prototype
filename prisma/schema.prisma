@@ -37,6 +37,7 @@ model Shop {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
   cover      String?
+  logo       String?
   phone      String?
   whatsapp   String?
   instagram  String?

@@ -64,6 +64,7 @@ const shopData = {
   descKz:
     "Аян Ет — Қостанай облысы фермерлерінің жаңа сойылған жылқы және сиыр еті. Үй шұжығы, ысталған қазы, күн сайын тартылған фарш; бешбармаққа жиынтық жинап береміз.",
   cover: PIC("cover.webp"),
+  logo: PIC("logo.webp"),
   phone: "+7 778 740 44 31",
   whatsapp: "77787404431",
   instagram: "ayan.et_karatal", // только ник, страница выводит его как @ник
@@ -112,6 +113,7 @@ async function main() {
   if (DRY) {
     console.log("\n--dry: ничего не записано. Что встанет:");
     console.log(`  обложка   ${shopData.cover}`);
+    console.log(`  логотип   ${shopData.logo}`);
     console.log(`  телефон   ${shopData.phone}`);
     console.log(`  витрина   ${shopData.row}, ${shopData.pavilion}`);
     console.log(`  товаров   ${products.length}`);
@@ -133,6 +135,11 @@ async function main() {
 
   console.log(`\nГотово. Магазин «${shop.nameRu}» записан, товаров ${products.length}.`);
   console.log(`Проверить: /shop/${SLUG}`);
+  console.log(
+    "\nВАЖНО: скрипт пишет в базу мимо Next и кеш чтений не сбрасывает.\n" +
+      "Открой /admin, зайди в любой магазин и нажми «Сохранить» — тег catalog\n" +
+      "один на весь каталог, одного сохранения хватит на все импортированные точки.",
+  );
 }
 
 main()
