@@ -456,7 +456,13 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                     <a className="contact-link" href={telHref(shop.phone)}>
                       {shop.phone}
                     </a>
-                    <span>{pick(lang, "звонок и WhatsApp", "қоңырау және WhatsApp")}</span>
+                    <span>
+                      {wa ? (
+                        <a href={wa}>{pick(lang, "написать в WhatsApp", "WhatsApp-қа жазу")}</a>
+                      ) : (
+                        pick(lang, "звонок", "қоңырау")
+                      )}
+                    </span>
                   </div>
                 </div>
               )}
@@ -485,20 +491,17 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                   <span>{pick(lang, "часы работы", "жұмыс уақыты")}</span>
                 </div>
               </div>
-              {shop.kaspiUrl ? (
+              {/* Кнопка WhatsApp отсюда убрана: то же действие уже есть в шапке
+                  страницы, в самом номере рядом и в липкой панели на телефоне.
+                  Kaspi остаётся — это отдельный адрес, которого больше нигде
+                  внизу страницы нет. */}
+              {shop.kaspiUrl && (
                 <a className="btn btn--accent btn--block btn--lg" href={shop.kaspiUrl} data-goal="kaspi_click" target="_blank" rel="noopener">
                   {pick(lang, "Перейти в магазин на Kaspi", "Kaspi-де дүкенге өту")}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path d="M7 17L17 7M9 7h8v8" />
                   </svg>
                 </a>
-              ) : (
-                wa && (
-                  <a className="btn btn--accent btn--block btn--lg" href={wa}>
-                    {pick(lang, "Написать в WhatsApp", "WhatsApp-қа жазу")}
-                    <WhatsAppIcon />
-                  </a>
-                )
               )}
             </div>
 
