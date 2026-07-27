@@ -550,6 +550,12 @@ export default async function CabinetPage({
           <div className="cab__top" style={{ marginTop: 40 }}>
             <div>
               <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Товары ({shop.products.length})</h2>
+              {/* Без этой строки первый вопрос на обучении администрации будет
+                  «а почему я завёл товары, а на сайте их нет». */}
+              <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 14, maxWidth: 620 }}>
+                Ассортимент и цены пока не показываются на сайте — блок включим на втором этапе.
+                Заводите товары сейчас: они сохраняются и появятся на витрине сразу после включения.
+              </p>
             </div>
           </div>
 

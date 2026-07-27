@@ -24,6 +24,13 @@ type ShopLayout = {
   gallery?: string[];
 };
 
+// Ассортимент и цены на витринах выключены по решению заказчика от 27 июля:
+// блок включаем на втором этапе, когда у точек будут реальные фото товаров
+// и подтверждённые цены. Товары при этом продолжают заводиться в кабинетах
+// и остаются в базе — здесь только показ. Обратно включается сменой на true,
+// ничего больше править не нужно.
+const SHOW_PRODUCTS = false;
+
 function parseLayout(raw: string | null): ShopLayout {
   if (!raw) return {};
   try {
@@ -112,7 +119,12 @@ export default async function ShopPage({ params }: { params: { slug: string } })
 
   const shopUrl = absUrl(`/shop/${shop.slug}`);
 
-  const priceValues = shop.products.map((p) => p.price).filter((v): v is number => v != null);
+  // priceRange уходит в микроразметку Store. Раз цен на странице нет,
+  // отдавать их поисковику нельзя: разметка обязана описывать то, что
+  // человек реально видит, иначе это расхождение и риск для сниппета.
+  const priceValues = SHOW_PRODUCTS
+    ? shop.products.map((p) => p.price).filter((v): v is number => v != null)
+    : [];
   const priceRange =
     priceValues.length > 0
       ? Math.min(...priceValues) === Math.max(...priceValues)
@@ -152,7 +164,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   };
 
   const productsLd =
-    shop.products.length > 0
+    SHOW_PRODUCTS && shop.products.length > 0
       ? {
           "@context": "https://schema.org",
           "@type": "ItemList",
@@ -245,7 +257,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                   </svg>
                 </a>
               ) : (
-                shop.products.length > 0 && (
+                SHOW_PRODUCTS && shop.products.length > 0 && (
                   <a className="btn btn--accent btn--lg" href="#tovary">
                     {pick(lang, "Смотреть товары", "Тауарларды көру")}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -306,7 +318,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         </section>
       )}
 
-      {shop.products.length > 0 && (
+      {SHOW_PRODUCTS && shop.products.length > 0 && (
         <section className="section section--tight reveal" id="tovary" style={{ background: "var(--surface-2)" }}>
           <div className="wrap">
             <div className="section-head">
@@ -397,7 +409,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
         </section>
       )}
 
-      {shop.products.length > 0 && (
+      {SHOW_PRODUCTS && shop.products.length > 0 && (
         <section className="section reveal">
           <div className="wrap">
             <div className="section-head">
