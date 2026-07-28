@@ -52,15 +52,34 @@ const shopFullRaw = unstable_cache(
   (slug: string) =>
     db.shop.findUnique({
       where: { slug },
-      include: { category: true, products: { orderBy: { order: "asc" } } },
+      include: {
+        category: true,
+        products: { orderBy: { order: "asc" } },
+        reviews: {
+          where: { status: "published" },
+          orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+        },
+      },
     }),
   ["shop-full"],
   { tags: [CATALOG_TAG] },
 );
 
+// Тот же подвох, что у новостей: unstable_cache сериализует в JSON, и
+// createdAt возвращается строкой. Оживляем до Date, иначе форматирование
+// даты на странице упадёт.
+async function shopFullRevived(slug: string) {
+  const shop = await shopFullRaw(slug);
+  if (!shop) return null;
+  return {
+    ...shop,
+    reviews: shop.reviews.map((r) => ({ ...r, createdAt: new Date(r.createdAt) })),
+  };
+}
+
 // cache() поверх — дедупликация в рамках одного запроса:
 // generateMetadata и страница читают магазин один раз, а не дважды.
-export const getShopFullCached = cache(shopFullRaw);
+export const getShopFullCached = cache(shopFullRevived);
 
 const neighborsRaw = unstable_cache(
   (pavilion: string, excludeId: string) =>
