@@ -82,6 +82,31 @@ async function toggleStatus(formData: FormData) {
   redirect("/admin?ok=1");
 }
 
+// Категорию можно было задать только при создании: ни в админке, ни в
+// кабинете поля для неё не было. Оператор ошибся при заведении — магазин
+// навсегда оставался в чужой категории, чинилось только удалением и
+// пересозданием, то есть потерей фото и товаров.
+async function setCategory(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const id = str(formData, "id");
+  const categoryId = str(formData, "categoryId");
+  if (!categoryId) redirect("/admin?err=cat");
+
+  const [shop, category] = await Promise.all([
+    db.shop.findUnique({ where: { id } }),
+    db.category.findUnique({ where: { id: categoryId } }),
+  ]);
+  if (!shop || !category) redirect("/admin?err=cat");
+
+  await db.shop.update({ where: { id: shop.id }, data: { categoryId } });
+
+  revalidatePath("/");
+  revalidateTag(CATALOG_TAG);
+  revalidatePath(`/shop/${shop.slug}`);
+  redirect("/admin?ok=1");
+}
+
 async function impersonate(formData: FormData) {
   "use server";
   const session = await requireAdmin();
@@ -274,6 +299,7 @@ export default async function AdminPage({
 
           {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
           {err === "name" && <div className="notice notice--err">Заполните название и категорию.</div>}
+          {err === "cat" && <div className="notice notice--err">Категория не выбрана или не найдена.</div>}
           {err === "login" && <div className="notice notice--err">Такой логин уже занят — выберите другой.</div>}
           {err === "pass" && <div className="notice notice--err">Пароль слишком короткий — минимум 6 символов.</div>}
           {err === "catUsed" && (
@@ -331,6 +357,19 @@ export default async function AdminPage({
                   <span>· /shop/{s.slug}</span>
                   <span>· {s.account ? `доступ: ${s.account.login}` : "доступа нет"}</span>
                 </div>
+                <form action={setCategory} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <input type="hidden" name="id" value={s.id} />
+                  <select className="select" name="categoryId" defaultValue={s.categoryId} style={{ width: "auto", minWidth: 220 }}>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nameRu}
+                      </option>
+                    ))}
+                  </select>
+                  <SubmitButton className="btn btn--ghost" pendingText="Меняю…">
+                    Сменить категорию
+                  </SubmitButton>
+                </form>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <form action={impersonate}>
                     <input type="hidden" name="id" value={s.id} />
