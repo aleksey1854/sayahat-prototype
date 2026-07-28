@@ -574,12 +574,22 @@ export default async function ShopPage({
                   <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
+                {/* Павильон и бутик раньше стояли одной строкой в <b>:
+                    «Продуктовый · витрина 13» не влезало в колонку и рвалось
+                    на две строки, из-за чего вся панель становилась выше.
+                    Теперь павильон сверху, бутик снизу вместо служебной
+                    подписи «где мы на рынке» — колонка стала как остальные,
+                    в две строки, и номер бутика полезнее этой подписи. */}
                 <div>
-                  <b>
-                    {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, "Уточняется", "Нақтылануда")}
-                    {shop.landmark ? ` — ${shop.landmark}` : ""}
-                  </b>
-                  <span>{pick(lang, "где мы на рынке", "базардағы орнымыз")}</span>
+                  <b>{pavilionLabel(lang, shop.pavilion) || pick(lang, "Уточняется", "Нақтылануда")}</b>
+                  <span>
+                    {[
+                      boothLabel(lang, shop.row).replace(/^ · /, ""),
+                      shop.landmark,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || pick(lang, "где мы на рынке", "базардағы орнымыз")}
+                  </span>
                 </div>
               </div>
               {shop.phone && (

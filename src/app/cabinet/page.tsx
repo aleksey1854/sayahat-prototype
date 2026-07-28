@@ -48,8 +48,52 @@ async function requireShopSession() {
   return session;
 }
 
+// Лимиты длины. В одном месте, потому что те же числа идут в maxLength
+// полей и в подписи под ними. Взяты по месту вывода: имя стоит в заголовке
+// и в карточке каталога, описание уходит ещё и в подвал, слоган в одну
+// строку под названием. Более длинный текст не переносится, а ломает вёрстку.
+const LIMITS = {
+  nameRu: 40,
+  nameKz: 40,
+  descRu: 200,
+  tagline: 80,
+  aboutTitle: 60,
+  aboutText: 600,
+  phone: 20,
+  whatsapp: 16,
+  instagram: 30,
+  kaspiUrl: 200,
+  row: 20,
+  landmark: 60,
+  hours: 40,
+  metaTitle: 70,
+  metaDesc: 200,
+  pName: 60,
+  pDesc: 160,
+  pUnit: 12,
+} as const;
+
 function str(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
+}
+
+// Режем на сервере: maxLength в браузере обходится вставкой из буфера,
+// а в базу должно попадать только то, что влезает в вёрстку.
+function cut(value: string, max: number) {
+  return value.length > max ? value.slice(0, max).trim() : value;
+}
+
+// Instagram выводится на странице как @ник. Оператор почти наверняка
+// вставит целую ссылку из адресной строки, и тогда получится
+// «@https://www.instagram.com/…». Вырезаем из ссылки ник.
+function normInstagram(raw: string): string | null {
+  const v = raw
+    .replace(/^https?:\/\//i, "")
+    .replace(/^(www\.)?instagram\.com\//i, "")
+    .replace(/^@/, "")
+    .replace(/[/?#].*$/, "")
+    .trim();
+  return v ? cut(v, LIMITS.instagram) : null;
 }
 
 function num(formData: FormData, name: string): number | null {
@@ -73,16 +117,16 @@ async function saveShop(formData: FormData) {
   "use server";
   const session = await requireShopSession();
 
-  const nameRu = str(formData, "nameRu");
+  const nameRu = cut(str(formData, "nameRu"), LIMITS.nameRu);
   if (!nameRu) redirect("/cabinet?err=1");
 
   const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
   if (!shop) redirect("/login");
 
   const layout = parseLayout(shop.layout);
-  const tagline = str(formData, "tagline");
-  const aboutTitle = str(formData, "aboutTitle");
-  const aboutText = str(formData, "aboutText");
+  const tagline = cut(str(formData, "tagline"), LIMITS.tagline);
+  const aboutTitle = cut(str(formData, "aboutTitle"), LIMITS.aboutTitle);
+  const aboutText = cut(str(formData, "aboutText"), LIMITS.aboutText);
 
   if (tagline) layout.tagline = tagline;
   else delete layout.tagline;
@@ -111,18 +155,18 @@ async function saveShop(formData: FormData) {
     where: { id: shop.id },
     data: {
       nameRu,
-      nameKz: str(formData, "nameKz") || nameRu,
-      descRu: opt("descRu"),
+      nameKz: cut(str(formData, "nameKz"), LIMITS.nameKz) || nameRu,
+      descRu: optCut("descRu", LIMITS.descRu),
       phone: normalizePhone(str(formData, "phone")),
       whatsapp: normalizeWhatsapp(str(formData, "whatsapp")),
-      instagram: str(formData, "instagram").replace(/^@/, "").trim() || null,
+      instagram: normInstagram(str(formData, "instagram")),
       kaspiUrl: cleanUrl(str(formData, "kaspiUrl")),
-      row: opt("row"), // номер бутика
+      row: optCut("row", LIMITS.row), // номер бутика
       pavilion: opt("pavilion"), // павильон
-      landmark: opt("landmark"),
-      hours: opt("hours"),
-      metaTitle: optCut("metaTitle", 70),
-      metaDesc: optCut("metaDesc", 200),
+      landmark: optCut("landmark", LIMITS.landmark),
+      hours: optCut("hours", LIMITS.hours),
+      metaTitle: optCut("metaTitle", LIMITS.metaTitle),
+      metaDesc: optCut("metaDesc", LIMITS.metaDesc),
       layout: JSON.stringify(layout),
     },
   });
@@ -192,7 +236,7 @@ async function removeLogo() {
 async function addProduct(formData: FormData) {
   "use server";
   const session = await requireShopSession();
-  const nameRu = str(formData, "nameRu");
+  const nameRu = cut(str(formData, "nameRu"), LIMITS.pName);
   if (!nameRu) redirect("/cabinet?err=1");
 
   const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
@@ -219,9 +263,9 @@ async function addProduct(formData: FormData) {
     data: {
       shopId: shop.id,
       nameRu,
-      nameKz: str(formData, "nameKz") || null,
+      nameKz: cut(str(formData, "nameKz"), LIMITS.pName) || null,
       price: num(formData, "price"),
-      unit: str(formData, "unit") || null,
+      unit: cut(str(formData, "unit"), LIMITS.pUnit) || null,
       image,
       order: (max._max.order ?? -1) + 1,
     },
@@ -234,7 +278,7 @@ async function saveProduct(formData: FormData) {
   "use server";
   const session = await requireShopSession();
   const id = str(formData, "id");
-  const nameRu = str(formData, "nameRu");
+  const nameRu = cut(str(formData, "nameRu"), LIMITS.pName);
   if (!nameRu) redirect("/cabinet?err=1");
 
   const product = await db.product.findFirst({
@@ -264,11 +308,11 @@ async function saveProduct(formData: FormData) {
     where: { id: product.id },
     data: {
       nameRu,
-      nameKz: str(formData, "nameKz") || null,
-      descRu: str(formData, "descRu") || null,
+      nameKz: cut(str(formData, "nameKz"), LIMITS.pName) || null,
+      descRu: cut(str(formData, "descRu"), LIMITS.pDesc) || null,
       price: num(formData, "price"),
       oldPrice: num(formData, "oldPrice"),
-      unit: str(formData, "unit") || null,
+      unit: cut(str(formData, "unit"), LIMITS.pUnit) || null,
       image,
     },
   });
@@ -426,20 +470,20 @@ export default async function CabinetPage({
               <div className="grid2">
                 <div className="field">
                   <label htmlFor="nameRu">Название (русский)</label>
-                  <input className="input" id="nameRu" name="nameRu" defaultValue={shop.nameRu} required />
+                  <input className="input" id="nameRu" name="nameRu" defaultValue={shop.nameRu} maxLength={LIMITS.nameRu} required />
                 </div>
                 <div className="field">
                   <label htmlFor="nameKz">Название (қазақша)</label>
-                  <input className="input" id="nameKz" name="nameKz" defaultValue={shop.nameKz} />
+                  <input className="input" id="nameKz" name="nameKz" defaultValue={shop.nameKz} maxLength={LIMITS.nameKz} />
                 </div>
               </div>
               <div className="field">
                 <label htmlFor="descRu">Короткое описание (видно в каталоге)</label>
-                <input className="input" id="descRu" name="descRu" defaultValue={shop.descRu ?? ""} />
+                <input className="input" id="descRu" name="descRu" defaultValue={shop.descRu ?? ""} maxLength={LIMITS.descRu} />
               </div>
               <div className="field">
                 <label htmlFor="tagline">Подзаголовок на странице (под названием)</label>
-                <input className="input" id="tagline" name="tagline" defaultValue={layout.tagline ?? ""} />
+                <input className="input" id="tagline" name="tagline" defaultValue={layout.tagline ?? ""} maxLength={LIMITS.tagline} />
               </div>
             </div>
 
@@ -447,11 +491,11 @@ export default async function CabinetPage({
               <h3 style={{ margin: 0 }}>О магазине</h3>
               <div className="field">
                 <label htmlFor="aboutTitle">Заголовок</label>
-                <input className="input" id="aboutTitle" name="aboutTitle" defaultValue={layout.about?.title ?? ""} />
+                <input className="input" id="aboutTitle" name="aboutTitle" defaultValue={layout.about?.title ?? ""} maxLength={LIMITS.aboutTitle} />
               </div>
               <div className="field">
                 <label htmlFor="aboutText">Текст (пустая строка — новый абзац)</label>
-                <textarea className="textarea" id="aboutText" name="aboutText" defaultValue={aboutText} />
+                <textarea className="textarea" id="aboutText" name="aboutText" defaultValue={aboutText} maxLength={LIMITS.aboutText} />
               </div>
             </div>
 
@@ -460,19 +504,19 @@ export default async function CabinetPage({
               <div className="grid2">
                 <div className="field">
                   <label htmlFor="phone">Телефон</label>
-                  <input className="input" id="phone" name="phone" defaultValue={shop.phone ?? ""} placeholder="+7 705 123 45 67" />
+                  <input className="input" id="phone" name="phone" type="tel" inputMode="tel" defaultValue={shop.phone ?? ""} maxLength={LIMITS.phone} placeholder="+7 705 123 45 67" />
                 </div>
                 <div className="field">
                   <label htmlFor="whatsapp">WhatsApp (только цифры)</label>
-                  <input className="input" id="whatsapp" name="whatsapp" defaultValue={shop.whatsapp ?? ""} placeholder="77051234567" />
+                  <input className="input" id="whatsapp" name="whatsapp" type="tel" inputMode="numeric" defaultValue={shop.whatsapp ?? ""} maxLength={LIMITS.whatsapp} placeholder="77051234567" />
                 </div>
                 <div className="field">
                   <label htmlFor="instagram">Instagram (без @)</label>
-                  <input className="input" id="instagram" name="instagram" defaultValue={shop.instagram ?? ""} />
+                  <input className="input" id="instagram" name="instagram" defaultValue={shop.instagram ?? ""} maxLength={LIMITS.instagram} placeholder="ayan.et_karatal" />
                 </div>
                 <div className="field">
                   <label htmlFor="kaspiUrl">Ссылка на Kaspi-магазин</label>
-                  <input className="input" id="kaspiUrl" name="kaspiUrl" defaultValue={shop.kaspiUrl ?? ""} placeholder="https://kaspi.kz/..." />
+                  <input className="input" id="kaspiUrl" name="kaspiUrl" type="url" defaultValue={shop.kaspiUrl ?? ""} maxLength={LIMITS.kaspiUrl} placeholder="https://kaspi.kz/..." />
                 </div>
               </div>
             </div>
@@ -492,15 +536,15 @@ export default async function CabinetPage({
                 </div>
                 <div className="field">
                   <label htmlFor="row">Бутик №</label>
-                  <input className="input" id="row" name="row" defaultValue={shop.row ?? ""} placeholder="37" />
+                  <input className="input" id="row" name="row" defaultValue={shop.row ?? ""} maxLength={LIMITS.row} placeholder="37" />
                 </div>
                 <div className="field">
                   <label htmlFor="landmark">Ориентир</label>
-                  <input className="input" id="landmark" name="landmark" defaultValue={shop.landmark ?? ""} placeholder="напротив входа" />
+                  <input className="input" id="landmark" name="landmark" defaultValue={shop.landmark ?? ""} maxLength={LIMITS.landmark} placeholder="напротив входа" />
                 </div>
                 <div className="field">
                   <label htmlFor="hours">Часы работы</label>
-                  <input className="input" id="hours" name="hours" defaultValue={shop.hours ?? ""} placeholder="Вт–Вс, 10:00–19:00" />
+                  <input className="input" id="hours" name="hours" defaultValue={shop.hours ?? ""} maxLength={LIMITS.hours} placeholder="Вт–Вс, 10:00–19:00" />
                 </div>
               </div>
             </div>
@@ -521,7 +565,7 @@ export default async function CabinetPage({
                       className="input"
                       id="metaTitle"
                       name="metaTitle"
-                      maxLength={70}
+                      maxLength={LIMITS.metaTitle}
                       defaultValue={shop.metaTitle ?? ""}
                       placeholder={`${shop.nameRu} · базар Саяхат, Костанай`}
                     />
@@ -532,7 +576,7 @@ export default async function CabinetPage({
                       className="textarea"
                       id="metaDesc"
                       name="metaDesc"
-                      maxLength={200}
+                      maxLength={LIMITS.metaDesc}
                       defaultValue={shop.metaDesc ?? ""}
                       style={{ minHeight: 80 }}
                       placeholder="Одно-два предложения: что продаёте и где вас найти на рынке."
@@ -578,16 +622,16 @@ export default async function CabinetPage({
                   <div className="grid2">
                     <div className="field">
                       <label>Название (русский)</label>
-                      <input className="input" name="nameRu" defaultValue={p.nameRu} required />
+                      <input className="input" name="nameRu" defaultValue={p.nameRu} maxLength={LIMITS.pName} required />
                     </div>
                     <div className="field">
                       <label>Название (қазақша)</label>
-                      <input className="input" name="nameKz" defaultValue={p.nameKz ?? ""} />
+                      <input className="input" name="nameKz" defaultValue={p.nameKz ?? ""} maxLength={LIMITS.pName} />
                     </div>
                   </div>
                   <div className="field">
                     <label>Описание (одна-две строки)</label>
-                    <input className="input" name="descRu" defaultValue={p.descRu ?? ""} />
+                    <input className="input" name="descRu" defaultValue={p.descRu ?? ""} maxLength={LIMITS.pDesc} />
                   </div>
                   <div className="grid3">
                     <div className="field">
@@ -600,7 +644,7 @@ export default async function CabinetPage({
                     </div>
                     <div className="field">
                       <label>Единица</label>
-                      <input className="input" name="unit" defaultValue={p.unit ?? ""} placeholder="кг / шт / пучок" />
+                      <input className="input" name="unit" maxLength={LIMITS.pUnit} defaultValue={p.unit ?? ""} placeholder="кг / шт / пучок" />
                     </div>
                   </div>
                   <PhotoInput name="image" kind="product" label="Заменить фото" />
@@ -625,11 +669,11 @@ export default async function CabinetPage({
               <div className="grid2">
                 <div className="field">
                   <label htmlFor="new-nameRu">Название (русский)</label>
-                  <input className="input" id="new-nameRu" name="nameRu" required />
+                  <input className="input" id="new-nameRu" name="nameRu" maxLength={LIMITS.pName} required />
                 </div>
                 <div className="field">
                   <label htmlFor="new-nameKz">Название (қазақша)</label>
-                  <input className="input" id="new-nameKz" name="nameKz" />
+                  <input className="input" id="new-nameKz" name="nameKz" maxLength={LIMITS.pName} />
                 </div>
               </div>
               <div className="grid3">
@@ -639,7 +683,7 @@ export default async function CabinetPage({
                 </div>
                 <div className="field">
                   <label htmlFor="new-unit">Единица</label>
-                  <input className="input" id="new-unit" name="unit" placeholder="кг / шт / пучок" />
+                  <input className="input" id="new-unit" name="unit" maxLength={LIMITS.pUnit} placeholder="кг / шт / пучок" />
                 </div>
                 <PhotoInput name="image" kind="product" label="Фото" />
               </div>
