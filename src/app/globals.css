@@ -1385,110 +1385,85 @@ a.news-card__more:active { transform: scale(.97); }
 }
 
 /* ── Отзывы ─────────────────────────────────────────────────────────────
-   Карточки цитат под галереей. Сетка автозаполнением: один отзыв тянется
-   во всю ширину, три встают в ряд — на рынке у большинства точек их будет
-   один-два, и пустых ячеек в сетке быть не должно. */
-.reviews {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+   Две колонки: слева список, справа форма. Форма открыта сразу — лишний
+   клик по «Оставить отзыв» отсекал часть людей, а пустого места на
+   десктопе и так хватало.
+
+   Отзыв оформлен цитатой с полосой слева, а не карточкой-панелью. Панель
+   в 1140px вокруг фразы «Хорошее мясо» выглядела сломанной; у цитаты нет
+   рамки, поэтому короткий текст читается нормально при любой длине. */
+.reviews-layout { display: grid; gap: 26px; align-items: start; }
+@media (min-width: 861px) {
+  .reviews-layout { grid-template-columns: minmax(0, 1fr) 372px; gap: 44px; }
 }
-.review {
-  margin: 0;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg, 18px);
-  padding: 20px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.review blockquote {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--ink);
-}
-.review figcaption {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: auto;
-  font-size: 13px;
-  color: var(--muted);
-}
+
+.review { margin: 0; padding-left: 18px; border-left: 3px solid var(--brand-50); display: grid; gap: 9px; }
+.review + .review { margin-top: 26px; }
+.review blockquote { margin: 0; font-size: 17px; line-height: 1.55; color: var(--ink); }
+.review figcaption { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .review__author { font-weight: 600; color: var(--ink); font-size: 14px; }
 
-/* Приглашение написать. Когда отзывов ещё нет, это единственное содержимое
-   блока — поэтому строка и кнопка в одну линию, без пустой панели. */
-.reviews__ask {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 18px;
-}
-.reviews__ask p { margin: 0; color: var(--muted); }
-.reviews__note { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+.reviews-empty { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; max-width: 46ch; }
+.reviews-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
 
-@media (max-width: 560px) {
-  .review { padding: 17px 18px; }
-  .reviews__ask { align-items: stretch; }
-  .reviews__ask .btn { width: 100%; justify-content: center; }
-}
-
-/* ── Форма отзыва ───────────────────────────────────────────────────────
-   Раскрытие на details/summary — без JavaScript. Маркер списка убираем,
-   summary стилизован как обычная кнопка. */
-.reviews__form { position: relative; }
-.reviews__form > summary { list-style: none; cursor: pointer; user-select: none; }
-.reviews__form > summary::-webkit-details-marker { display: none; }
-.reviews__form[open] > summary { margin-bottom: 16px; }
-
-.review-form {
-  display: grid;
-  gap: 14px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg, 18px);
-  padding: 20px 22px;
-  max-width: 560px;
-}
-.review-form label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--ink); }
-.review-form input,
-.review-form textarea {
-  font: inherit;
-  font-weight: 400;
-  padding: 11px 13px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-2, #fff);
-  color: var(--ink);
-  width: 100%;
-}
-.review-form textarea { resize: vertical; min-height: 96px; }
-.review-form input:focus-visible,
-.review-form textarea:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.review-form { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+.review-form h3 { margin: 0; font-size: 19px; }
 .review-form .btn { justify-self: start; }
+.review-form .notice { margin-bottom: 0; }
 
 /* Поле-ловушка для ботов. Не display:none — часть ботов такие поля
    пропускает; уводим за пределы экрана, для людей его нет. */
-.review-form__trap {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Внутри блока отзывов приглашение и форма встают друг под другом. */
-.reviews__ask { display: block; }
-.reviews__ask p { margin: 0 0 14px; }
+.review-form__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 @media (max-width: 560px) {
-  .review-form { padding: 17px 18px; }
+  .review-form { padding: 18px; }
   .review-form .btn { justify-self: stretch; width: 100%; }
+  .review blockquote { font-size: 16px; }
+}
+
+/* ── Выпадающий список ──────────────────────────────────────────────────
+   В проекте есть .input и .textarea, а стиля для select не было — в
+   админке отзывов он вылезал системным. Повторяем .input и рисуем
+   свою стрелку, системную убираем через appearance. */
+.select {
+  font-family: var(--font-body); font-size: 16px; color: var(--ink);
+  background: var(--surface); border: 1.5px solid var(--line-strong);
+  border-radius: 12px; padding: 11px 38px 11px 14px; outline: none; width: 100%;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23545049' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
+}
+.select:focus { border-color: var(--brand); }
+
+/* ── Админка отзывов ────────────────────────────────────────────────────
+   Карточка отзыва в очереди: шапка со статусом, поля, кнопки. */
+.rev-admin { display: grid; gap: 16px; }
+.rev-card { display: grid; gap: 14px; }
+.rev-card__head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.rev-card__shop { font-size: 17px; font-weight: 700; color: var(--ink); }
+.rev-card__acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.rev-two { display: grid; gap: 14px; }
+@media (min-width: 721px) { .rev-two { grid-template-columns: 260px minmax(0, 1fr); } }
+
+/* ── «Рядом в этом павильоне»: из сетки карточек в строку ссылок ────────
+   Было шесть панелей 3×2 — около 200px высоты ради шести ссылок. Виктор
+   попросил сократить визитку, и это самый дешёвый по смыслу блок: карточка
+   соседа несла название, категорию и номер бутика, из которых полезно
+   только название и категория.
+
+   Ссылок по-прежнему шесть — перелинковка внутри каталога не теряется,
+   меняется только форма подачи. Высота падает примерно втрое. */
+.neighbors__list { display: flex; flex-wrap: wrap; gap: 8px; grid-template-columns: none; }
+.neighbor {
+  flex-direction: row; align-items: baseline; gap: 7px;
+  padding: 8px 14px; border-radius: 999px;
+}
+.neighbor:hover { transform: none; box-shadow: none; }
+.neighbor b { font-size: 14px; }
+.neighbor span { font-size: 13px; }
+
+@media (max-width: 560px) {
+  .neighbor { padding: 7px 12px; }
+  .neighbor b { font-size: 13.5px; }
+  .neighbor span { font-size: 12.5px; }
 }

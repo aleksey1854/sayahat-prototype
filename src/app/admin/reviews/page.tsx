@@ -199,8 +199,8 @@ export default async function AdminReviewsPage({
           </div>
 
           <p style={{ color: "var(--muted)", maxWidth: 640, marginTop: 12 }}>
-            Публичной формы на сайте нет: посетитель отправляет отзыв в WhatsApp администрации,
-            вы проверяете и заводите его здесь. Всё, что попадает на сайт, проходит через эту страницу.
+            Отзывы с формы на сайте попадают сюда со статусом «на проверке» и не видны посетителям,
+            пока вы не нажмёте «Опубликовать». Здесь же можно завести отзыв вручную.
           </p>
 
           {searchParams.ok && <div className="notice notice--ok">Сохранено.</div>}
@@ -211,9 +211,9 @@ export default async function AdminReviewsPage({
           <form action={addReview} className="panel form-grid" style={{ marginTop: 24, marginBottom: 32 }}>
             <h3 style={{ margin: 0 }}>Новый отзыв</h3>
 
-            <label>
-              Магазин
-              <select name="shopId" defaultValue="" required>
+            <div className="field">
+              <label htmlFor="rv-shop">Магазин</label>
+              <select id="rv-shop" className="select" name="shopId" defaultValue="" required>
                 <option value="" disabled>
                   Выберите магазин
                 </option>
@@ -223,23 +223,25 @@ export default async function AdminReviewsPage({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
 
-            <label>
-              Подпись
-              <input name="author" maxLength={AUTHOR_MAX} placeholder="Айгуль, покупатель" required />
-            </label>
+            <div className="field">
+              <label htmlFor="rv-author">Подпись · до {AUTHOR_MAX} знаков</label>
+              <input id="rv-author" className="input" name="author" maxLength={AUTHOR_MAX} placeholder="Айгуль, покупатель" required />
+            </div>
 
-            <label>
-              Текст отзыва
+            <div className="field">
+              <label htmlFor="rv-text">Текст отзыва · до {TEXT_MAX} знаков</label>
               <textarea
+                id="rv-text"
+                className="textarea"
                 name="text"
                 rows={4}
                 maxLength={TEXT_MAX}
                 placeholder="Что человек сказал. Своими словами, без правки под рекламу — иначе отзывы перестают читать."
                 required
               />
-            </label>
+            </div>
 
             <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input type="checkbox" name="hidden" />
@@ -257,40 +259,37 @@ export default async function AdminReviewsPage({
               только приглашение написать.
             </p>
           ) : (
-            <div className="form-grid">
+            <div className="rev-admin">
               {reviews.map((r) => (
-                <form action={updateReview} className="panel form-grid" key={r.id}>
+                <form action={updateReview} className="panel rev-card" key={r.id}>
                   <input type="hidden" name="id" value={r.id} />
 
-                  <div className="admin-meta">
-                    <strong style={{ fontSize: 17, color: "var(--ink)" }}>{r.shop.nameRu}</strong>
+                  <div className="rev-card__head">
+                    <span className="rev-card__shop">{r.shop.nameRu}</span>
                     <span className={r.status === "published" ? "pill pill--ok" : "pill pill--muted"}>
-                      {r.status === "published" ? "на сайте" : "скрыт"}
+                      {r.status === "published" ? "на сайте" : "на проверке"}
                     </span>
-                    <span>· {new Date(r.createdAt).toLocaleDateString("ru-RU")}</span>
+                    <span>{new Date(r.createdAt).toLocaleDateString("ru-RU")}</span>
                     <span>· /shop/{r.shop.slug}</span>
                   </div>
 
-                  <label>
-                    Подпись
-                    <input name="author" defaultValue={r.author} maxLength={AUTHOR_MAX} required />
-                  </label>
+                  <div className="rev-two">
+                    <div className="field">
+                      <label>Подпись</label>
+                      <input className="input" name="author" defaultValue={r.author} maxLength={AUTHOR_MAX} required />
+                    </div>
+                    <div className="field">
+                      <label>Текст</label>
+                      <textarea className="textarea" name="text" defaultValue={r.text} rows={3} maxLength={TEXT_MAX} required style={{ minHeight: 88 }} />
+                    </div>
+                  </div>
 
-                  <label>
-                    Текст
-                    <textarea name="text" defaultValue={r.text} rows={3} maxLength={TEXT_MAX} required />
-                  </label>
-
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <div className="rev-card__acts">
                     <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
                     <button className="btn btn--ghost" formAction={toggleReview} formNoValidate>
                       {r.status === "published" ? "Скрыть" : "Опубликовать"}
                     </button>
-                    <ConfirmButton
-                      formAction={deleteReview}
-                      formNoValidate
-                      message="Удалить отзыв? Восстановить не получится."
-                    >
+                    <ConfirmButton formAction={deleteReview} formNoValidate message="Удалить отзыв? Восстановить не получится.">
                       Удалить
                     </ConfirmButton>
                   </div>

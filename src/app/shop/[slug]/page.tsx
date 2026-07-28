@@ -7,6 +7,7 @@ import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
 import { getShopReviews } from "@/lib/reviews";
 import { submitReview } from "@/lib/reviewActions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ClearReviewParam } from "@/components/ClearReviewParam";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -433,130 +434,100 @@ export default async function ShopPage({
               <h2>{pick(lang, "Отзывы", "Пікірлер")}</h2>
             </div>
 
-            {reviews.length > 0 && (
-              <div className="reviews">
-                {reviews.map((r) => (
-                  <figure className="review" key={r.id}>
-                    <blockquote>{r.text}</blockquote>
-                    <figcaption>
-                      <span className="review__author">{r.author}</span>
-                      <time dateTime={r.createdAt.toISOString()}>
-                        {r.createdAt.toLocaleDateString(lang === "kz" ? "kk-KZ" : "ru-RU", {
-                          year: "numeric",
-                          month: "long",
-                        })}
-                      </time>
-                    </figcaption>
-                  </figure>
-                ))}
+            <div className="reviews-layout">
+              <div>
+                {reviews.length > 0 ? (
+                  reviews.map((r) => (
+                    <figure className="review" key={r.id}>
+                      <blockquote>{r.text}</blockquote>
+                      <figcaption>
+                        <span className="review__author">{r.author}</span>
+                        <time dateTime={r.createdAt.toISOString()}>
+                          {r.createdAt.toLocaleDateString(lang === "kz" ? "kk-KZ" : "ru-RU", {
+                            year: "numeric",
+                            month: "long",
+                          })}
+                        </time>
+                      </figcaption>
+                    </figure>
+                  ))
+                ) : (
+                  <p className="reviews-empty">
+                    {pick(
+                      lang,
+                      "Пока никто не оставил отзыв об этом магазине. Ваш будет первым.",
+                      "Бұл дүкен туралы әзірге ешкім пікір қалдырмаған. Сіздікі бірінші болады.",
+                    )}
+                  </p>
+                )}
               </div>
-            )}
 
-            <div className="reviews__ask">
-              <p>
-                {reviews.length > 0
-                  ? pick(lang, "Покупали здесь? Расскажите, как всё прошло.", "Осы жерден сатып алдыңыз ба? Қалай өткенін айтыңыз.")
-                  : pick(lang, "Знаете этот магазин? Напишите первый отзыв.", "Бұл дүкенді білесіз бе? Алғашқы пікірді жазыңыз.")}
-              </p>
-
-              {/* details/summary вместо клиентского компонента: раскрытие
-                  работает без JavaScript, лишнего кода на страницу не едет. */}
-              <details className="reviews__form" open={Boolean(searchParams.review)}>
-                <summary className="btn btn--ghost" data-goal="review_click">
-                  {pick(lang, "Оставить отзыв", "Пікір қалдыру")}
-                </summary>
-
-                {searchParams.review === "ok" && (
-                  <div className="notice notice--ok">
-                    {pick(
-                      lang,
-                      "Спасибо. Отзыв ушёл на проверку администрации рынка и появится после неё.",
-                      "Рахмет. Пікір базар әкімшілігінің тексеруіне жіберілді және содан кейін пайда болады.",
-                    )}
-                  </div>
-                )}
-                {searchParams.review === "short" && (
-                  <div className="notice notice--err">
-                    {pick(
-                      lang,
-                      "Слишком коротко: имя от 2 знаков, отзыв от 10.",
-                      "Тым қысқа: аты 2 таңбадан, пікір 10 таңбадан басталады.",
-                    )}
-                  </div>
-                )}
-                {searchParams.review === "limit" && (
-                  <div className="notice notice--err">
-                    {pick(
-                      lang,
-                      "Вы уже оставили отзыв недавно. Попробуйте через час.",
-                      "Сіз жақында пікір қалдырдыңыз. Бір сағаттан кейін көріңіз.",
-                    )}
-                  </div>
-                )}
-                {searchParams.review === "err" && (
-                  <div className="notice notice--err">
-                    {pick(
-                      lang,
-                      "Не удалось отправить. Попробуйте позже или напишите в WhatsApp.",
-                      "Жіберілмеді. Кейінірек көріңіз немесе WhatsApp-қа жазыңыз.",
-                    )}
-                  </div>
-                )}
-
+              <aside>
                 <form action={submitReview} className="review-form">
+                  <h3>{pick(lang, "Оставить отзыв", "Пікір қалдыру")}</h3>
+
+                  {searchParams.review && <ClearReviewParam />}
+                  {searchParams.review === "ok" && (
+                    <div className="notice notice--ok">
+                      {pick(
+                        lang,
+                        "Спасибо. Отзыв ушёл на проверку администрации и появится после неё.",
+                        "Рахмет. Пікір әкімшілік тексеруіне жіберілді және содан кейін пайда болады.",
+                      )}
+                    </div>
+                  )}
+                  {searchParams.review === "short" && (
+                    <div className="notice notice--err">
+                      {pick(lang, "Слишком коротко: имя от 2 знаков, отзыв от 10.", "Тым қысқа: аты 2 таңбадан, пікір 10 таңбадан.")}
+                    </div>
+                  )}
+                  {searchParams.review === "limit" && (
+                    <div className="notice notice--err">
+                      {pick(lang, "Вы уже оставили отзыв недавно. Попробуйте через час.", "Сіз жақында пікір қалдырдыңыз. Бір сағаттан кейін көріңіз.")}
+                    </div>
+                  )}
+                  {searchParams.review === "err" && (
+                    <div className="notice notice--err">
+                      {pick(lang, "Не удалось отправить. Попробуйте позже.", "Жіберілмеді. Кейінірек көріңіз.")}
+                    </div>
+                  )}
+
                   <input type="hidden" name="slug" value={shop.slug} />
                   {/* Ловушка для ботов: людям не видна, боты заполняют всё подряд. */}
-                  <input
-                    className="review-form__trap"
-                    type="text"
-                    name="company"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    aria-hidden="true"
-                  />
+                  <input className="review-form__trap" type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
-                  <label>
-                    {pick(lang, "Как вас зовут", "Атыңыз")}
-                    <input
-                      name="author"
-                      maxLength={60}
-                      required
-                      placeholder={pick(lang, "Айгуль", "Айгүл")}
-                    />
-                  </label>
+                  <div className="field">
+                    <label htmlFor="rv-author">{pick(lang, "Как вас зовут", "Атыңыз")}</label>
+                    <input id="rv-author" className="input" name="author" maxLength={60} required placeholder={pick(lang, "Айгуль", "Айгүл")} />
+                  </div>
 
-                  <label>
-                    {pick(lang, "Отзыв", "Пікір")}
+                  <div className="field">
+                    <label htmlFor="rv-text">{pick(lang, "Отзыв", "Пікір")}</label>
                     <textarea
+                      id="rv-text"
+                      className="textarea"
                       name="text"
                       rows={4}
                       maxLength={400}
                       required
-                      placeholder={pick(
-                        lang,
-                        "Что понравилось, что купили, как обслужили.",
-                        "Не ұнады, не сатып алдыңыз, қалай қызмет көрсетті.",
-                      )}
+                      placeholder={pick(lang, "Что понравилось, что купили, как обслужили.", "Не ұнады, не сатып алдыңыз, қалай қызмет көрсетті.")}
                     />
-                  </label>
+                  </div>
 
-                  <SubmitButton
-                    className="btn btn--primary"
-                    pendingText={pick(lang, "Отправляю…", "Жіберілуде…")}
-                  >
+                  <SubmitButton className="btn btn--primary" pendingText={pick(lang, "Отправляю…", "Жіберілуде…")}>
                     {pick(lang, "Отправить", "Жіберу")}
                   </SubmitButton>
                 </form>
-              </details>
-            </div>
 
-            <p className="reviews__note">
-              {pick(
-                lang,
-                "Отзывы публикует администрация рынка после проверки.",
-                "Пікірлерді базар әкімшілігі тексергеннен кейін жариялайды.",
-              )}
-            </p>
+                <p className="reviews-note">
+                  {pick(
+                    lang,
+                    "Отзывы публикует администрация рынка после проверки.",
+                    "Пікірлерді базар әкімшілігі тексергеннен кейін жариялайды.",
+                  )}
+                </p>
+              </aside>
+            </div>
           </div>
         </section>
       )}
@@ -678,10 +649,9 @@ export default async function ShopPage({
                 {neighbors.map((n) => (
                   <a className="neighbor" href={`/shop/${n.slug}`} key={n.slug}>
                     <b>{pick(lang, n.nameRu, n.nameKz)}</b>
-                    <span>
-                      {pick(lang, n.category.nameRu, n.category.nameKz)}
-                      {boothLabel(lang, n.row)}
-                    </span>
+                    {/* Номер бутика соседа убран: со страницы другого магазина
+                        по нему никто не ориентируется, а строку он удлинял. */}
+                    <span>{pick(lang, n.category.nameRu, n.category.nameKz)}</span>
                   </a>
                 ))}
               </div>
