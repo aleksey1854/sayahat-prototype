@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
 import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
 import { getShopReviews } from "@/lib/reviews";
+import { SHOW_PRODUCTS } from "@/lib/features";
 import { submitReview } from "@/lib/reviewActions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ClearReviewParam } from "@/components/ClearReviewParam";
@@ -27,13 +28,6 @@ type ShopLayout = {
   promo?: { eyebrow?: string; title?: string; text?: string };
   gallery?: string[];
 };
-
-// Ассортимент и цены на витринах выключены по решению заказчика от 27 июля:
-// блок включаем на втором этапе, когда у точек будут реальные фото товаров
-// и подтверждённые цены. Товары при этом продолжают заводиться в кабинетах
-// и остаются в базе — здесь только показ. Обратно включается сменой на true,
-// ничего больше править не нужно.
-const SHOW_PRODUCTS = false;
 
 function parseLayout(raw: string | null): ShopLayout {
   if (!raw) return {};

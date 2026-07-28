@@ -12,6 +12,7 @@ import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { PhotoInput } from "@/components/PhotoInput";
+import { SHOW_PRODUCTS } from "@/lib/features";
 import { ScrollTopOnMount } from "@/components/ScrollTopOnMount";
 
 const PHOTO_ERRORS: Record<string, string> = {
@@ -591,107 +592,116 @@ export default async function CabinetPage({
             </SubmitButton>
           </form>
 
-          <div className="cab__top" style={{ marginTop: 40 }}>
-            <div>
-              <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Товары ({shop.products.length})</h2>
-              {/* Без этой строки первый вопрос на обучении администрации будет
-                  «а почему я завёл товары, а на сайте их нет». */}
-              <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 14, maxWidth: 620 }}>
-                Ассортимент и цены пока не показываются на сайте — блок включим на втором этапе.
-                Заводите товары сейчас: они сохраняются и появятся на витрине сразу после включения.
-              </p>
+          {/* Блок товаров скрыт целиком, пока ассортимент не выводится на
+              сайте. Раньше он был виден с подписью «пока не показывается» —
+              оператор всё равно тратил на него время. Данные не тронуты:
+              заведённые товары лежат в базе, при SHOW_PRODUCTS = true блок
+              возвращается как был. */}
+          {SHOW_PRODUCTS && (
+            <>
+            <div className="cab__top" style={{ marginTop: 40 }}>
+              <div>
+                <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Товары ({shop.products.length})</h2>
+                {/* Без этой строки первый вопрос на обучении администрации будет
+                    «а почему я завёл товары, а на сайте их нет». */}
+                <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 14, maxWidth: 620 }}>
+                  Ассортимент и цены пока не показываются на сайте — блок включим на втором этапе.
+                  Заводите товары сейчас: они сохраняются и появятся на витрине сразу после включения.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="form-grid">
-            {shop.products.map((p, i) => {
-              const img = photoUrl(p.image);
-              return (
-                <form action={saveProduct} className="panel form-grid" key={p.id}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <div className="prod-head">
-                    {img ? (
-                      <div className="prod-thumb" style={{ background: `url('${srcSetFor(img)?.src}') center/cover` }} />
-                    ) : (
-                      <div className="prod-thumb prod-thumb--empty">{p.nameRu.trim().charAt(0).toUpperCase()}</div>
-                    )}
-                    <strong style={{ fontSize: 17 }}>
-                      {i + 1}. {p.nameRu}
-                    </strong>
-                  </div>
-                  <div className="grid2">
-                    <div className="field">
-                      <label>Название (русский)</label>
-                      <input className="input" name="nameRu" defaultValue={p.nameRu} maxLength={LIMITS.pName} required />
+            <div className="form-grid">
+              {shop.products.map((p, i) => {
+                const img = photoUrl(p.image);
+                return (
+                  <form action={saveProduct} className="panel form-grid" key={p.id}>
+                    <input type="hidden" name="id" value={p.id} />
+                    <div className="prod-head">
+                      {img ? (
+                        <div className="prod-thumb" style={{ background: `url('${srcSetFor(img)?.src}') center/cover` }} />
+                      ) : (
+                        <div className="prod-thumb prod-thumb--empty">{p.nameRu.trim().charAt(0).toUpperCase()}</div>
+                      )}
+                      <strong style={{ fontSize: 17 }}>
+                        {i + 1}. {p.nameRu}
+                      </strong>
+                    </div>
+                    <div className="grid2">
+                      <div className="field">
+                        <label>Название (русский)</label>
+                        <input className="input" name="nameRu" defaultValue={p.nameRu} maxLength={LIMITS.pName} required />
+                      </div>
+                      <div className="field">
+                        <label>Название (қазақша)</label>
+                        <input className="input" name="nameKz" defaultValue={p.nameKz ?? ""} maxLength={LIMITS.pName} />
+                      </div>
                     </div>
                     <div className="field">
-                      <label>Название (қазақша)</label>
-                      <input className="input" name="nameKz" defaultValue={p.nameKz ?? ""} maxLength={LIMITS.pName} />
+                      <label>Описание (одна-две строки)</label>
+                      <input className="input" name="descRu" defaultValue={p.descRu ?? ""} maxLength={LIMITS.pDesc} />
                     </div>
+                    <div className="grid3">
+                      <div className="field">
+                        <label>Цена, ₸</label>
+                        <input className="input" name="price" inputMode="numeric" defaultValue={p.price ?? ""} />
+                      </div>
+                      <div className="field">
+                        <label>Старая цена (для скидки)</label>
+                        <input className="input" name="oldPrice" inputMode="numeric" defaultValue={p.oldPrice ?? ""} />
+                      </div>
+                      <div className="field">
+                        <label>Единица</label>
+                        <input className="input" name="unit" maxLength={LIMITS.pUnit} defaultValue={p.unit ?? ""} placeholder="кг / шт / пучок" />
+                      </div>
+                    </div>
+                    <PhotoInput name="image" kind="product" label="Заменить фото" />
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
+                      <button className="btn btn--ghost" formAction={moveProduct} name="dir" value="up" aria-label="Выше">
+                        ↑
+                      </button>
+                      <button className="btn btn--ghost" formAction={moveProduct} name="dir" value="down" aria-label="Ниже">
+                        ↓
+                      </button>
+                      <ConfirmButton formAction={deleteProduct} message="Удалить этот товар? Восстановить не получится.">
+                        Удалить
+                      </ConfirmButton>
+                    </div>
+                  </form>
+                );
+              })}
+
+              <form action={addProduct} className="panel form-grid">
+                <h3 style={{ margin: 0 }}>Добавить товар</h3>
+                <div className="grid2">
+                  <div className="field">
+                    <label htmlFor="new-nameRu">Название (русский)</label>
+                    <input className="input" id="new-nameRu" name="nameRu" maxLength={LIMITS.pName} required />
                   </div>
                   <div className="field">
-                    <label>Описание (одна-две строки)</label>
-                    <input className="input" name="descRu" defaultValue={p.descRu ?? ""} maxLength={LIMITS.pDesc} />
+                    <label htmlFor="new-nameKz">Название (қазақша)</label>
+                    <input className="input" id="new-nameKz" name="nameKz" maxLength={LIMITS.pName} />
                   </div>
-                  <div className="grid3">
-                    <div className="field">
-                      <label>Цена, ₸</label>
-                      <input className="input" name="price" inputMode="numeric" defaultValue={p.price ?? ""} />
-                    </div>
-                    <div className="field">
-                      <label>Старая цена (для скидки)</label>
-                      <input className="input" name="oldPrice" inputMode="numeric" defaultValue={p.oldPrice ?? ""} />
-                    </div>
-                    <div className="field">
-                      <label>Единица</label>
-                      <input className="input" name="unit" maxLength={LIMITS.pUnit} defaultValue={p.unit ?? ""} placeholder="кг / шт / пучок" />
-                    </div>
+                </div>
+                <div className="grid3">
+                  <div className="field">
+                    <label htmlFor="new-price">Цена, ₸</label>
+                    <input className="input" id="new-price" name="price" inputMode="numeric" />
                   </div>
-                  <PhotoInput name="image" kind="product" label="Заменить фото" />
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
-                    <button className="btn btn--ghost" formAction={moveProduct} name="dir" value="up" aria-label="Выше">
-                      ↑
-                    </button>
-                    <button className="btn btn--ghost" formAction={moveProduct} name="dir" value="down" aria-label="Ниже">
-                      ↓
-                    </button>
-                    <ConfirmButton formAction={deleteProduct} message="Удалить этот товар? Восстановить не получится.">
-                      Удалить
-                    </ConfirmButton>
+                  <div className="field">
+                    <label htmlFor="new-unit">Единица</label>
+                    <input className="input" id="new-unit" name="unit" maxLength={LIMITS.pUnit} placeholder="кг / шт / пучок" />
                   </div>
-                </form>
-              );
-            })}
-
-            <form action={addProduct} className="panel form-grid">
-              <h3 style={{ margin: 0 }}>Добавить товар</h3>
-              <div className="grid2">
-                <div className="field">
-                  <label htmlFor="new-nameRu">Название (русский)</label>
-                  <input className="input" id="new-nameRu" name="nameRu" maxLength={LIMITS.pName} required />
+                  <PhotoInput name="image" kind="product" label="Фото" />
                 </div>
-                <div className="field">
-                  <label htmlFor="new-nameKz">Название (қазақша)</label>
-                  <input className="input" id="new-nameKz" name="nameKz" maxLength={LIMITS.pName} />
-                </div>
-              </div>
-              <div className="grid3">
-                <div className="field">
-                  <label htmlFor="new-price">Цена, ₸</label>
-                  <input className="input" id="new-price" name="price" inputMode="numeric" />
-                </div>
-                <div className="field">
-                  <label htmlFor="new-unit">Единица</label>
-                  <input className="input" id="new-unit" name="unit" maxLength={LIMITS.pUnit} placeholder="кг / шт / пучок" />
-                </div>
-                <PhotoInput name="image" kind="product" label="Фото" />
-              </div>
-              <SubmitButton className="btn btn--accent" pendingText="Добавляю…" style={{ justifySelf: "start" }}>
-                Добавить товар
-              </SubmitButton>
-            </form>
-          </div>
+                <SubmitButton className="btn btn--accent" pendingText="Добавляю…" style={{ justifySelf: "start" }}>
+                  Добавить товар
+                </SubmitButton>
+              </form>
+            </div>
+            </>
+          )}
         </div>
       </section>
     </>
