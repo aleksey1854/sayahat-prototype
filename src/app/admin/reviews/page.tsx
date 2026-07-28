@@ -121,6 +121,13 @@ async function deleteReview(formData: FormData) {
   redirect("/admin/reviews?ok=1");
 }
 
+function loadReviews() {
+  return db.review.findMany({
+    include: { shop: { select: { nameRu: true, slug: true } } },
+    orderBy: [{ createdAt: "desc" }],
+  });
+}
+
 export default async function AdminReviewsPage({
   searchParams,
 }: {
@@ -128,13 +135,47 @@ export default async function AdminReviewsPage({
 }) {
   await requireAdmin();
 
-  const [shops, reviews] = await Promise.all([
-    db.shop.findMany({ orderBy: { nameRu: "asc" }, select: { id: true, nameRu: true, slug: true } }),
-    db.review.findMany({
-      include: { shop: { select: { nameRu: true, slug: true } } },
-      orderBy: [{ createdAt: "desc" }],
-    }),
-  ]);
+  const shops = await db.shop.findMany({
+    orderBy: { nameRu: "asc" },
+    select: { id: true, nameRu: true, slug: true },
+  });
+
+  // Если таблицы Review нет, страница не должна падать белым экраном —
+  // она должна сказать, что делать.
+  let reviews: Awaited<ReturnType<typeof loadReviews>> = [];
+  let tableMissing = false;
+  try {
+    reviews = await loadReviews();
+  } catch {
+    tableMissing = true;
+  }
+
+  if (tableMissing) {
+    return (
+      <>
+        <Header />
+        <main className="section">
+          <div className="wrap">
+            <div className="eyebrow">Модерация</div>
+            <h1 style={{ fontSize: 34, margin: "8px 0 16px" }}>Отзывы</h1>
+            <div className="notice notice--err">Таблица отзывов не создана в базе.</div>
+            <p style={{ color: "var(--muted)", maxWidth: 640 }}>
+              Выполните <code>npm run db:push</code> в корне проекта. Локальный <code>.env</code> должен
+              содержать те же <code>DATABASE_URL</code> и <code>DATABASE_URL_UNPOOLED</code>, что заданы
+              в переменных окружения на хостинге — иначе таблица создастся в другой базе.
+            </p>
+            <p style={{ color: "var(--muted)" }}>
+              До этого момента блок отзывов на страницах магазинов просто не показывается,
+              сайт работает как обычно.
+            </p>
+            <Link className="btn btn--ghost" href="/admin">
+              К магазинам
+            </Link>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   const errText: Record<string, string> = {
     shop: "Не выбран магазин.",
