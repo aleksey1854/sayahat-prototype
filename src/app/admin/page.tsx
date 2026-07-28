@@ -266,7 +266,7 @@ async function logout() {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { ok?: string; err?: string };
+  searchParams: { ok?: string; err?: string; q?: string; f?: string };
 }) {
   await requireAdmin();
 
@@ -279,6 +279,38 @@ export default async function AdminPage({
   ]);
 
   const err = searchParams.err;
+
+  // Поиск и фильтры считаем на месте: полсотни магазинов, отдельные
+  // запросы к базе тут дороже, чем фильтр массива.
+  const q = (searchParams.q ?? "").trim().toLowerCase();
+
+  // Чего не хватает точке, чтобы её было не стыдно показать: без телефона
+  // карточка бесполезна, без обложки выглядит пустой.
+  const gapsOf = (x: (typeof shops)[number]) => {
+    const g: string[] = [];
+    if (!x.phone) g.push("нет телефона");
+    if (!x.cover) g.push("нет фото");
+    if (!x.descRu) g.push("нет описания");
+    if (!x.row) g.push("нет бутика");
+    return g;
+  };
+
+  const counts = {
+    all: shops.length,
+    hidden: shops.filter((x) => x.status !== "published").length,
+    todo: shops.filter((x) => gapsOf(x).length > 0).length,
+  };
+
+  const visible = shops
+    .filter((x) => (q ? x.nameRu.toLowerCase().includes(q) || x.slug.includes(q) : true))
+    .filter((x) =>
+      searchParams.f === "hidden"
+        ? x.status !== "published"
+        : searchParams.f === "todo"
+          ? gapsOf(x).length > 0
+          : true,
+    );
+
 
   return (
     <>
@@ -306,119 +338,167 @@ export default async function AdminPage({
             <div className="notice notice--err">В категории есть магазины — сначала перенесите их в другую.</div>
           )}
 
-          <form action={createShop} className="panel form-grid" style={{ marginBottom: 24 }}>
-            <h3 style={{ margin: 0 }}>Новый магазин</h3>
-            <div className="grid2">
-              <div className="field">
-                <label htmlFor="c-nameRu">Название (русский)</label>
-                <input className="input" id="c-nameRu" name="nameRu" required />
+          {/* Форма создания свёрнута: она нужна один раз на магазин,
+              а занимала целый экран над списком. */}
+          <details className="panel" style={{ marginBottom: 20 }}>
+            <summary className="admin-add">Добавить магазин</summary>
+            <form action={createShop} className="form-grid" style={{ marginTop: 16 }}>
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="c-nameRu">Название (русский)</label>
+                  <input className="input" id="c-nameRu" name="nameRu" maxLength={40} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="c-nameKz">Название (қазақша)</label>
+                  <input className="input" id="c-nameKz" name="nameKz" maxLength={40} />
+                </div>
               </div>
-              <div className="field">
-                <label htmlFor="c-nameKz">Название (қазақша)</label>
-                <input className="input" id="c-nameKz" name="nameKz" />
-              </div>
-            </div>
-            <div className="grid2">
-              <div className="field">
-                <label htmlFor="c-cat">Категория</label>
-                <select className="input" id="c-cat" name="categoryId" required defaultValue="">
-                  <option value="" disabled>
-                    Выберите категорию
-                  </option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nameRu}
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="c-cat">Категория</label>
+                  <select className="select" id="c-cat" name="categoryId" required defaultValue="">
+                    <option value="" disabled>
+                      Выберите категорию
                     </option>
-                  ))}
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="c-slug">Адрес страницы (можно пусто — создастся сам)</label>
-                <input className="input" id="c-slug" name="slug" placeholder="naprimer-lavka" />
-              </div>
-            </div>
-            <SubmitButton pendingText="Создаю…" style={{ justifySelf: "start" }}>
-              Создать магазин (черновиком)
-            </SubmitButton>
-          </form>
-
-          <div className="form-grid">
-            {shops.map((s) => (
-              <div className="panel form-grid" key={s.id}>
-                <div className="admin-meta">
-                  <strong style={{ fontSize: 18, color: "var(--ink)" }}>{s.nameRu}</strong>
-                  <span className={s.status === "published" ? "pill pill--ok" : "pill pill--muted"}>
-                    {s.status === "published" ? "опубликован" : "черновик"}
-                  </span>
-                </div>
-                <div className="admin-meta">
-                  <span>{s.category.nameRu}</span>
-                  <span>· товаров: {s._count.products}</span>
-                  <span>· /shop/{s.slug}</span>
-                  <span>· {s.account ? `доступ: ${s.account.login}` : "доступа нет"}</span>
-                </div>
-                <form action={setCategory} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <input type="hidden" name="id" value={s.id} />
-                  <select className="select" name="categoryId" defaultValue={s.categoryId} style={{ width: "auto", minWidth: 220 }}>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.nameRu}
                       </option>
                     ))}
                   </select>
-                  <SubmitButton className="btn btn--ghost" pendingText="Меняю…">
-                    Сменить категорию
-                  </SubmitButton>
-                </form>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <form action={impersonate}>
-                    <input type="hidden" name="id" value={s.id} />
-                    <button className="btn btn--primary" type="submit">
-                      Редактировать
-                    </button>
-                  </form>
-                  <Link className="btn btn--ghost" href={`/shop/${s.slug}`}>
-                    Открыть
-                  </Link>
-                  <form action={toggleStatus}>
-                    <input type="hidden" name="id" value={s.id} />
-                    <button className="btn btn--ghost" type="submit">
-                      {s.status === "published" ? "Снять с публикации" : "Опубликовать"}
-                    </button>
-                  </form>
                 </div>
-                <details className="details-block">
-                  <summary>Доступ арендатора и удаление</summary>
-                  <div className="form-grid" style={{ marginTop: 14 }}>
-                    <form action={setCredentials} className="form-grid">
-                      <input type="hidden" name="shopId" value={s.id} />
-                      <div className="grid2">
-                        <div className="field">
-                          <label>Логин</label>
-                          <input className="input" name="login" defaultValue={s.account?.login ?? s.slug} required />
-                        </div>
-                        <div className="field">
-                          <label>Новый пароль (придумайте и сообщите арендатору)</label>
-                          <input className="input" name="password" required minLength={6} placeholder="минимум 6 символов" />
-                        </div>
-                      </div>
-                      <SubmitButton className="btn btn--ghost" pendingText="Сохраняю…" style={{ justifySelf: "start" }}>
-                        {s.account ? "Сменить доступ" : "Создать доступ"}
-                      </SubmitButton>
-                    </form>
-                    <form action={deleteShop} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <div className="field">
+                  <label htmlFor="c-slug">Адрес страницы (можно пусто, создастся сам)</label>
+                  <input className="input" id="c-slug" name="slug" placeholder="naprimer-lavka" />
+                </div>
+              </div>
+              <SubmitButton pendingText="Создаю…" style={{ justifySelf: "start" }}>
+                Создать
+              </SubmitButton>
+              <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
+                Магазин создаётся скрытым. На сайте он появится, когда вы нажмёте «Показать на сайте».
+              </p>
+            </form>
+          </details>
+
+          {/* Поиск и фильтры. Обычная GET-форма, без скриптов. */}
+          <form method="get" className="admin-search">
+            <input
+              className="input"
+              name="q"
+              defaultValue={searchParams.q ?? ""}
+              placeholder="Поиск по названию"
+              aria-label="Поиск по названию"
+            />
+            {searchParams.f && <input type="hidden" name="f" value={searchParams.f} />}
+            <button className="btn btn--ghost" type="submit">
+              Найти
+            </button>
+          </form>
+
+          <div className="admin-tabs">
+            <Link className={`chip ${!searchParams.f ? "chip--on" : ""}`} href="/admin">
+              Все ({counts.all})
+            </Link>
+            <Link className={`chip ${searchParams.f === "hidden" ? "chip--on" : ""}`} href="/admin?f=hidden">
+              Не на сайте ({counts.hidden})
+            </Link>
+            <Link className={`chip ${searchParams.f === "todo" ? "chip--on" : ""}`} href="/admin?f=todo">
+              Нужно дозаполнить ({counts.todo})
+            </Link>
+          </div>
+
+          {visible.length === 0 && (
+            <p style={{ color: "var(--muted)" }}>Ничего не нашлось. Попробуйте другое слово или снимите фильтр.</p>
+          )}
+
+          <div className="shop-rows">
+            {visible.map((s) => {
+              const gaps = gapsOf(s);
+              const live = s.status === "published";
+              return (
+                <div className="shop-row" key={s.id}>
+                  <div className="shop-row__top">
+                    <span className="shop-row__name">{s.nameRu}</span>
+                    <span className={live ? "pill pill--ok" : "pill pill--muted"}>
+                      {live ? "на сайте" : "не на сайте"}
+                    </span>
+                    {gaps.length > 0 && <span className="shop-row__gaps">{gaps.join(" · ")}</span>}
+                  </div>
+
+                  <div className="shop-row__acts">
+                    <form action={impersonate}>
                       <input type="hidden" name="id" value={s.id} />
-                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14.5, color: "var(--muted)" }}>
-                        <input type="checkbox" required /> подтверждаю удаление
-                      </label>
-                      <button className="btn btn--ghost btn--danger" type="submit">
-                        Удалить магазин
+                      <button className="btn btn--primary btn--sm" type="submit">
+                        Заполнить
+                      </button>
+                    </form>
+                    <Link className="btn btn--ghost btn--sm" href={`/shop/${s.slug}`}>
+                      Посмотреть
+                    </Link>
+                    <form action={toggleStatus}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button className="btn btn--ghost btn--sm" type="submit">
+                        {live ? "Убрать с сайта" : "Показать на сайте"}
                       </button>
                     </form>
                   </div>
-                </details>
-              </div>
-            ))}
+
+                  <details className="shop-row__more">
+                    <summary>Ещё: категория, доступ, удаление</summary>
+                    <div className="form-grid" style={{ marginTop: 14 }}>
+                      <div className="admin-meta">
+                        <span>{s.category.nameRu}</span>
+                        <span>· товаров: {s._count.products}</span>
+                        <span>· /shop/{s.slug}</span>
+                        <span>· {s.account ? `доступ: ${s.account.login}` : "доступа нет"}</span>
+                      </div>
+
+                      <form action={setCategory} className="shop-row__cat">
+                        <input type="hidden" name="id" value={s.id} />
+                        <select className="select" name="categoryId" defaultValue={s.categoryId}>
+                          {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.nameRu}
+                            </option>
+                          ))}
+                        </select>
+                        <SubmitButton className="btn btn--ghost" pendingText="Меняю…">
+                          Сменить категорию
+                        </SubmitButton>
+                      </form>
+
+                      <form action={setCredentials} className="form-grid">
+                        <input type="hidden" name="shopId" value={s.id} />
+                        <div className="grid2">
+                          <div className="field">
+                            <label>Логин</label>
+                            <input className="input" name="login" defaultValue={s.account?.login ?? s.slug} required />
+                          </div>
+                          <div className="field">
+                            <label>Новый пароль (придумайте и сообщите арендатору)</label>
+                            <input className="input" name="password" required minLength={6} placeholder="минимум 6 символов" />
+                          </div>
+                        </div>
+                        <SubmitButton className="btn btn--ghost" pendingText="Сохраняю…" style={{ justifySelf: "start" }}>
+                          {s.account ? "Сменить доступ" : "Создать доступ"}
+                        </SubmitButton>
+                      </form>
+
+                      <form action={deleteShop} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                        <input type="hidden" name="id" value={s.id} />
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14.5, color: "var(--muted)" }}>
+                          <input type="checkbox" required /> подтверждаю удаление
+                        </label>
+                        <button className="btn btn--ghost btn--danger" type="submit">
+                          Удалить магазин
+                        </button>
+                      </form>
+                    </div>
+                  </details>
+                </div>
+              );
+            })}
           </div>
 
           <div className="cab__top" style={{ marginTop: 40 }}>

@@ -1467,3 +1467,59 @@ a.news-card__more:active { transform: scale(.97); }
   .neighbor b { font-size: 13.5px; }
   .neighbor span { font-size: 12.5px; }
 }
+
+/* ── Админка: список магазинов ──────────────────────────────────────────
+   Было по карточке на магазин, около 200px каждая. На полусотне точек
+   страница переставала листаться до конца. Стало строкой на магазин:
+   название, состояние, чего не хватает, кнопки. Редкое (категория,
+   доступ, удаление) убрано под «Ещё».
+
+   Слова «черновик» и «опубликован» заменены на «не на сайте» и «на сайте»:
+   оператору важно, видно точку посетителю или нет, а не как это
+   называется в базе. */
+.admin-add {
+  list-style: none; cursor: pointer; font-weight: 700; font-size: 17px;
+  color: var(--brand-700); user-select: none;
+}
+.admin-add::-webkit-details-marker { display: none; }
+.admin-add::before { content: "+ "; }
+
+.admin-search { display: flex; gap: 8px; margin-bottom: 14px; max-width: 520px; }
+.admin-search .input { flex: 1; }
+
+.admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.chip {
+  display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px;
+  border: 1.5px solid var(--line-strong); background: var(--surface);
+  font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none;
+}
+.chip:hover { border-color: var(--brand); }
+.chip--on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+.shop-rows { display: grid; gap: 8px; }
+.shop-row {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 16px; display: grid; gap: 10px;
+}
+@media (min-width: 861px) {
+  .shop-row { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .shop-row__more { grid-column: 1 / -1; }
+}
+.shop-row__top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.shop-row__name { font-size: 16px; font-weight: 700; color: var(--ink); }
+.shop-row__gaps { font-size: 13px; color: var(--terracotta-700, #A6512B); }
+.shop-row__acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.shop-row__acts form { display: contents; }
+
+.btn--sm { padding: 7px 13px; font-size: 14px; min-height: 0; }
+
+.shop-row__more > summary {
+  list-style: none; cursor: pointer; font-size: 13px; color: var(--muted);
+  padding-top: 2px; user-select: none;
+}
+.shop-row__more > summary::-webkit-details-marker { display: none; }
+.shop-row__more > summary::before { content: "▸ "; }
+.shop-row__more[open] > summary::before { content: "▾ "; }
+
+.shop-row__cat { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.shop-row__cat .select { width: auto; min-width: 220px; }
