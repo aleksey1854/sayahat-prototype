@@ -57,6 +57,7 @@ const LIMITS = {
   nameRu: 40,
   nameKz: 40,
   descRu: 200,
+  keywords: 300,
   tagline: 80,
   aboutTitle: 60,
   aboutText: 600,
@@ -158,6 +159,7 @@ async function saveShop(formData: FormData) {
       nameRu,
       nameKz: cut(str(formData, "nameKz"), LIMITS.nameKz) || nameRu,
       descRu: optCut("descRu", LIMITS.descRu),
+      keywords: optCut("keywords", LIMITS.keywords),
       phone: normalizePhone(str(formData, "phone")),
       whatsapp: normalizeWhatsapp(str(formData, "whatsapp")),
       instagram: normInstagram(str(formData, "instagram")),
@@ -481,6 +483,21 @@ export default async function CabinetPage({
               <div className="field">
                 <label htmlFor="descRu">Короткое описание (видно в каталоге)</label>
                 <input className="input" id="descRu" name="descRu" defaultValue={shop.descRu ?? ""} maxLength={LIMITS.descRu} />
+              </div>
+              <div className="field">
+                <label htmlFor="keywords">Что вы продаёте (для поиска, на странице не видно)</label>
+                <input
+                  className="input"
+                  id="keywords"
+                  name="keywords"
+                  defaultValue={shop.keywords ?? ""}
+                  maxLength={LIMITS.keywords}
+                  placeholder="казы, шужык, конина, говядина, фарш, бешбармак"
+                />
+                <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: 13 }}>
+                  Перечислите через запятую, что у вас можно купить. По этим словам вас найдут
+                  через поиск на сайте. Пишите так, как спрашивают покупатели.
+                </p>
               </div>
               <div className="field">
                 <label htmlFor="tagline">Подзаголовок на странице (под названием)</label>

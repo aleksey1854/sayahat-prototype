@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { can } from "@/lib/roles";
 
 // Отзыв — это публичное высказывание о чужом бизнесе, который платит за место.
 // Поэтому лимиты жёсткие: короткая подпись и текст в размер карточки.
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 // отношений с арендаторами — доступ к ним шире не раздаём.
 async function requireAdmin() {
   const session = await getSession();
-  if (!session.accountId || session.role !== "admin") redirect("/login");
+  if (!session.accountId || !can(session.role, "reviews")) redirect("/login");
   return session;
 }
 
@@ -133,7 +134,7 @@ export default async function AdminReviewsPage({
 }: {
   searchParams: { ok?: string; err?: string };
 }) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const shops = await db.shop.findMany({
     orderBy: { nameRu: "asc" },
@@ -185,9 +186,6 @@ export default async function AdminReviewsPage({
 
   return (
     <>
-      <Header />
-      <main className="section">
-        <div className="wrap">
           <div className="cab__top">
             <div>
               <div className="eyebrow">Модерация</div>
@@ -197,6 +195,7 @@ export default async function AdminReviewsPage({
               К магазинам
             </Link>
           </div>
+
 
           <p style={{ color: "var(--muted)", maxWidth: 640, marginTop: 12 }}>
             Отзывы с формы на сайте попадают сюда со статусом «на проверке» и не видны посетителям,
@@ -297,8 +296,6 @@ export default async function AdminReviewsPage({
               ))}
             </div>
           )}
-        </div>
-      </main>
     </>
   );
 }

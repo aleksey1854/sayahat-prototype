@@ -3,21 +3,29 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CATALOG_TAG } from "@/lib/cached";
-import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { makeSlug } from "@/lib/slug";
-import { removeUpload } from "@/lib/img";
 import { site } from "@/lib/site";
-import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { can } from "@/lib/roles";
+import { setCategory, toggleStatus, impersonate } from "./actions";
 
 export const metadata: Metadata = {
   title: "Админка базара",
   robots: { index: false },
 };
 
+// Раздел «Магазины» открыт админу и оператору. Выдача доступов арендаторам
+// и удаление магазина внутри раздела остаются только у админа.
+async function requireShopsAccess() {
+  const session = await getSession();
+  if (!session.accountId || !can(session.role, "shops")) redirect("/login");
+  return session;
+}
+
+// Действия, которые оператору недоступны: пароли арендаторов и удаление.
 async function requireAdmin() {
   const session = await getSession();
   if (!session.accountId || session.role !== "admin") redirect("/login");
@@ -39,7 +47,7 @@ async function uniqueSlug(base: string) {
 
 async function createShop(formData: FormData) {
   "use server";
-  await requireAdmin();
+  await requireShopsAccess();
 
   const nameRu = str(formData, "nameRu");
   const categoryId = str(formData, "categoryId");
@@ -64,114 +72,6 @@ async function createShop(formData: FormData) {
   redirect("/admin?ok=1");
 }
 
-async function toggleStatus(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-  const shop = await db.shop.findUnique({ where: { id } });
-  if (!shop) redirect("/admin");
-
-  await db.shop.update({
-    where: { id: shop.id },
-    data: { status: shop.status === "published" ? "draft" : "published" },
-  });
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  revalidatePath(`/shop/${shop.slug}`);
-  redirect("/admin?ok=1");
-}
-
-// Категорию можно было задать только при создании: ни в админке, ни в
-// кабинете поля для неё не было. Оператор ошибся при заведении — магазин
-// навсегда оставался в чужой категории, чинилось только удалением и
-// пересозданием, то есть потерей фото и товаров.
-async function setCategory(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-  const categoryId = str(formData, "categoryId");
-  if (!categoryId) redirect("/admin?err=cat");
-
-  const [shop, category] = await Promise.all([
-    db.shop.findUnique({ where: { id } }),
-    db.category.findUnique({ where: { id: categoryId } }),
-  ]);
-  if (!shop || !category) redirect("/admin?err=cat");
-
-  await db.shop.update({ where: { id: shop.id }, data: { categoryId } });
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  revalidatePath(`/shop/${shop.slug}`);
-  redirect("/admin?ok=1");
-}
-
-async function impersonate(formData: FormData) {
-  "use server";
-  const session = await requireAdmin();
-  const id = str(formData, "id");
-  const shop = await db.shop.findUnique({ where: { id } });
-  if (!shop) redirect("/admin");
-
-  session.shopId = shop.id;
-  await session.save();
-  // from=admin: кабинету нужно знать, что это переход из списка, и сбросить
-  // прокрутку. redirect() из server action её не сбрасывает сам.
-  redirect("/cabinet?from=admin");
-}
-
-async function setCredentials(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const shopId = str(formData, "shopId");
-  const login = str(formData, "login").toLowerCase().replace(/\s+/g, "");
-  const password = String(formData.get("password") ?? "");
-
-  if (!login) redirect("/admin?err=login");
-  if (password.length < 6) redirect("/admin?err=pass");
-
-  const shop = await db.shop.findUnique({ where: { id: shopId }, include: { account: true } });
-  if (!shop) redirect("/admin");
-
-  const taken = await db.account.findUnique({ where: { login } });
-  if (taken && taken.id !== shop.account?.id) redirect("/admin?err=login");
-
-  const passwordHash = bcrypt.hashSync(password, 10);
-  if (shop.account) {
-    await db.account.update({ where: { id: shop.account.id }, data: { login, passwordHash } });
-  } else {
-    await db.account.create({ data: { login, passwordHash, role: "tenant", shopId: shop.id } });
-  }
-
-  redirect("/admin?ok=1");
-}
-
-async function deleteShop(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-
-  const shop = await db.shop.findUnique({
-    where: { id },
-    include: { products: true, account: true },
-  });
-  if (!shop) redirect("/admin");
-
-  for (const p of shop.products) {
-    await removeUpload(p.image);
-  }
-  await removeUpload(shop.cover);
-  if (shop.account) {
-    await db.account.delete({ where: { id: shop.account.id } });
-  }
-  await db.shop.delete({ where: { id: shop.id } });
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
-}
-
 
 async function uniqueCategorySlug(base: string) {
   let slug = base;
@@ -184,7 +84,7 @@ async function uniqueCategorySlug(base: string) {
 
 async function addCategory(formData: FormData) {
   "use server";
-  await requireAdmin();
+  await requireShopsAccess();
   const nameRu = str(formData, "nameRu");
   if (!nameRu) redirect("/admin?err=name");
 
@@ -206,7 +106,7 @@ async function addCategory(formData: FormData) {
 
 async function renameCategory(formData: FormData) {
   "use server";
-  await requireAdmin();
+  await requireShopsAccess();
   const id = str(formData, "id");
   const nameRu = str(formData, "nameRu");
   if (!nameRu) redirect("/admin?err=name");
@@ -268,7 +168,8 @@ export default async function AdminPage({
 }: {
   searchParams: { ok?: string; err?: string; q?: string; f?: string };
 }) {
-  await requireAdmin();
+  const session = await requireShopsAccess();
+  const isAdmin = session.role === "admin";
 
   const [shops, categories] = await Promise.all([
     db.shop.findMany({
@@ -314,9 +215,6 @@ export default async function AdminPage({
 
   return (
     <>
-      <Header variant="shop" withSearch={false} />
-      <section className="section">
-        <div className="wrap cab" style={{ maxWidth: 860 }}>
           <div className="cab__top">
             <div>
               <div className="eyebrow">Администрация рынка</div>
@@ -328,6 +226,7 @@ export default async function AdminPage({
               </button>
             </form>
           </div>
+
 
           {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
           {err === "name" && <div className="notice notice--err">Заполните название и категорию.</div>}
@@ -444,58 +343,9 @@ export default async function AdminPage({
                     </form>
                   </div>
 
-                  <details className="shop-row__more">
-                    <summary>Ещё: категория, доступ, удаление</summary>
-                    <div className="form-grid" style={{ marginTop: 14 }}>
-                      <div className="admin-meta">
-                        <span>{s.category.nameRu}</span>
-                        <span>· товаров: {s._count.products}</span>
-                        <span>· /shop/{s.slug}</span>
-                        <span>· {s.account ? `доступ: ${s.account.login}` : "доступа нет"}</span>
-                      </div>
-
-                      <form action={setCategory} className="shop-row__cat">
-                        <input type="hidden" name="id" value={s.id} />
-                        <select className="select" name="categoryId" defaultValue={s.categoryId}>
-                          {categories.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.nameRu}
-                            </option>
-                          ))}
-                        </select>
-                        <SubmitButton className="btn btn--ghost" pendingText="Меняю…">
-                          Сменить категорию
-                        </SubmitButton>
-                      </form>
-
-                      <form action={setCredentials} className="form-grid">
-                        <input type="hidden" name="shopId" value={s.id} />
-                        <div className="grid2">
-                          <div className="field">
-                            <label>Логин</label>
-                            <input className="input" name="login" defaultValue={s.account?.login ?? s.slug} required />
-                          </div>
-                          <div className="field">
-                            <label>Новый пароль (придумайте и сообщите арендатору)</label>
-                            <input className="input" name="password" required minLength={6} placeholder="минимум 6 символов" />
-                          </div>
-                        </div>
-                        <SubmitButton className="btn btn--ghost" pendingText="Сохраняю…" style={{ justifySelf: "start" }}>
-                          {s.account ? "Сменить доступ" : "Создать доступ"}
-                        </SubmitButton>
-                      </form>
-
-                      <form action={deleteShop} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                        <input type="hidden" name="id" value={s.id} />
-                        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14.5, color: "var(--muted)" }}>
-                          <input type="checkbox" required /> подтверждаю удаление
-                        </label>
-                        <button className="btn btn--ghost btn--danger" type="submit">
-                          Удалить магазин
-                        </button>
-                      </form>
-                    </div>
-                  </details>
+                  <Link className="shop-row__more-link" href={`/admin/shop/${s.id}`}>
+                    Ещё
+                  </Link>
                 </div>
               );
             })}
@@ -571,8 +421,6 @@ export default async function AdminPage({
               Управление новостями →
             </Link>
           </div>
-        </div>
-      </section>
     </>
   );
 }

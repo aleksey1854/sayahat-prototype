@@ -1,9 +1,10 @@
 import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import type { Role } from "@/lib/roles";
 
 export type SessionData = {
   accountId?: string;
-  role?: "tenant" | "admin" | "editor";
+  role?: Role;
   shopId?: string | null;
 };
 

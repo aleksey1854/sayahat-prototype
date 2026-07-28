@@ -1,4 +1,5 @@
 import { getCatalogShopsCached } from "@/lib/cached";
+import { SHOW_PRODUCTS } from "@/lib/features";
 import { pick, type Lang } from "@/lib/lang";
 import { photoUrl } from "@/lib/format";
 import { pavilionKey, boothLabel, pavilionLabel } from "@/lib/site";
@@ -13,15 +14,22 @@ export async function loadCatalogCards(lang: Lang): Promise<CardShop[]> {
     const fields: CardShop["fields"] = [
       { text: `${s.nameRu} ${s.nameKz}`, weight: 10, kind: "name" },
       { text: `${s.category.nameRu} ${s.category.nameKz}`, weight: 6, kind: "other" },
+      // Товары остаются в индексе: «кто продаёт казы» — главный сценарий
+      // каталога. Но пока ассортимент на сайте скрыт, помечаем их как
+      // обычный текст: kind "product" заставляет подсказку показать
+      // название товара и цену, а человек, перейдя, их на странице не найдёт.
       ...s.products.map((p, i) => ({
         text: `${p.nameRu} ${p.nameKz ?? ""}`,
         weight: 5,
-        kind: "product" as const,
-        productIdx: i,
+        kind: (SHOW_PRODUCTS ? "product" : "other") as "product" | "other",
+        productIdx: SHOW_PRODUCTS ? i : undefined,
       })),
       { text: s.slug, weight: 2, kind: "other" as const },
     ];
     if (s.descRu) fields.push({ text: s.descRu, weight: 3, kind: "other" });
+    // Ключевые слова — то, что точка продаёт, своими словами. Вес как
+    // у товаров: это ровно та же роль, только заполняется вручную.
+    if (s.keywords) fields.push({ text: s.keywords, weight: 5, kind: "other" });
     if (s.pavilion) {
       fields.push({ text: `павильон бутик ${s.pavilion} ${s.row ?? ""}`, weight: 1, kind: "other" });
     }

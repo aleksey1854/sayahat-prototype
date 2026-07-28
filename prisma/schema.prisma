@@ -33,6 +33,10 @@ model Shop {
   nameRu     String
   nameKz     String
   descRu     String?
+  // Что точка продаёт, своими словами через запятую. Нужно только поиску:
+  // на странице не выводится. Заменяет собой поиск по товарам, пока сам
+  // ассортимент на сайте скрыт.
+  keywords   String?
   descKz     String?
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])

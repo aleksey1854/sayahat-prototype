@@ -6,10 +6,10 @@ import { NEWS_TAG } from "@/lib/cached";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { newsDate } from "@/lib/format";
-import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { FormButton } from "@/components/FormButton";
+import { can } from "@/lib/roles";
 
 // Лимиты длины: карточки новостей на главной — блоки одинаковой высоты,
 // длинный текст ломает сетку. maxLength в форме подсказывает,
@@ -30,9 +30,7 @@ export const metadata: Metadata = {
 // Новости ведут админ и редактор (SMM). Остальных — на вход.
 async function requireNewsAccess() {
   const session = await getSession();
-  if (!session.accountId || (session.role !== "admin" && session.role !== "editor")) {
-    redirect("/login");
-  }
+  if (!session.accountId || !can(session.role, "news")) redirect("/login");
   return session;
 }
 
@@ -172,9 +170,6 @@ export default async function AdminNewsPage({
 
   return (
     <>
-      <Header variant="shop" withSearch={false} />
-      <section className="section">
-        <div className="wrap cab" style={{ maxWidth: 860 }}>
           <div className="cab__top">
             <div>
               <div className="eyebrow">Новости рынка</div>
@@ -193,6 +188,7 @@ export default async function AdminNewsPage({
               </form>
             </div>
           </div>
+
 
           {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
           {err === "title" && <div className="notice notice--err">Заполните заголовок (русский).</div>}
@@ -359,8 +355,6 @@ export default async function AdminNewsPage({
               </div>
             ))}
           </div>
-        </div>
-      </section>
     </>
   );
 }

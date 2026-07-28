@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { tooManyAttempts, registerFailure, clearFailures } from "@/lib/ratelimit";
 import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
+import { homeFor, isRole } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "Вход для арендаторов",
@@ -36,34 +37,19 @@ async function login(formData: FormData) {
 
   const session = await getSession();
   session.accountId = account!.id;
-  session.role =
-    account!.role === "admin" ? "admin" : account!.role === "editor" ? "editor" : "tenant";
+  // Неизвестное значение в базе трактуем как арендатора: лишних прав
+  // от опечатки в роли возникнуть не должно.
+  session.role = isRole(account!.role) ? account!.role : "tenant";
   session.shopId = account!.shopId;
   await session.save();
 
-  redirect(
-    session.role === "admin"
-      ? "/admin"
-      : session.role === "editor"
-        ? "/admin/news"
-        : account!.shopId
-          ? "/cabinet"
-          : "/",
-  );
+  redirect(homeFor(session.role, account!.shopId));
 }
 
 export default async function LoginPage({ searchParams }: { searchParams: { e?: string } }) {
   const session = await getSession();
   if (session.accountId) {
-    redirect(
-      session.role === "admin"
-        ? "/admin"
-        : session.role === "editor"
-          ? "/admin/news"
-          : session.shopId
-            ? "/cabinet"
-            : "/",
-    );
+    redirect(homeFor(session.role, session.shopId));
   }
 
   return (
