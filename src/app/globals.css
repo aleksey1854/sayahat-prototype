@@ -1438,3 +1438,57 @@ a.news-card__more:active { transform: scale(.97); }
   .reviews__ask { align-items: stretch; }
   .reviews__ask .btn { width: 100%; justify-content: center; }
 }
+
+/* ── Форма отзыва ───────────────────────────────────────────────────────
+   Раскрытие на details/summary — без JavaScript. Маркер списка убираем,
+   summary стилизован как обычная кнопка. */
+.reviews__form { position: relative; }
+.reviews__form > summary { list-style: none; cursor: pointer; user-select: none; }
+.reviews__form > summary::-webkit-details-marker { display: none; }
+.reviews__form[open] > summary { margin-bottom: 16px; }
+
+.review-form {
+  display: grid;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg, 18px);
+  padding: 20px 22px;
+  max-width: 560px;
+}
+.review-form label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.review-form input,
+.review-form textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2, #fff);
+  color: var(--ink);
+  width: 100%;
+}
+.review-form textarea { resize: vertical; min-height: 96px; }
+.review-form input:focus-visible,
+.review-form textarea:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.review-form .btn { justify-self: start; }
+
+/* Поле-ловушка для ботов. Не display:none — часть ботов такие поля
+   пропускает; уводим за пределы экрана, для людей его нет. */
+.review-form__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Внутри блока отзывов приглашение и форма встают друг под другом. */
+.reviews__ask { display: block; }
+.reviews__ask p { margin: 0 0 14px; }
+
+@media (max-width: 560px) {
+  .review-form { padding: 17px 18px; }
+  .review-form .btn { justify-self: stretch; width: 100%; }
+}

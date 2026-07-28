@@ -5,6 +5,8 @@ import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
 import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
 import { getShopReviews } from "@/lib/reviews";
+import { submitReview } from "@/lib/reviewActions";
+import { SubmitButton } from "@/components/SubmitButton";
 import { price, discountPercent, photoUrl, srcSetFor } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
 import { Header } from "@/components/Header";
@@ -82,7 +84,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ShopPage({ params }: { params: { slug: string } }) {
+export default async function ShopPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams: { review?: string };
+}) {
   const shop = await getShopFullCached(params.slug);
 
   if (!shop) notFound();
@@ -123,12 +131,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
   // null — таблицы отзывов нет, блок не показываем совсем.
   // Массив — показываем: карточки, если есть, иначе одно приглашение.
   const reviews = await getShopReviews(shop.id);
-  // Отзыв уходит в WhatsApp администрации рынка, а не самой точки:
-  // точка не может модерировать отзывы о себе.
-  const reviewWa = waLink(
-    site.whatsapp,
-    `Отзыв о магазине «${shop.nameRu}» (${shopUrl})\n\nЧто хочу рассказать: `,
-  );
 
   // priceRange уходит в микроразметку Store. Раз цен на странице нет,
   // отдавать их поисковику нельзя: разметка обязана описывать то, что
@@ -425,7 +427,7 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           Публичной формы нет: посетитель пишет в WhatsApp администрации,
           та проверяет и заводит отзыв через /admin/reviews. */}
       {reviews && (
-        <section className="section section--tight reveal">
+        <section className="section section--tight reveal" id="otzyvy">
           <div className="wrap">
             <div className="section-head">
               <h2>{pick(lang, "Отзывы", "Пікірлер")}</h2>
@@ -456,9 +458,96 @@ export default async function ShopPage({ params }: { params: { slug: string } })
                   ? pick(lang, "Покупали здесь? Расскажите, как всё прошло.", "Осы жерден сатып алдыңыз ба? Қалай өткенін айтыңыз.")
                   : pick(lang, "Знаете этот магазин? Напишите первый отзыв.", "Бұл дүкенді білесіз бе? Алғашқы пікірді жазыңыз.")}
               </p>
-              <a className="btn btn--ghost" href={reviewWa} data-goal="review_click">
-                {pick(lang, "Оставить отзыв", "Пікір қалдыру")}
-              </a>
+
+              {/* details/summary вместо клиентского компонента: раскрытие
+                  работает без JavaScript, лишнего кода на страницу не едет. */}
+              <details className="reviews__form" open={Boolean(searchParams.review)}>
+                <summary className="btn btn--ghost" data-goal="review_click">
+                  {pick(lang, "Оставить отзыв", "Пікір қалдыру")}
+                </summary>
+
+                {searchParams.review === "ok" && (
+                  <div className="notice notice--ok">
+                    {pick(
+                      lang,
+                      "Спасибо. Отзыв ушёл на проверку администрации рынка и появится после неё.",
+                      "Рахмет. Пікір базар әкімшілігінің тексеруіне жіберілді және содан кейін пайда болады.",
+                    )}
+                  </div>
+                )}
+                {searchParams.review === "short" && (
+                  <div className="notice notice--err">
+                    {pick(
+                      lang,
+                      "Слишком коротко: имя от 2 знаков, отзыв от 10.",
+                      "Тым қысқа: аты 2 таңбадан, пікір 10 таңбадан басталады.",
+                    )}
+                  </div>
+                )}
+                {searchParams.review === "limit" && (
+                  <div className="notice notice--err">
+                    {pick(
+                      lang,
+                      "Вы уже оставили отзыв недавно. Попробуйте через час.",
+                      "Сіз жақында пікір қалдырдыңыз. Бір сағаттан кейін көріңіз.",
+                    )}
+                  </div>
+                )}
+                {searchParams.review === "err" && (
+                  <div className="notice notice--err">
+                    {pick(
+                      lang,
+                      "Не удалось отправить. Попробуйте позже или напишите в WhatsApp.",
+                      "Жіберілмеді. Кейінірек көріңіз немесе WhatsApp-қа жазыңыз.",
+                    )}
+                  </div>
+                )}
+
+                <form action={submitReview} className="review-form">
+                  <input type="hidden" name="slug" value={shop.slug} />
+                  {/* Ловушка для ботов: людям не видна, боты заполняют всё подряд. */}
+                  <input
+                    className="review-form__trap"
+                    type="text"
+                    name="company"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
+                  <label>
+                    {pick(lang, "Как вас зовут", "Атыңыз")}
+                    <input
+                      name="author"
+                      maxLength={60}
+                      required
+                      placeholder={pick(lang, "Айгуль", "Айгүл")}
+                    />
+                  </label>
+
+                  <label>
+                    {pick(lang, "Отзыв", "Пікір")}
+                    <textarea
+                      name="text"
+                      rows={4}
+                      maxLength={400}
+                      required
+                      placeholder={pick(
+                        lang,
+                        "Что понравилось, что купили, как обслужили.",
+                        "Не ұнады, не сатып алдыңыз, қалай қызмет көрсетті.",
+                      )}
+                    />
+                  </label>
+
+                  <SubmitButton
+                    className="btn btn--primary"
+                    pendingText={pick(lang, "Отправляю…", "Жіберілуде…")}
+                  >
+                    {pick(lang, "Отправить", "Жіберу")}
+                  </SubmitButton>
+                </form>
+              </details>
             </div>
 
             <p className="reviews__note">

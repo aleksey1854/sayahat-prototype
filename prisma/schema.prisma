@@ -69,9 +69,13 @@ model Review {
   text      String
   status    String   @default("published")
   order     Int      @default(0)
+  // Хеш IP отправителя, не сам адрес. Нужен только чтобы считать частоту
+  // отправок с одного адреса — восстановить IP из хеша нельзя.
+  ipHash    String?
   createdAt DateTime @default(now())
 
   @@index([shopId, status])
+  @@index([ipHash, createdAt])
 }
 
 model Product {
