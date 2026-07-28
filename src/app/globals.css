@@ -1359,3 +1359,82 @@ a.news-card__more:active { transform: scale(.97); }
    арку над строкой. Если покажется лишним — удалить эту строку, к
    искажению выше она отношения не имеет. */
 .brand__word { transform: translateY(2px); }
+
+/* ── Логотип на телефоне: только слово ──────────────────────────────────
+   Отменяет пару «верблюд + САЯХАТ» на телефоне. Причина не в пропорции,
+   а в размере: эмблема — детальная иллюстрация, лучи вокруг арки имеют
+   толщину 1px при ширине холста 160px, то есть 0,28px при отрисовке
+   в 40px. Отдельный овощ в корзине — 4px. Половина цветовых кластеров
+   пропадает. Рядом с чистым вордмарком это читается как цветное пятно.
+
+   Вордмарк векторно чистый на любом размере. При 26px он занимает 125px
+   против 135px у нынешней пары: имя стало крупнее и чётче, а шапка даже
+   немного уже. На узких экранах 21px.
+
+   На десктопе всё как было — там .brand__logo высотой 56px, иллюстрация
+   в этом размере держится.
+
+   Откат: удалить весь этот блок. Правки выше (пропорция и посадка) от
+   него не зависят. */
+@media (max-width: 560px) {
+  .brand__square { display: none; }
+  .brand__word { display: block; height: 26px; transform: none; }
+}
+@media (max-width: 360px) {
+  .brand__word { display: block; height: 21px; }
+}
+
+/* ── Отзывы ─────────────────────────────────────────────────────────────
+   Карточки цитат под галереей. Сетка автозаполнением: один отзыв тянется
+   во всю ширину, три встают в ряд — на рынке у большинства точек их будет
+   один-два, и пустых ячеек в сетке быть не должно. */
+.reviews {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.review {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg, 18px);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.review blockquote {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.review figcaption {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+.review__author { font-weight: 600; color: var(--ink); font-size: 14px; }
+
+/* Приглашение написать. Когда отзывов ещё нет, это единственное содержимое
+   блока — поэтому строка и кнопка в одну линию, без пустой панели. */
+.reviews__ask {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.reviews__ask p { margin: 0; color: var(--muted); }
+.reviews__note { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .review { padding: 17px 18px; }
+  .reviews__ask { align-items: stretch; }
+  .reviews__ask .btn { width: 100%; justify-content: center; }
+}

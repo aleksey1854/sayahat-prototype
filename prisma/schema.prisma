@@ -53,8 +53,25 @@ model Shop {
   status     String   @default("published")
   account    Account?
   products   Product[]
+  reviews    Review[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// Отзывы о точке. Пишет администрация рынка через /admin/reviews: посетитель
+// отправляет отзыв в WhatsApp администрации, та проверяет и заводит здесь.
+// Публичной формы отправки нет намеренно — модерация до публикации, а не после.
+model Review {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  author    String
+  text      String
+  status    String   @default("published")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([shopId, status])
 }
 
 model Product {
