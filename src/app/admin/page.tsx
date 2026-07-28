@@ -8,7 +8,6 @@ import { getSession } from "@/lib/auth";
 import { makeSlug } from "@/lib/slug";
 import { site } from "@/lib/site";
 import { SubmitButton } from "@/components/SubmitButton";
-import { ConfirmButton } from "@/components/ConfirmButton";
 import { can } from "@/lib/roles";
 import { setCategory, toggleStatus, impersonate } from "./actions";
 
@@ -72,89 +71,6 @@ async function createShop(formData: FormData) {
   redirect("/admin?ok=1");
 }
 
-
-async function uniqueCategorySlug(base: string) {
-  let slug = base;
-  let n = 2;
-  while (await db.category.findUnique({ where: { slug } })) {
-    slug = `${base}-${n++}`;
-  }
-  return slug;
-}
-
-async function addCategory(formData: FormData) {
-  "use server";
-  await requireShopsAccess();
-  const nameRu = str(formData, "nameRu");
-  if (!nameRu) redirect("/admin?err=name");
-
-  const slug = await uniqueCategorySlug(makeSlug(nameRu));
-  const max = await db.category.aggregate({ _max: { order: true } });
-  await db.category.create({
-    data: {
-      slug,
-      nameRu,
-      nameKz: str(formData, "nameKz") || nameRu,
-      order: (max._max.order ?? 0) + 1,
-    },
-  });
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
-}
-
-async function renameCategory(formData: FormData) {
-  "use server";
-  await requireShopsAccess();
-  const id = str(formData, "id");
-  const nameRu = str(formData, "nameRu");
-  if (!nameRu) redirect("/admin?err=name");
-
-  await db.category.update({
-    where: { id },
-    data: { nameRu, nameKz: str(formData, "nameKz") || nameRu },
-  });
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
-}
-
-async function moveCategory(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-  const dir = str(formData, "dir");
-
-  const cats = await db.category.findMany({ orderBy: { order: "asc" } });
-  const idx = cats.findIndex((c) => c.id === id);
-  const j = dir === "up" ? idx - 1 : idx + 1;
-  if (idx < 0 || j < 0 || j >= cats.length) redirect("/admin");
-
-  await db.$transaction([
-    db.category.update({ where: { id: cats[idx].id }, data: { order: cats[j].order } }),
-    db.category.update({ where: { id: cats[j].id }, data: { order: cats[idx].order } }),
-  ]);
-
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
-}
-
-async function deleteCategory(formData: FormData) {
-  "use server";
-  await requireAdmin();
-  const id = str(formData, "id");
-
-  const count = await db.shop.count({ where: { categoryId: id } });
-  if (count > 0) redirect("/admin?err=catUsed");
-
-  await db.category.delete({ where: { id } });
-  revalidatePath("/");
-  revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
-}
 
 async function logout() {
   "use server";
@@ -351,76 +267,6 @@ export default async function AdminPage({
             })}
           </div>
 
-          <div className="cab__top" style={{ marginTop: 40 }}>
-            <div>
-              <h2 style={{ fontSize: 28, margin: "8px 0 0" }}>Категории ({categories.length})</h2>
-            </div>
-          </div>
-
-          <div className="form-grid">
-            {categories.map((c) => (
-              <form action={renameCategory} className="panel form-grid" key={c.id}>
-                <input type="hidden" name="id" value={c.id} />
-                <div className="grid2">
-                  <div className="field">
-                    <label>Название (русский)</label>
-                    <input className="input" name="nameRu" defaultValue={c.nameRu} required />
-                  </div>
-                  <div className="field">
-                    <label>Название (қазақша)</label>
-                    <input className="input" name="nameKz" defaultValue={c.nameKz} />
-                  </div>
-                </div>
-                <div className="admin-meta">
-                  <span>магазинов: {c._count.shops}</span>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
-                  <button className="btn btn--ghost" formAction={moveCategory} name="dir" value="up" aria-label="Выше">
-                    ↑
-                  </button>
-                  <button className="btn btn--ghost" formAction={moveCategory} name="dir" value="down" aria-label="Ниже">
-                    ↓
-                  </button>
-                  <ConfirmButton
-                    formAction={deleteCategory}
-                    message="Удалить категорию? Магазины из неё не удалятся, но категорию придётся создавать заново."
-                  >
-                    Удалить
-                  </ConfirmButton>
-                </div>
-              </form>
-            ))}
-
-            <form action={addCategory} className="panel form-grid">
-              <h3 style={{ margin: 0 }}>Добавить категорию</h3>
-              <div className="grid2">
-                <div className="field">
-                  <label htmlFor="cat-nameRu">Название (русский)</label>
-                  <input className="input" id="cat-nameRu" name="nameRu" required />
-                </div>
-                <div className="field">
-                  <label htmlFor="cat-nameKz">Название (қазақша)</label>
-                  <input className="input" id="cat-nameKz" name="nameKz" />
-                </div>
-              </div>
-              <SubmitButton className="btn btn--accent" pendingText="Добавляю…" style={{ justifySelf: "start" }}>
-                Добавить категорию
-              </SubmitButton>
-            </form>
-          </div>
-
-          <div className="panel" style={{ marginTop: 40, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <div>
-              <strong>Новости рынка</strong>
-              <div style={{ color: "var(--muted)", fontSize: 14 }}>
-                Добавление, текст, закрепление, порядок и ссылки на Instagram.
-              </div>
-            </div>
-            <Link href="/admin/news" className="btn btn--accent">
-              Управление новостями →
-            </Link>
-          </div>
     </>
   );
 }

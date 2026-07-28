@@ -1552,3 +1552,16 @@ a.news-card__more:active { transform: scale(.97); }
 }
 .shop-row__more-link:hover { color: var(--brand); text-decoration: underline; }
 .shop-row__more-link::after { content: " →"; }
+
+/* ── Админка: строки категорий и сотрудников ────────────────────────────
+   Одна разметка на оба раздела: поля, служебная строка, кнопки. */
+.cat-rows { display: grid; gap: 10px; }
+.cat-row {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px; display: grid; gap: 12px;
+}
+.cat-row__fields { display: grid; gap: 12px; }
+@media (min-width: 721px) { .cat-row__fields { grid-template-columns: 1fr 1fr; } }
+.cat-row__meta { font-size: 13px; color: var(--muted); }
+.cat-row__acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cat-row__acts .btn[disabled] { opacity: .4; cursor: default; }

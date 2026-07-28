@@ -7,11 +7,11 @@
  *
  * Матрица по договорённости от 28 июля:
  *
- *   роль       магазины  новости  отзывы  сотрудники
- *   admin         да       да       да       да
- *   operator      да       да       да       нет
- *   editor       нет       да      нет       нет
- *   tenant       нет      нет      нет       нет   (только свой кабинет)
+ *   роль       магазины  категории  новости  отзывы  сотрудники
+ *   admin         да        да        да       да       да
+ *   operator      да       нет        да       да      нет
+ *   editor       нет       нет        да      нет      нет
+ *   tenant       нет       нет       нет      нет      нет   (только свой кабинет)
  *
  * Внутри раздела «Магазины» у оператора нет двух вещей: выдачи доступов
  * арендаторам и удаления магазина. Первое это раздача паролей, второе
@@ -32,10 +32,13 @@ export const ROLE_NAMES: Record<Role, string> = {
   tenant: "Арендатор",
 };
 
-type Area = "shops" | "news" | "reviews" | "staff";
+type Area = "shops" | "categories" | "news" | "reviews" | "staff";
 
 const ACCESS: Record<Role, Area[]> = {
-  admin: ["shops", "news", "reviews", "staff"],
+  admin: ["shops", "categories", "news", "reviews", "staff"],
+  // Категории оператору не даём: переименование меняет надписи по всему
+  // сайту, удаление перестраивает каталог. Назначить магазину одну из
+  // существующих категорий он может и без этого раздела.
   operator: ["shops", "news", "reviews"],
   editor: ["news"],
   tenant: [],
@@ -60,6 +63,7 @@ export function homeFor(role: Role | undefined, shopId?: string | null): string 
 
 export const AREAS: { area: Area; href: string; label: string }[] = [
   { area: "shops", href: "/admin", label: "Магазины" },
+  { area: "categories", href: "/admin/categories", label: "Категории" },
   { area: "news", href: "/admin/news", label: "Новости" },
   { area: "reviews", href: "/admin/reviews", label: "Отзывы" },
   { area: "staff", href: "/admin/staff", label: "Сотрудники" },
