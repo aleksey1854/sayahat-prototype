@@ -119,15 +119,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
 
   const shopUrl = absUrl(`/shop/${shop.slug}`);
 
-  const reviews = shop.reviews;
-  // Отзыв уходит в WhatsApp администрации рынка, а не самой точки: точка не
-  // может быть модератором отзывов о себе. Название и адрес страницы
-  // подставляем в текст, иначе администрации не понять, о ком речь.
-  const reviewWa = waLink(
-    site.whatsapp,
-    `Отзыв о магазине «${shop.nameRu}» (${shopUrl})\n\nЧто хочу рассказать: `,
-  );
-
   // priceRange уходит в микроразметку Store. Раз цен на странице нет,
   // отдавать их поисковику нельзя: разметка обязана описывать то, что
   // человек реально видит, иначе это расхождение и риск для сниппета.
@@ -417,58 +408,6 @@ export default async function ShopPage({ params }: { params: { slug: string } })
           </div>
         </section>
       )}
-
-      {/* Отзывы. Публичной формы нет намеренно: посетитель пишет в WhatsApp
-          администрации рынка, та проверяет и заводит отзыв через /admin/reviews.
-          Модерация до публикации, а не после — на рынке, где точки платят за
-          место, разбирать уже опубликованную грубость дороже, чем не пустить её.
-          Пока отзывов нет, показываем только приглашение: «отзывов пока нет» на
-          полусотне страниц читается как «сюда никто не ходит». */}
-      <section className="section section--tight reveal">
-        <div className="wrap">
-          <div className="section-head">
-            <h2>{pick(lang, "Отзывы", "Пікірлер")}</h2>
-          </div>
-
-          {reviews.length > 0 && (
-            <div className="reviews">
-              {reviews.map((r) => (
-                <figure className="review" key={r.id}>
-                  <blockquote>{r.text}</blockquote>
-                  <figcaption>
-                    <span className="review__author">{r.author}</span>
-                    <time dateTime={r.createdAt.toISOString()}>
-                      {r.createdAt.toLocaleDateString(lang === "kz" ? "kk-KZ" : "ru-RU", {
-                        year: "numeric",
-                        month: "long",
-                      })}
-                    </time>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
-
-          <div className="reviews__ask">
-            <p>
-              {reviews.length > 0
-                ? pick(lang, "Покупали здесь? Расскажите, как всё прошло.", "Осы жерден сатып алдыңыз ба? Қалай өткенін айтыңыз.")
-                : pick(lang, "Знаете этот магазин? Напишите первый отзыв.", "Бұл дүкенді білесіз бе? Алғашқы пікірді жазыңыз.")}
-            </p>
-            <a className="btn btn--ghost" href={reviewWa} data-goal="review_click">
-              {pick(lang, "Оставить отзыв", "Пікір қалдыру")}
-            </a>
-          </div>
-
-          <p className="reviews__note">
-            {pick(
-              lang,
-              "Отзывы публикует администрация рынка после проверки.",
-              "Пікірлерді базар әкімшілігі тексергеннен кейін жариялайды.",
-            )}
-          </p>
-        </div>
-      </section>
 
       {SHOW_PRODUCTS && shop.products.length > 0 && (
         <section className="section reveal">
