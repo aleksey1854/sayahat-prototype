@@ -1596,3 +1596,31 @@ a.news-card__more:active { transform: scale(.97); }
    Ровно это же правило уже есть у .btn--block, здесь оно просто не
    применялось — класс на этих кнопках не стоит. */
 .arenda__cta .btn { justify-content: center; }
+
+/* ── Адрес рынка в шапке ────────────────────────────────────────────────
+   Ведёт на блок «Как добраться». Живёт в одном ряду с иконками соцсетей,
+   поэтому наследует их круглую форму — на телефоне остаётся ровно такой
+   же кружок с меткой, только текст скрыт.
+
+   Причина: в шапке телефона под адрес нет места. Логотип, две иконки и
+   переключатель языка занимают почти всю ширину; строка «Костанай,
+   ул. Карбышева, 131» ушла бы на второй ряд и подняла шапку. Нажать при
+   этом нужно уметь одинаково с обоих устройств, поэтому кнопка остаётся,
+   пропадает только подпись. */
+.topbar__addr svg { width: 19px; height: 19px; flex: none; }
+.topbar__addr-txt { display: none; }
+
+@media (min-width: 1024px) {
+  .topbar__addr {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 14px !important;
+    padding: 7px 14px 7px 11px;
+    gap: 9px;
+    text-decoration: none;
+  }
+  .topbar__addr-txt { display: grid; gap: 1px; line-height: 1.25; text-align: left; }
+  .topbar__addr-txt b { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .topbar__addr-txt i { font-size: 12px; font-style: normal; color: var(--muted); }
+  .topbar__addr:hover .topbar__addr-txt b { color: var(--brand-700); }
+}

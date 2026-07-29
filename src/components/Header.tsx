@@ -61,6 +61,23 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
             >
               <WhatsAppIcon />
             </a>
+            {/* Адрес рынка. Ведёт на блок «Как добраться» на главной, поэтому
+                ссылка абсолютная: со страницы магазина якорь без пути никуда
+                не приведёт.
+
+                На широком экране — текст в две строки, на телефоне остаётся
+                одна метка рядом с Instagram и WhatsApp: там в шапке нет места
+                даже под одну строку адреса, а нажать нужно уметь одинаково. */}
+            <a className="topbar__addr" href="/#how-to-get" title={pick(lang, "Как добраться", "Қалай жетуге болады")}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+              <span className="topbar__addr-txt">
+                <b>{pick(lang, `Костанай, ${site.address}`, `Қостанай, ${site.addressKz}`)}</b>
+                <i>{pick(lang, "На территории автовокзала", "Автовокзал аумағында")}</i>
+              </span>
+            </a>
           </div>
           <LangToggle lang={lang} />
         </div>
