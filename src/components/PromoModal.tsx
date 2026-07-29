@@ -6,6 +6,11 @@ import Link from "next/link";
 /**
  * Всплывающий баннер на главной.
  *
+ * Классы начинаются с pmodal, а не promo: класс .promo в проекте уже занят
+ * терракотовым блоком на главной. Он задаёт color: #fff и border-radius,
+ * и модал молча получал белый текст на кремовом фоне и скруглённые углы
+ * у затемнения, сквозь которые была видна страница.
+ *
  * Показывается один раз за визит. Ключ в sessionStorage, а не в
  * localStorage: закрыл вкладку, пришёл завтра — увидит снова. Внутри
  * визита не повторяется, переход «главная → магазин → главная» экран
@@ -92,21 +97,21 @@ export function PromoModal({
   if (!open) return null;
 
   return (
-    <div className="promo" role="dialog" aria-modal="true" aria-labelledby="promo-title" onClick={close}>
+    <div className="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmodal-title" onClick={close}>
       {/* Клик по самому окну не закрывает: останавливаем всплытие здесь,
           а не вешаем обработчик на подложку. */}
-      <div className="promo__box" onClick={(e) => e.stopPropagation()}>
-        <button className="promo__x" type="button" onClick={close} aria-label="Закрыть">
+      <div className="pmodal__box" onClick={(e) => e.stopPropagation()}>
+        <button className="pmodal__x" type="button" onClick={close} aria-label="Закрыть">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
 
-        <div className="promo__art">
+        <div className="pmodal__art">
           {IMAGE ? (
-            <img className="promo__img" src={IMAGE} alt="" />
+            <img className="pmodal__img" src={IMAGE} alt="" />
           ) : (
-            <div className="promo__ph" aria-hidden="true">
+            <div className="pmodal__ph" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="16" rx="3" />
                 <circle cx="8.5" cy="9.5" r="1.6" />
@@ -118,13 +123,13 @@ export function PromoModal({
           )}
         </div>
 
-        <div className="promo__body">
+        <div className="pmodal__body">
           {/* Плашка сидит на стыке картинки и текста и держит два блока
               вместе: без неё они читаются как две отдельные карточки. */}
-          <span className="promo__badge">Рынок «Саяхат»</span>
-          <h2 id="promo-title">{title}</h2>
+          <span className="pmodal__badge">Рынок «Саяхат»</span>
+          <h2 id="pmodal-title">{title}</h2>
           <p>{text}</p>
-          <Link className="btn btn--accent btn--lg promo__cta" href={href} onClick={close}>
+          <Link className="btn btn--accent btn--lg pmodal__cta" href={href} onClick={close}>
             {action}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <path d="M5 12h14M13 6l6 6-6 6" />
