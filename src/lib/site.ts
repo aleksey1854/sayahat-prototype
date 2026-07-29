@@ -35,8 +35,10 @@ export const site = {
   // Аренда мест — отдельный номер
   rentPhone: "+7 775 847 8819",
   rentWhatsapp: "77758478819",
-  rentFrom: "от 1 500 ₸/м²",
-  rentFromKz: "1 500 ₸/м²-ден",
+  // Без «/м²»: единица площади называется в самой фразе на странице,
+  // иначе выходило «от 1 500 ₸/м² за 1 м² в месяц».
+  rentFrom: "от 1 500 ₸",
+  rentFromKz: "1 500 ₸-ден",
 
   instagram: "sayahat_kst",
   instagramUrl: "https://instagram.com/sayahat_kst",
