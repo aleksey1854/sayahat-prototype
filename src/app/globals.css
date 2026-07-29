@@ -1782,6 +1782,21 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 .crop-check__box--wide { aspect-ratio: 16 / 10; }
 .crop-check__box--mob { aspect-ratio: 2 / 1; }
 
+/* ── Предпросмотр кадрирования обложки в кабинете ───────────────────────
+   Два окна в тех же пропорциях, в которых сайт реально показывает
+   обложку: 16:10 в сетке каталога на компьютере и 2:1 на телефоне.
+   Кадрирование от центра, как у object-fit: cover на странице, поэтому
+   человек видит именно то, что срежется. */
+.crop-check { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 620px; }
+.crop-check figure { margin: 0; display: grid; gap: 6px; }
+.crop-check figcaption { font-size: 12.5px; color: var(--muted); }
+.crop-check__box {
+  background-position: center; background-size: cover; background-repeat: no-repeat;
+  border-radius: 14px; border: 1px solid var(--line);
+}
+.crop-check__box--wide { aspect-ratio: 16 / 10; }
+.crop-check__box--mob { aspect-ratio: 2 / 1; }
+
 /* ── Всплывающий баннер на главной ──────────────────────────────────────
    Рекламное окно, а не системный диалог: крупный квадрат под баннер,
    заголовок дисплейным шрифтом, амбровая кнопка во всю ширину.
@@ -1917,4 +1932,146 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   .promo__art { border-radius: 24px 24px 0 0; }
   .promo__body { padding: 22px 20px 26px; }
   .promo__body h2 { font-size: 23px; }
+}
+
+/* ── Всплывающий баннер на главной ──────────────────────────────────────
+   Собрано по тому, что работает в рекламных окнах: заголовок ведёт,
+   а не подписывает картинку; одна кнопка, крупная и контрастная; ничего
+   лишнего, что можно перепутать с кнопкой.
+
+   Карточка кремовая, а не белая: белый прямоугольник на затемнённой
+   странице выглядит как системное окно, кремовый — как часть сайта.
+
+   Плашка «Рынок Саяхат» сидит на стыке картинки и текста. Без неё два
+   блока читаются как две отдельные карточки, поставленные друг на друга. */
+.promo {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(26, 24, 21, .62);
+  backdrop-filter: blur(5px);
+  animation: promo-fade .26s var(--ease-out-quint) both;
+}
+@keyframes promo-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.promo__box {
+  position: relative;
+  width: 100%; max-width: 396px;
+  max-height: calc(100dvh - 40px); overflow: auto;
+  background: var(--bg);
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(26,24,21,.4), 0 0 0 1px rgba(255,255,255,.5) inset;
+  animation: promo-in .44s var(--ease-out-expo) both;
+}
+@keyframes promo-in {
+  from { opacity: 0; transform: translateY(24px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.promo__art {
+  position: relative; overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  animation: promo-part .5s var(--ease-out-expo) .1s both;
+  /* Баннер вертикальный 4:5. На низком экране подрезаем его, а не прячем
+     кнопку: невидимая кнопка хуже, чем срезанный край картинки. */
+  max-height: min(56dvh, 540px);
+}
+.promo__img { display: block; width: 100%; height: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+
+/* Заглушка. Тёплая, с пунктиром и размером — видно, подо что макет. */
+.promo__ph {
+  position: relative; height: 100%; aspect-ratio: 4 / 5;
+  display: grid; place-content: center; justify-items: center; gap: 9px;
+  background:
+    radial-gradient(130% 80% at 50% 8%, rgba(226,147,15,.18), transparent 60%),
+    linear-gradient(180deg, var(--accent-50), #F7EFE0);
+  color: var(--accent-700);
+}
+.promo__ph::after {
+  content: ""; position: absolute; inset: 16px;
+  border: 2px dashed rgba(174,110,16,.3); border-radius: 20px; pointer-events: none;
+}
+.promo__ph svg { width: 42px; height: 42px; opacity: .7; }
+.promo__ph b { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+.promo__ph span {
+  font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
+  background: #fff; border-radius: 999px; padding: 4px 12px;
+  border: 1px solid rgba(174,110,16,.22);
+}
+
+/* Блик один раз при появлении: показывает, что окно живое, и не мозолит
+   глаза, как зациклённая анимация. */
+.promo__art::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.45) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: promo-sheen 1.1s var(--ease-out-quint) .5s both;
+}
+@keyframes promo-sheen { to { transform: translateX(120%); } }
+
+.promo__body {
+  position: relative;
+  padding: 26px 26px 26px; text-align: center;
+  display: grid; gap: 10px; justify-items: center;
+}
+
+.promo__badge {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  background: var(--brand); color: #fff;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  padding: 7px 15px; border-radius: 999px; white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(28,107,87,.3);
+  animation: promo-part .45s var(--ease-out-expo) .14s both;
+}
+
+.promo__body h2 {
+  margin: 8px 0 0; font-size: 27px; line-height: 1.12; letter-spacing: -.025em;
+  text-wrap: balance;
+  animation: promo-part .5s var(--ease-out-expo) .2s both;
+}
+.promo__body p {
+  margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 30ch;
+  text-wrap: pretty;
+  animation: promo-part .5s var(--ease-out-expo) .26s both;
+}
+.promo__cta {
+  margin-top: 10px; width: 100%; justify-content: center; gap: 9px;
+  box-shadow: 0 10px 24px rgba(226,147,15,.34);
+  animation: promo-part .5s var(--ease-out-expo) .32s both;
+}
+.promo__cta svg { width: 18px; height: 18px; }
+
+@keyframes promo-part {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.promo__x {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.9); color: var(--ink);
+  border: 0; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(26,24,21,.18);
+  transition: background .18s ease, color .18s ease, transform .18s var(--ease-out-quint);
+  animation: promo-part .4s var(--ease-out-expo) .38s both;
+}
+.promo__x svg { width: 17px; height: 17px; }
+.promo__x:hover { background: #fff; color: var(--terracotta-700); }
+.promo__x:active { transform: scale(.92); }
+
+/* На телефоне окно приезжает снизу: привычнее и до крестика ближе. */
+@media (max-width: 560px) {
+  .promo { padding: 0; align-items: flex-end; }
+  .promo__box {
+    max-width: none; border-radius: 26px 26px 0 0;
+    max-height: 92dvh; animation-name: promo-up;
+  }
+  @keyframes promo-up {
+    from { opacity: 0; transform: translateY(44px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .promo__art { border-radius: 26px 26px 0 0; max-height: 52dvh; }
+  .promo__body { padding: 24px 20px 26px; }
+  .promo__body h2 { font-size: 24px; }
 }

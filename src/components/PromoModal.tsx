@@ -70,11 +70,22 @@ export function PromoModal({
       if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+
+    // Блокируем прокрутку под окном, иначе на телефоне страница едет
+    // под пальцем. Но overflow: hidden убирает полосу прокрутки, а вместе
+    // с ней страница становится шире на её ширину — всё содержимое
+    // прыгает вбок при открытии и обратно при закрытии. Возвращаем эту
+    // ширину отступом, тогда смещения нет.
+    const gap = window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = document.body.style.overflow;
+    const prevPad = document.body.style.paddingRight;
     document.body.style.overflow = "hidden";
+    if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPad;
     };
   }, [open]);
 
@@ -96,7 +107,7 @@ export function PromoModal({
             <img className="promo__img" src={IMAGE} alt="" />
           ) : (
             <div className="promo__ph" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="16" rx="3" />
                 <circle cx="8.5" cy="9.5" r="1.6" />
                 <path d="M3.5 17l4.8-4.6a2 2 0 0 1 2.7 0l3 2.8a2 2 0 0 0 2.7 0l2-1.8" />
@@ -108,6 +119,9 @@ export function PromoModal({
         </div>
 
         <div className="promo__body">
+          {/* Плашка сидит на стыке картинки и текста и держит два блока
+              вместе: без неё они читаются как две отдельные карточки. */}
+          <span className="promo__badge">Рынок «Саяхат»</span>
           <h2 id="promo-title">{title}</h2>
           <p>{text}</p>
           <Link className="btn btn--accent btn--lg promo__cta" href={href} onClick={close}>
