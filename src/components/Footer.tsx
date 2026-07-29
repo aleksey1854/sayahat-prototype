@@ -1,4 +1,4 @@
-import { getLang, pick } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n";
 import { site, waLink, telHref } from "@/lib/site";
 
 export function Footer() {

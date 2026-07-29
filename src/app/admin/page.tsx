@@ -9,7 +9,7 @@ import { makeSlug } from "@/lib/slug";
 import { site } from "@/lib/site";
 import { SubmitButton } from "@/components/SubmitButton";
 import { can } from "@/lib/roles";
-import { setCategory, toggleStatus, impersonate } from "./actions";
+import { toggleStatus, impersonate } from "./actions";
 
 export const metadata: Metadata = {
   title: "Админка базара",

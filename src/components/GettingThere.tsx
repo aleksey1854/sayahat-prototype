@@ -1,4 +1,4 @@
-import { site, yandexMapsUrl, yandexWidgetUrl, YANDEX_ORG_ID, yandexRouteUrl, googleRouteUrl, gis2RouteUrl, telHref, waLink } from "@/lib/site";
+import { site, yandexWidgetUrl, YANDEX_ORG_ID, yandexRouteUrl, googleRouteUrl, gis2RouteUrl, telHref, waLink } from "@/lib/site";
 import type { Lang } from "@/lib/i18n";
 
 // «Как добраться»: рынок на территории автовокзала «Саяхат» (сосед по зданию).
