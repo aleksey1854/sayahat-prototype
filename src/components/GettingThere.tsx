@@ -1,4 +1,4 @@
-import { site, yandexMapsUrl, googleMapsUrl, yandexWidgetUrl, YANDEX_ORG_ID } from "@/lib/site";
+import { site, yandexMapsUrl, yandexWidgetUrl, YANDEX_ORG_ID, yandexRouteUrl, googleRouteUrl, gis2RouteUrl } from "@/lib/site";
 import type { Lang } from "@/lib/i18n";
 
 // «Как добраться»: рынок на территории автовокзала «Саяхат» (сосед по зданию).
@@ -52,8 +52,8 @@ export function GettingThere({ lang }: { lang: Lang }) {
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
               <div>
-                <b>{t(site.addressFull, `${site.addressKz}, ${site.cityKz}`)}</b>
-                <span>{t("на территории автовокзала «Саяхат»", "«Саяхат» автовокзалы аумағында")}</span>
+                <b>{t(site.addressFull, site.addressFullKz)}</b>
+                <span>{t("торговый центр и автовокзал находятся в одном здании", "сауда орталығы мен автовокзал бір ғимаратта орналасқан")}</span>
               </div>
             </div>
             <div className="getthere__row">
@@ -68,20 +68,20 @@ export function GettingThere({ lang }: { lang: Lang }) {
             </div>
 
             <div className="getthere__actions">
-              <a className="btn btn--primary btn--block" href={site.gis2Url} target="_blank" rel="noopener">
-                {t("Открыть в 2ГИС", "2ГИС-те ашу")}
+              <a className="btn btn--primary btn--block" href={gis2RouteUrl()} target="_blank" rel="noopener">
+                {t("Маршрут в 2ГИС", "2ГИС-те бағыт")}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M7 17L17 7M9 7h8v8" />
                 </svg>
               </a>
-              <a className="btn btn--ghost btn--block" href={yandexMapsUrl()} target="_blank" rel="noopener">
+              <a className="btn btn--ghost btn--block" href={yandexRouteUrl()} target="_blank" rel="noopener">
                 {t("Маршрут в Яндекс.Картах", "Яндекс.Карталарда бағыт")}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M7 17L17 7M9 7h8v8" />
                 </svg>
               </a>
-              <a className="btn btn--ghost btn--block" href={googleMapsUrl()} target="_blank" rel="noopener">
-                {t("Google Карты", "Google Карталар")}
+              <a className="btn btn--ghost btn--block" href={googleRouteUrl()} target="_blank" rel="noopener">
+                {t("Маршрут в Google Картах", "Google Карталарда бағыт")}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M7 17L17 7M9 7h8v8" />
                 </svg>

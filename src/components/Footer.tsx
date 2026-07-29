@@ -53,7 +53,7 @@ export function Footer() {
 
           <div>
             <div className="foot-h">{t("Адрес и аренда", "Мекенжай және жалдау")}</div>
-            <div className="foot-text">{t(site.addressFull, `${site.addressKz}, ${site.cityKz}`)}</div>
+            <div className="foot-text">{t(site.addressFull, site.addressFullKz)}</div>
             <div className="foot-text">
               {t(site.hours, site.hoursKz)} · {t(site.dayOff, site.dayOffKz)}
             </div>

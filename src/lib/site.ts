@@ -10,7 +10,10 @@ export const site = {
   cityKz: "Қостанай",
   address: "ул. Карбышева, 131",
   addressKz: "Карбышев к-сі, 131",
-  addressFull: "ул. Карбышева, 131, Костанай",
+  // Город первым: так просил заказчик, и так адрес читается быстрее —
+  // человек сначала убеждается, что это его город.
+  addressFull: "Костанай, ул. Карбышева, 131",
+  addressFullKz: "Қостанай, Карбышев к-сі, 131",
 
   // Вт–Вс 10:00–19:00, понедельник — выходной
   hours: "Вт–Вс, 10:00–19:00",
@@ -68,6 +71,28 @@ export function yandexMapsUrl() {
 
 export function googleMapsUrl() {
   return "https://maps.app.goo.gl/PSNBhPhFoHmBDKVA9";
+}
+
+// ── Ссылки на построение маршрута ───────────────────────────────────────
+// Раньше все три кнопки вели на карточку организации, а подписаны были
+// вразнобой: «Открыть в 2ГИС», «Маршрут в Яндекс.Картах», «Google Карты».
+// Подписи свели к одному виду, значит и вести должны действительно на
+// маршрут, иначе кнопка обещает больше, чем делает.
+export function yandexRouteUrl() {
+  const { lat, lng } = site.geo;
+  return `https://yandex.kz/maps/?rtext=~${lat},${lng}&rtt=auto`;
+}
+
+export function googleRouteUrl() {
+  const { lat, lng } = site.geo;
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+// У 2ГИС координаты идут долготой вперёд, а ведущая вертикальная черта
+// означает «откуда — от моего местоположения».
+export function gis2RouteUrl() {
+  const { lat, lng } = site.geo;
+  return `https://2gis.kz/kostanaj/directions/points/%7C${lng}%2C${lat}`;
 }
 
 // Встраиваемый виджет Яндекс.Карт с уже выбранной организацией.

@@ -74,7 +74,7 @@ export function Header({ variant = "catalog", withSearch = true }: { variant?: "
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
               <span className="topbar__addr-txt">
-                <b>{pick(lang, `Костанай, ${site.address}`, `Қостанай, ${site.addressKz}`)}</b>
+                <b>{pick(lang, site.addressFull, site.addressFullKz)}</b>
                 <i>{pick(lang, "На территории автовокзала", "Автовокзал аумағында")}</i>
               </span>
             </a>
