@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 
 type ShopLayout = {
   gallery?: string[];
+  trust?: { title: string; titleKz?: string; sub: string; subKz?: string }[];
   tagline?: string;
   taglineKz?: string;
   about?: {
@@ -73,6 +74,8 @@ const LIMITS = {
   tagline: 80,
   aboutTitle: 60,
   aboutText: 600,
+  trustTitle: 22,
+  trustSub: 34,
   phone: 20,
   whatsapp: 16,
   instagram: 30,
@@ -147,6 +150,21 @@ async function saveShop(formData: FormData) {
 
   if (tagline) layout.tagline = tagline;
   else delete layout.tagline;
+
+  // Плашки под шапкой: четыре фиксированных слота, столько же рисует
+  // страница. Слот без заголовка выпадает — так оператор оставляет
+  // пустыми лишние, не удаляя их отдельной кнопкой.
+  const trust = [0, 1, 2, 3]
+    .map((i) => ({
+      title: cut(str(formData, `trust${i}Title`), LIMITS.trustTitle),
+      titleKz: cut(str(formData, `trust${i}TitleKz`), LIMITS.trustTitle) || undefined,
+      sub: cut(str(formData, `trust${i}Sub`), LIMITS.trustSub),
+      subKz: cut(str(formData, `trust${i}SubKz`), LIMITS.trustSub) || undefined,
+    }))
+    .filter((x) => x.title);
+
+  if (trust.length) layout.trust = trust;
+  else delete layout.trust;
 
   if (taglineKz) layout.taglineKz = taglineKz;
   else delete layout.taglineKz;
@@ -531,6 +549,7 @@ export default async function CabinetPage({
   const logo = photoUrl(shop.logo);
   const aboutPic = photoUrl(layout.about?.image);
   const gallery = Array.isArray(layout.gallery) ? layout.gallery : [];
+  const trust = Array.isArray(layout.trust) ? layout.trust : [];
 
   return (
     <>
@@ -771,6 +790,67 @@ export default async function CabinetPage({
                 Казахские поля можно оставить пустыми: тогда на казахской версии сайта
                 покажется русский текст. Заполните, когда будет перевод.
               </p>
+            </div>
+
+            <div className="panel form-grid">
+              <h3 style={{ margin: 0 }}>Плашки под шапкой</h3>
+              <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
+                Зелёная полоса сразу под названием магазина. Четыре коротких довода: стаж,
+                где вас найти, чем вы лучше, доставка. Пустые слоты не показываются, а всю
+                полосу можно убрать, очистив все четыре заголовка.
+              </p>
+
+              {[0, 1, 2, 3].map((i) => (
+                <div className="trust-slot" key={i}>
+                  <div className="trust-slot__n">{i + 1}</div>
+                  <div className="grid2">
+                    <div className="field">
+                      <label htmlFor={`t${i}-title`}>Заголовок · до {LIMITS.trustTitle} знаков</label>
+                      <input
+                        className="input"
+                        id={`t${i}-title`}
+                        name={`trust${i}Title`}
+                        defaultValue={trust[i]?.title ?? ""}
+                        maxLength={LIMITS.trustTitle}
+                        placeholder={["10+ лет", "Витрина 13", "Честный вес", "Доставка"][i]}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor={`t${i}-titlekz`}>Заголовок (қазақша)</label>
+                      <input
+                        className="input"
+                        id={`t${i}-titlekz`}
+                        name={`trust${i}TitleKz`}
+                        defaultValue={trust[i]?.titleKz ?? ""}
+                        maxLength={LIMITS.trustTitle}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid2">
+                    <div className="field">
+                      <label htmlFor={`t${i}-sub`}>Подпись · до {LIMITS.trustSub} знаков</label>
+                      <input
+                        className="input"
+                        id={`t${i}-sub`}
+                        name={`trust${i}Sub`}
+                        defaultValue={trust[i]?.sub ?? ""}
+                        maxLength={LIMITS.trustSub}
+                        placeholder={["на рынке «Саяхат»", "продуктовый павильон", "без переплат", "по Костанаю"][i]}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor={`t${i}-subkz`}>Подпись (қазақша)</label>
+                      <input
+                        className="input"
+                        id={`t${i}-subkz`}
+                        name={`trust${i}SubKz`}
+                        defaultValue={trust[i]?.subKz ?? ""}
+                        maxLength={LIMITS.trustSub}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="panel form-grid">

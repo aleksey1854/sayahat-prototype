@@ -1726,3 +1726,19 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 @media (max-width: 560px) {
   .arenda__price b { font-size: 19px; }
 }
+
+/* Слот плашки в кабинете: номер слева, поля справа. Номер нужен, чтобы
+   оператор понимал, в каком порядке они встанут на странице. */
+.trust-slot {
+  display: grid; gap: 12px;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px;
+  background: var(--surface-2);
+  position: relative;
+}
+.trust-slot__n {
+  position: absolute; top: -9px; left: 14px;
+  width: 22px; height: 22px; border-radius: 999px;
+  background: var(--brand); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
