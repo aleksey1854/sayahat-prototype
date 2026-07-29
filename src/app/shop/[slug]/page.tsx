@@ -19,7 +19,6 @@ import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { PhotoFallback, SafeImg } from "@/components/PhotoFallback";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { GoalTracker } from "@/components/GoalTracker";
-import { DEMO_POOL } from "@/../prisma/demo-photos";
 
 type ShopLayout = {
   tagline?: string; taglineKz?: string;
@@ -107,9 +106,11 @@ export default async function ShopPage({
   // Раньше при отсутствии обоих показывалась заглушка на пол-экрана.
   // В блоке «о магазине» показываем другой кадр из пула категории, а не
   // повтор обложки — иначе одна и та же сцена висит дважды на странице.
-  const poolPics = DEMO_POOL[shop.category?.slug ?? ""] ?? [];
-  const altPic = poolPics.find((f) => f !== shop.cover) ?? poolPics[0];
-  const aboutPic = photoUrl(layout.about?.image ?? altPic ?? shop.cover);
+  // Запасной картинкой берём обложку самого магазина, а не снимок
+  // из демо-набора. Чужое фото мяса на странице реальной точки — хуже,
+  // чем блок без картинки: покупатель решит, что это их прилавок.
+  // Своё фото для этого блока оператор загружает в кабинете.
+  const aboutPic = photoUrl(layout.about?.image ?? shop.cover);
   // Витрина хранит обе версии. Если казахской нет — показываем русскую,
   // чтобы страница не осталась с пустым местом.
   const L = (ru?: string, kz?: string) => (lang === "kz" ? kz || ru || "" : ru || "");
