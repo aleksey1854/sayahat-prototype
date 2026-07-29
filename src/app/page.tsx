@@ -5,6 +5,7 @@ import { absUrl } from "@/lib/seo";
 import { site, pavilionKey, boothLabel } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { PromoModal } from "@/components/PromoModal";
 import { FreeSpaces } from "@/components/FreeSpaces";
 import { GettingThere } from "@/components/GettingThere";
 import { Reveal } from "@/components/Reveal";
@@ -205,6 +206,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       </Reveal>
 
       <Footer />
+
+      <PromoModal
+        title={pick(lang, "Едем за покупками в «Саяхат»", "Сауда жасауға «Саяхатқа» барамыз")}
+        text={pick(
+          lang,
+          "Продукты, одежда, обувь и сладости — в одном здании с автовокзалом. Посмотрите каталог до поездки.",
+          "Азық-түлік, киім, аяқ киім және тәттілер — автовокзалмен бір ғимаратта. Барар алдында каталогты қараңыз.",
+        )}
+        action={pick(lang, "Смотреть каталог", "Каталогты қарау")}
+        href="#catalog"
+      />
     </>
   );
 }

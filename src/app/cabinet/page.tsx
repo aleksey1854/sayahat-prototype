@@ -597,8 +597,34 @@ export default async function CabinetPage({
 
           <form action={uploadCover} className="panel form-grid" style={{ marginBottom: 16 }}>
             <h3 style={{ margin: 0 }}>Обложка магазина</h3>
-            {cover && (
-              <div className="cover-preview" style={{ background: `url('${srcSetFor(cover)?.src}') center/cover` }} />
+            {/* Показываем не сам файл, а ровно то, что от него останется
+                на сайте. Кадрирование идёт от центра, и у вертикального
+                снимка с телефона в узкой карточке срезается больше половины
+                сверху и снизу. Без этого предпросмотра человек узнаёт об
+                этом только на живой странице. */}
+            {cover ? (
+              <>
+                <div className="crop-check">
+                  <figure>
+                    <div className="crop-check__box crop-check__box--wide" style={{ backgroundImage: `url('${srcSetFor(cover)?.src}')` }} />
+                    <figcaption>в каталоге на компьютере</figcaption>
+                  </figure>
+                  <figure>
+                    <div className="crop-check__box crop-check__box--mob" style={{ backgroundImage: `url('${srcSetFor(cover)?.src}')` }} />
+                    <figcaption>в каталоге на телефоне</figcaption>
+                  </figure>
+                </div>
+                <p style={{ margin: 0, color: "var(--muted)", fontSize: 13.5, maxWidth: 620 }}>
+                  Так обложка будет выглядеть у покупателя. Фото обрезается от центра — если
+                  товар ушёл за край, обрежьте снимок в галерее телефона и загрузите заново.
+                  Горизонтальные кадры теряют меньше всего.
+                </p>
+              </>
+            ) : (
+              <p style={{ margin: 0, color: "var(--muted)", fontSize: 13.5, maxWidth: 620 }}>
+                Общий план прилавка. Лучше горизонтальный кадр: вертикальный обрежется сверху
+                и снизу больше чем наполовину.
+              </p>
             )}
             <PhotoInput name="cover" kind="cover" label="Новое фото" required />
             <SubmitButton pendingText="Загружаю фото…" style={{ justifySelf: "start" }}>

@@ -1742,3 +1742,97 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* ── Блок аренды: колонки вместо space-between ──────────────────────────
+   Было display:flex с justify-content:space-between. Текст занимал 62ch,
+   колонка кнопок 240px, а блок — 1044px: около 150 пикселей оставались
+   ничьими и вылезали дырой между текстом и кнопками. Плюс align-items:
+   center подвешивал пару кнопок в вертикальной середине, ни с чем
+   не выравниваясь.
+
+   Сетка с заданными долями делит ширину без остатка, кнопки становятся
+   на треть шире и перестают выглядеть потерянными. */
+@media (min-width: 861px) {
+  .arenda {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 48px;
+    align-items: center;
+  }
+  .arenda__txt { max-width: none; }
+  .arenda__cta { min-width: 0; }
+}
+
+/* Кнопки в блоке занимают всю ширину своей колонки: две одинаковые
+   капсулы читаются как пара, разноширокие — как случайность. */
+.arenda__cta .btn { width: 100%; }
+
+/* ── Всплывающий баннер на главной ──────────────────────────────────────
+   Картинка квадратная: 1080×1080. Такой размер уже есть у любого, кто
+   ведёт Instagram, и одинаково ложится и на телефон, и на десктоп.
+   Пока картинки нет, блок просто не рисуется, окно остаётся текстовым. */
+.promo {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(26, 24, 21, .55);
+  backdrop-filter: blur(3px);
+  animation: promo-fade .22s var(--ease-out-quint) both;
+}
+@keyframes promo-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.promo__box {
+  position: relative;
+  width: 100%; max-width: 420px;
+  max-height: calc(100vh - 40px); overflow: auto;
+  background: var(--surface);
+  border-radius: var(--radius-xl, 24px);
+  box-shadow: 0 24px 60px rgba(26,24,21,.28);
+  animation: promo-in .28s var(--ease-out-expo) both;
+}
+@keyframes promo-in {
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.promo__img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+
+.promo__body { padding: 26px 26px 28px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+.promo__body h2 { margin: 0; font-size: 25px; line-height: 1.2; }
+.promo__body p { margin: 0; color: var(--muted); font-size: 15.5px; line-height: 1.5; max-width: 34ch; }
+.promo__body .btn { margin-top: 6px; }
+
+/* Крестик поверх картинки, поэтому со своей подложкой — на светлом
+   снимке белый крест без неё теряется. */
+.promo__x {
+  position: absolute; top: 12px; right: 12px; z-index: 1;
+  width: 36px; height: 36px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.92); color: var(--ink);
+  border: 1px solid var(--line); cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.promo__x svg { width: 18px; height: 18px; }
+.promo__x:hover { background: #fff; color: var(--terracotta-700); }
+
+@media (max-width: 560px) {
+  .promo { padding: 14px; align-items: flex-end; }
+  .promo__box { max-width: none; }
+  .promo__body { padding: 22px 20px 24px; }
+  .promo__body h2 { font-size: 22px; }
+}
+
+/* ── Предпросмотр кадрирования обложки в кабинете ───────────────────────
+   Два окна в тех же пропорциях, в которых сайт реально показывает
+   обложку: 16:10 в сетке каталога на компьютере и 2:1 на телефоне.
+   Кадрирование от центра, как у object-fit: cover на странице, поэтому
+   человек видит именно то, что срежется. */
+.crop-check { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 620px; }
+.crop-check figure { margin: 0; display: grid; gap: 6px; }
+.crop-check figcaption { font-size: 12.5px; color: var(--muted); }
+.crop-check__box {
+  background-position: center; background-size: cover; background-repeat: no-repeat;
+  border-radius: 14px; border: 1px solid var(--line);
+}
+.crop-check__box--wide { aspect-ratio: 16 / 10; }
+.crop-check__box--mob { aspect-ratio: 2 / 1; }
