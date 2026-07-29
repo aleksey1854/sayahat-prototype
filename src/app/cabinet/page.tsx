@@ -21,6 +21,7 @@ const PHOTO_ERRORS: Record<string, string> = {
   heic: "Это HEIC — формат камеры iPhone. Отправьте фото себе в WhatsApp и сохраните оттуда (станет JPG), либо в настройках камеры включите «Наиболее совместимые».",
   small: "Фото меньше 200 пикселей по стороне — слишком маленькое, выберите крупнее.",
   bad: "Не получилось прочитать файл. Нужен JPG, PNG или WebP до 8 МБ.",
+  many: "В галерее уже пять снимков — больше на странице не поместится. Удалите лишний.",
 };
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 };
 
 type ShopLayout = {
+  gallery?: string[];
   tagline?: string;
   taglineKz?: string;
   about?: {
@@ -61,6 +63,8 @@ async function requireShopSession() {
 // полей и в подписи под ними. Взяты по месту вывода: имя стоит в заголовке
 // и в карточке каталога, описание уходит ещё и в подвал, слоган в одну
 // строку под названием. Более длинный текст не переносится, а ломает вёрстку.
+const GALLERY_MAX = 5;
+
 const LIMITS = {
   nameRu: 40,
   nameKz: 40,
@@ -246,6 +250,120 @@ async function uploadLogo(formData: FormData) {
   await refresh(shop.slug, "saved", Math.round(up.bytes / 1024));
 }
 
+// Картинка блока «о магазине» и галерея прилавка живут внутри layout,
+// а не отдельными колонками. Загрузка та же, что у обложки: сжатие в webp,
+// поворот по EXIF, чистка метаданных.
+async function uploadAbout(formData: FormData) {
+  "use server";
+  const session = await requireShopSession();
+  const file = pickFile(formData, "about");
+  if (!file) redirect("/cabinet?perr=1");
+
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  let up: Awaited<ReturnType<typeof saveUpload>> | null = null;
+  let code = "bad";
+  try {
+    up = await saveUpload(file);
+  } catch (e) {
+    code = e instanceof Error ? e.message : "bad";
+  }
+  if (!up) redirect(`/cabinet?perr=${code}`);
+
+  const layout = parseLayout(shop.layout);
+  await removeUpload(layout.about?.image);
+  layout.about = { ...(layout.about ?? {}), image: up.url };
+
+  await db.shop.update({ where: { id: shop.id }, data: { layout: JSON.stringify(layout) } });
+  await refresh(shop.slug, "saved", Math.round(up.bytes / 1024));
+}
+
+async function removeAbout() {
+  "use server";
+  const session = await requireShopSession();
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  const layout = parseLayout(shop.layout);
+  await removeUpload(layout.about?.image);
+  if (layout.about) delete layout.about.image;
+
+  await db.shop.update({ where: { id: shop.id }, data: { layout: JSON.stringify(layout) } });
+  await refresh(shop.slug, "saved");
+}
+
+// Галерея. Снимки добавляются по одному и складываются в конец списка:
+// первый занимает крупную ячейку в сетке, поэтому порядок важен и его
+// можно менять стрелками.
+async function addGallery(formData: FormData) {
+  "use server";
+  const session = await requireShopSession();
+  const file = pickFile(formData, "photo");
+  if (!file) redirect("/cabinet?perr=1");
+
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  let up: Awaited<ReturnType<typeof saveUpload>> | null = null;
+  let code = "bad";
+  try {
+    up = await saveUpload(file);
+  } catch (e) {
+    code = e instanceof Error ? e.message : "bad";
+  }
+  if (!up) redirect(`/cabinet?perr=${code}`);
+
+  const layout = parseLayout(shop.layout);
+  const list = Array.isArray(layout.gallery) ? layout.gallery : [];
+  // Пять снимков — вся сетка на странице. Дальше они просто не поместятся.
+  if (list.length >= GALLERY_MAX) {
+    await removeUpload(up.url);
+    redirect("/cabinet?perr=many");
+  }
+  layout.gallery = [...list, up.url];
+
+  await db.shop.update({ where: { id: shop.id }, data: { layout: JSON.stringify(layout) } });
+  await refresh(shop.slug, "saved", Math.round(up.bytes / 1024));
+}
+
+async function removeGallery(formData: FormData) {
+  "use server";
+  const session = await requireShopSession();
+  const url = str(formData, "url");
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  const layout = parseLayout(shop.layout);
+  const list = Array.isArray(layout.gallery) ? layout.gallery : [];
+  layout.gallery = list.filter((x) => x !== url);
+  await removeUpload(url);
+
+  await db.shop.update({ where: { id: shop.id }, data: { layout: JSON.stringify(layout) } });
+  await refresh(shop.slug, "saved");
+}
+
+async function moveGallery(formData: FormData) {
+  "use server";
+  const session = await requireShopSession();
+  const url = str(formData, "url");
+  const dir = str(formData, "dir");
+  const shop = await db.shop.findUnique({ where: { id: session.shopId! } });
+  if (!shop) redirect("/login");
+
+  const layout = parseLayout(shop.layout);
+  const list = [...(Array.isArray(layout.gallery) ? layout.gallery : [])];
+  const i = list.indexOf(url);
+  const j = dir === "up" ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= list.length) redirect("/cabinet");
+
+  [list[i], list[j]] = [list[j], list[i]];
+  layout.gallery = list;
+
+  await db.shop.update({ where: { id: shop.id }, data: { layout: JSON.stringify(layout) } });
+  await refresh(shop.slug, "saved");
+}
+
 async function removeLogo() {
   "use server";
   const session = await requireShopSession();
@@ -411,6 +529,8 @@ export default async function CabinetPage({
   const aboutTextKz = (layout.about?.paragraphsKz ?? []).join("\n\n");
   const cover = photoUrl(shop.cover);
   const logo = photoUrl(shop.logo);
+  const aboutPic = photoUrl(layout.about?.image);
+  const gallery = Array.isArray(layout.gallery) ? layout.gallery : [];
 
   return (
     <>
@@ -494,6 +614,86 @@ export default async function CabinetPage({
               )}
             </div>
           </form>
+
+          <form action={uploadAbout} className="panel form-grid" style={{ marginBottom: 16 }}>
+            <h3 style={{ margin: 0 }}>Фото к блоку «О магазине»</h3>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
+              Стоит справа от текста о магазине. Подойдёт общий план прилавка или витрины.
+            </p>
+            {aboutPic && (
+              <img
+                src={srcSetFor(aboutPic)?.src}
+                alt=""
+                style={{ width: 190, height: 120, objectFit: "cover", borderRadius: 14, display: "block" }}
+              />
+            )}
+            <PhotoInput name="about" kind="cover" label={aboutPic ? "Заменить фото" : "Файл фото"} required />
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <SubmitButton pendingText="Загружаю…">{aboutPic ? "Заменить" : "Загрузить"}</SubmitButton>
+              {aboutPic && (
+                <ConfirmButton formAction={removeAbout} formNoValidate message="Убрать фото из блока «О магазине»?">
+                  Убрать
+                </ConfirmButton>
+              )}
+            </div>
+          </form>
+
+          <div className="panel form-grid" style={{ marginBottom: 16 }}>
+            <h3 style={{ margin: 0 }}>Прилавок и товар ({gallery.length} из {GALLERY_MAX})</h3>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
+              Галерея на странице магазина. Первый снимок занимает крупную ячейку — поставьте
+              туда самый удачный. Порядок меняется стрелками.
+            </p>
+
+            {gallery.length > 0 && (
+              <div className="gal-admin">
+                {gallery.map((g, i) => {
+                  const url = photoUrl(g);
+                  return (
+                    <div className="gal-admin__item" key={g}>
+                      {url && <img src={srcSetFor(url)?.src} alt="" />}
+                      <div className="gal-admin__acts">
+                        <form action={moveGallery}>
+                          <input type="hidden" name="url" value={g} />
+                          <button className="btn btn--ghost btn--sm" name="dir" value="up" disabled={i === 0} aria-label="Левее">
+                            ←
+                          </button>
+                        </form>
+                        <form action={moveGallery}>
+                          <input type="hidden" name="url" value={g} />
+                          <button
+                            className="btn btn--ghost btn--sm"
+                            name="dir"
+                            value="down"
+                            disabled={i === gallery.length - 1}
+                            aria-label="Правее"
+                          >
+                            →
+                          </button>
+                        </form>
+                        <form action={removeGallery}>
+                          <input type="hidden" name="url" value={g} />
+                          <ConfirmButton formNoValidate message="Удалить этот снимок из галереи?">
+                            Удалить
+                          </ConfirmButton>
+                        </form>
+                      </div>
+                      {i === 0 && <span className="gal-admin__first">крупная ячейка</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {gallery.length < GALLERY_MAX && (
+              <form action={addGallery} className="form-grid">
+                <PhotoInput name="photo" kind="cover" label="Добавить снимок" required />
+                <SubmitButton pendingText="Загружаю…" style={{ justifySelf: "start" }}>
+                  Добавить в галерею
+                </SubmitButton>
+              </form>
+            )}
+          </div>
 
           <form action={saveShop} className="form-grid">
             <div className="panel form-grid">

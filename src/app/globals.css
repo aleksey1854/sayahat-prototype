@@ -1692,3 +1692,19 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 .getthere__link { color: inherit; text-decoration: none; }
 .getthere__link:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; }
 .getthere__row span .getthere__link { color: var(--brand); }
+
+/* Галерея прилавка в кабинете: миниатюры с кнопками порядка и удаления. */
+.gal-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.gal-admin__item { position: relative; display: grid; gap: 8px; }
+.gal-admin__item img {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: 12px; border: 1px solid var(--line); display: block;
+}
+.gal-admin__acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.gal-admin__acts form { display: contents; }
+.gal-admin__acts .btn[disabled] { opacity: .4; cursor: default; }
+.gal-admin__first {
+  position: absolute; top: 8px; left: 8px;
+  background: var(--brand); color: #fff; font-size: 11.5px; font-weight: 600;
+  padding: 4px 9px; border-radius: 999px;
+}
