@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NEWS_TAG } from "@/lib/cached";
@@ -147,13 +146,6 @@ async function deleteNews(formData: FormData) {
   redirect("/admin/news?ok=1");
 }
 
-async function logout() {
-  "use server";
-  const session = await getSession();
-  session.destroy();
-  redirect("/");
-}
-
 export default async function AdminNewsPage({
   searchParams,
 }: {
@@ -174,18 +166,6 @@ export default async function AdminNewsPage({
             <div>
               <div className="eyebrow">Новости рынка</div>
               <h1 style={{ fontSize: 34, margin: "8px 0 0" }}>Новости ({news.length})</h1>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              {session.role === "admin" && (
-                <Link href="/admin" className="btn btn--ghost">
-                  В админку
-                </Link>
-              )}
-              <form action={logout}>
-                <button className="btn btn--ghost" type="submit">
-                  Выйти
-                </button>
-              </form>
             </div>
           </div>
 

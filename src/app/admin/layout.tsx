@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { Header } from "@/components/Header";
+import { AdminBar } from "@/components/AdminBar";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { AREAS, can } from "@/lib/roles";
 
@@ -17,10 +18,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const hasAny = AREAS.some((a) => can(session.role, a.area));
   if (!session.accountId || !hasAny) redirect("/login");
 
+  const account = await db.account.findUnique({
+    where: { id: session.accountId },
+    select: { login: true },
+  });
+
   return (
     <>
-      <Header variant="shop" withSearch={false} />
-      <section className="section">
+      <AdminBar login={account?.login ?? ""} role={session.role} />
+      <section className="section" style={{ paddingTop: 28 }}>
         <div className="wrap admin-shell">
           <AdminSidebar role={session.role} />
           <div className="admin-body">{children}</div>

@@ -63,7 +63,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     };
   });
 
-  const catList = categories.map((c) => ({ slug: c.slug, name: pick(lang, c.nameRu, c.nameKz) }));
+  const catList = categories.map((c) => ({ slug: c.slug, name: pick(lang, c.nameRu, c.nameKz), icon: c.icon }));
 
   const jsonLd = [
     {

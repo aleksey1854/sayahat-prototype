@@ -23,6 +23,11 @@ model Category {
   slug   String @unique
   nameRu String
   nameKz String
+  // Какую иконку рисовать. Пусто — берётся по slug, как было раньше.
+  // Нужно для категорий, созданных из админки: их slug не совпадает
+  // ни с одним из готовых рисунков, и без этого поля они получали
+  // нейтральную витрину.
+  icon   String?
   order  Int    @default(0)
   shops  Shop[]
 }

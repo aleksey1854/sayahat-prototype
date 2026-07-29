@@ -46,7 +46,7 @@ async function uniqueSlug(base: string) {
 
 async function createShop(formData: FormData) {
   "use server";
-  await requireShopsAccess();
+  const session = await requireShopsAccess();
 
   const nameRu = str(formData, "nameRu");
   const categoryId = str(formData, "categoryId");
@@ -55,7 +55,7 @@ async function createShop(formData: FormData) {
   const requested = str(formData, "slug");
   const slug = await uniqueSlug(makeSlug(requested || nameRu));
 
-  await db.shop.create({
+  const created = await db.shop.create({
     data: {
       slug,
       nameRu,
@@ -68,16 +68,15 @@ async function createShop(formData: FormData) {
 
   revalidatePath("/");
   revalidateTag(CATALOG_TAG);
-  redirect("/admin?ok=1");
+
+  // Сразу открываем форму заполнения. Раньше человек создавал магазин,
+  // возвращался в список, искал его там и жал «Заполнить» — три лишних
+  // действия на каждую из пятидесяти точек.
+  session.shopId = created.id;
+  await session.save();
+  redirect("/cabinet?from=admin");
 }
 
-
-async function logout() {
-  "use server";
-  const session = await getSession();
-  session.destroy();
-  redirect("/");
-}
 
 export default async function AdminPage({
   searchParams,
@@ -88,11 +87,26 @@ export default async function AdminPage({
   const isAdmin = session.role === "admin";
 
   const [shops, categories] = await Promise.all([
+    // Только то, что рисует список. Раньше здесь был include, а он тянет
+    // все колонки, включая layout — вёрстку витрины на пару килобайт JSON
+    // на магазин, которую список не открывает ни разу. На полусотне точек
+    // это около 60 КБ впустую в каждом запросе, плюс join к аккаунтам и
+    // подзапрос на счёт товаров, которые тоже переехали на карточку.
     db.shop.findMany({
-      include: { category: true, account: true, _count: { select: { products: true } } },
+      select: {
+        id: true,
+        nameRu: true,
+        slug: true,
+        status: true,
+        phone: true,
+        cover: true,
+        descRu: true,
+        row: true,
+      },
       orderBy: { createdAt: "asc" },
     }),
-    db.category.findMany({ include: { _count: { select: { shops: true } } }, orderBy: { order: "asc" } }),
+    // Категории нужны только для выпадающего списка в форме создания.
+    db.category.findMany({ select: { id: true, nameRu: true }, orderBy: { order: "asc" } }),
   ]);
 
   const err = searchParams.err;
@@ -136,11 +150,6 @@ export default async function AdminPage({
               <div className="eyebrow">Администрация рынка</div>
               <h1 style={{ fontSize: 34, margin: "8px 0 0" }}>Магазины ({shops.length})</h1>
             </div>
-            <form action={logout}>
-              <button className="btn btn--ghost" type="submit">
-                Выйти
-              </button>
-            </form>
           </div>
 
 

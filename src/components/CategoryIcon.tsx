@@ -117,6 +117,9 @@ const P: Record<string, React.ReactNode> = {
   ),
 };
 
+// Ключи всех нарисованных иконок — для выбора в админке.
+export const ICON_KEYS = Object.keys(P);
+
 export function CategoryIcon({ slug, className }: Props) {
   const d = P[slug];
   if (!d) {

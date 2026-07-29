@@ -26,7 +26,10 @@ export async function loadCatalogCards(lang: Lang): Promise<CardShop[]> {
       })),
       { text: s.slug, weight: 2, kind: "other" as const },
     ];
+    // Оба описания в индекс: по-казахски ищут теми же словами, что написаны
+    // в казахской версии, и без этого поиск на «ҚАЗ» находил бы меньше.
     if (s.descRu) fields.push({ text: s.descRu, weight: 3, kind: "other" });
+    if (s.descKz) fields.push({ text: s.descKz, weight: 3, kind: "other" });
     // Ключевые слова — то, что точка продаёт, своими словами. Вес как
     // у товаров: это ровно та же роль, только заполняется вручную.
     if (s.keywords) fields.push({ text: s.keywords, weight: 5, kind: "other" });

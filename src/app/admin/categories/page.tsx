@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { makeSlug } from "@/lib/slug";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { CategoryIcon, ICON_KEYS, SHORT_CAT } from "@/components/CategoryIcon";
 
 export const metadata: Metadata = { title: "Категории", robots: { index: false } };
 
@@ -55,6 +56,7 @@ async function addCategory(formData: FormData) {
       slug: await uniqueCategorySlug(makeSlug(nameRu)),
       nameRu,
       nameKz: str(formData, "nameKz") || nameRu,
+      icon: str(formData, "icon") || null,
       order: (last?.order ?? 0) + 1,
     },
   });
@@ -72,7 +74,7 @@ async function renameCategory(formData: FormData) {
 
   await db.category.update({
     where: { id },
-    data: { nameRu, nameKz: str(formData, "nameKz") || nameRu },
+    data: { nameRu, nameKz: str(formData, "nameKz") || nameRu, icon: str(formData, "icon") || null },
   });
 
   await refresh();
@@ -161,6 +163,17 @@ export default async function AdminCategoriesPage({
               <input className="input" id="n-kz" name="nameKz" maxLength={40} />
             </div>
           </div>
+            <div className="field">
+              <label htmlFor="n-icon">Иконка</label>
+              <select className="select" id="n-icon" name="icon" defaultValue={""}>
+                <option value="">По названию раздела</option>
+                {ICON_KEYS.map((k) => (
+                  <option key={k} value={k}>
+                    {SHORT_CAT[k]?.ru ?? k}
+                  </option>
+                ))}
+              </select>
+            </div>
           <SubmitButton pendingText="Создаю…" style={{ justifySelf: "start" }}>
             Создать
           </SubmitButton>
@@ -172,6 +185,10 @@ export default async function AdminCategoriesPage({
           <form action={renameCategory} className="cat-row" key={c.id}>
             <input type="hidden" name="id" value={c.id} />
 
+            <div className="cat-row__icon" aria-hidden="true">
+              <CategoryIcon slug={c.icon ?? c.slug} />
+            </div>
+
             <div className="cat-row__fields">
               <div className="field">
                 <label>Название (русский)</label>
@@ -180,6 +197,17 @@ export default async function AdminCategoriesPage({
               <div className="field">
                 <label>Название (қазақша)</label>
                 <input className="input" name="nameKz" defaultValue={c.nameKz ?? ""} maxLength={40} />
+              </div>
+              <div className="field">
+                <label>Иконка</label>
+                <select className="select" name="icon" defaultValue={c.icon ?? ""}>
+                  <option value="">По названию раздела</option>
+                  {ICON_KEYS.map((k) => (
+                    <option key={k} value={k}>
+                      {SHORT_CAT[k]?.ru ?? k}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

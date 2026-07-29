@@ -14,6 +14,7 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import { PhotoInput } from "@/components/PhotoInput";
 import { SHOW_PRODUCTS } from "@/lib/features";
 import { ScrollTopOnMount } from "@/components/ScrollTopOnMount";
+import { can } from "@/lib/roles";
 
 const PHOTO_ERRORS: Record<string, string> = {
   big: "Файл больше 8 МБ — выберите фото полегче или сожмите это.",
@@ -29,7 +30,14 @@ export const metadata: Metadata = {
 
 type ShopLayout = {
   tagline?: string;
-  about?: { title?: string; image?: string; paragraphs?: string[] };
+  taglineKz?: string;
+  about?: {
+    title?: string;
+    titleKz?: string;
+    image?: string;
+    paragraphs?: string[];
+    paragraphsKz?: string[];
+  };
   [key: string]: unknown;
 };
 
@@ -45,7 +53,7 @@ function parseLayout(raw: string | null): ShopLayout {
 async function requireShopSession() {
   const session = await getSession();
   if (!session.accountId) redirect("/login");
-  if (!session.shopId) redirect(session.role === "admin" ? "/admin" : "/login");
+  if (!session.shopId) redirect(can(session.role, "shops") ? "/admin" : "/login");
   return session;
 }
 
@@ -129,17 +137,29 @@ async function saveShop(formData: FormData) {
   const tagline = cut(str(formData, "tagline"), LIMITS.tagline);
   const aboutTitle = cut(str(formData, "aboutTitle"), LIMITS.aboutTitle);
   const aboutText = cut(str(formData, "aboutText"), LIMITS.aboutText);
+  const taglineKz = cut(str(formData, "taglineKz"), LIMITS.tagline);
+  const aboutTitleKz = cut(str(formData, "aboutTitleKz"), LIMITS.aboutTitle);
+  const aboutTextKz = cut(str(formData, "aboutTextKz"), LIMITS.aboutText);
 
   if (tagline) layout.tagline = tagline;
   else delete layout.tagline;
 
-  if (aboutTitle || aboutText) {
+  if (taglineKz) layout.taglineKz = taglineKz;
+  else delete layout.taglineKz;
+
+  // Абзацы разделяются пустой строкой — так же, как в русском поле.
+  const paras = (v: string) =>
+    v ? v.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean) : [];
+
+  if (aboutTitle || aboutText || aboutTitleKz || aboutTextKz) {
     layout.about = {
       ...(layout.about ?? {}),
       title: aboutTitle || undefined,
-      paragraphs: aboutText
-        ? aboutText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
-        : [],
+      titleKz: aboutTitleKz || undefined,
+      paragraphs: paras(aboutText),
+      // Пустой массив вместо undefined ломает фолбэк на русский:
+      // страница проверяет длину и решила бы, что перевод есть.
+      paragraphsKz: aboutTextKz ? paras(aboutTextKz) : undefined,
     };
   } else {
     delete layout.about;
@@ -159,6 +179,7 @@ async function saveShop(formData: FormData) {
       nameRu,
       nameKz: cut(str(formData, "nameKz"), LIMITS.nameKz) || nameRu,
       descRu: optCut("descRu", LIMITS.descRu),
+      descKz: optCut("descKz", LIMITS.descRu),
       keywords: optCut("keywords", LIMITS.keywords),
       phone: normalizePhone(str(formData, "phone")),
       whatsapp: normalizeWhatsapp(str(formData, "whatsapp")),
@@ -368,7 +389,9 @@ async function logout() {
   "use server";
   const session = await getSession();
   session.destroy();
-  redirect("/");
+  // На страницу входа, а не на главную: из кабинета выходят, чтобы зайти
+  // под другим, а не чтобы попасть на витрину рынка.
+  redirect("/login");
 }
 
 export default async function CabinetPage({
@@ -385,6 +408,7 @@ export default async function CabinetPage({
 
   const layout = parseLayout(shop.layout);
   const aboutText = (layout.about?.paragraphs ?? []).join("\n\n");
+  const aboutTextKz = (layout.about?.paragraphsKz ?? []).join("\n\n");
   const cover = photoUrl(shop.cover);
   const logo = photoUrl(shop.logo);
 
@@ -399,9 +423,13 @@ export default async function CabinetPage({
               <h1 style={{ fontSize: 34, margin: "8px 0 0" }}>{shop.nameRu}</h1>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {session.role === "admin" && (
-                <Link className="btn btn--ghost" href="/admin">
-                  ← Админка
+              {/* Возврат нужен всем, кто пришёл сюда из админки, а не только
+                  админу. У оператора раньше выхода отсюда не было вовсе:
+                  оставалась кнопка «Выйти», то есть выход из системы целиком
+                  посреди заполнения полусотни точек. */}
+              {can(session.role, "shops") && (
+                <Link className="btn btn--primary" href="/admin">
+                  ← К магазинам
                 </Link>
               )}
               <Link className="btn btn--ghost" href={`/shop/${shop.slug}`}>
@@ -480,9 +508,15 @@ export default async function CabinetPage({
                   <input className="input" id="nameKz" name="nameKz" defaultValue={shop.nameKz} maxLength={LIMITS.nameKz} />
                 </div>
               </div>
-              <div className="field">
-                <label htmlFor="descRu">Короткое описание (видно в каталоге)</label>
-                <input className="input" id="descRu" name="descRu" defaultValue={shop.descRu ?? ""} maxLength={LIMITS.descRu} />
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="descRu">Короткое описание (видно в каталоге)</label>
+                  <input className="input" id="descRu" name="descRu" defaultValue={shop.descRu ?? ""} maxLength={LIMITS.descRu} />
+                </div>
+                <div className="field">
+                  <label htmlFor="descKz">Короткое описание (қазақша)</label>
+                  <input className="input" id="descKz" name="descKz" defaultValue={shop.descKz ?? ""} maxLength={LIMITS.descRu} />
+                </div>
               </div>
               <div className="field">
                 <label htmlFor="keywords">Что вы продаёте (для поиска, на странице не видно)</label>
@@ -499,22 +533,44 @@ export default async function CabinetPage({
                   через поиск на сайте. Пишите так, как спрашивают покупатели.
                 </p>
               </div>
-              <div className="field">
-                <label htmlFor="tagline">Подзаголовок на странице (под названием)</label>
-                <input className="input" id="tagline" name="tagline" defaultValue={layout.tagline ?? ""} maxLength={LIMITS.tagline} />
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="tagline">Подзаголовок на странице (под названием)</label>
+                  <input className="input" id="tagline" name="tagline" defaultValue={layout.tagline ?? ""} maxLength={LIMITS.tagline} />
+                </div>
+                <div className="field">
+                  <label htmlFor="taglineKz">Подзаголовок (қазақша)</label>
+                  <input className="input" id="taglineKz" name="taglineKz" defaultValue={layout.taglineKz ?? ""} maxLength={LIMITS.tagline} />
+                </div>
               </div>
             </div>
 
             <div className="panel form-grid">
               <h3 style={{ margin: 0 }}>О магазине</h3>
-              <div className="field">
-                <label htmlFor="aboutTitle">Заголовок</label>
-                <input className="input" id="aboutTitle" name="aboutTitle" defaultValue={layout.about?.title ?? ""} maxLength={LIMITS.aboutTitle} />
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="aboutTitle">Заголовок</label>
+                  <input className="input" id="aboutTitle" name="aboutTitle" defaultValue={layout.about?.title ?? ""} maxLength={LIMITS.aboutTitle} />
+                </div>
+                <div className="field">
+                  <label htmlFor="aboutTitleKz">Заголовок (қазақша)</label>
+                  <input className="input" id="aboutTitleKz" name="aboutTitleKz" defaultValue={layout.about?.titleKz ?? ""} maxLength={LIMITS.aboutTitle} />
+                </div>
               </div>
-              <div className="field">
-                <label htmlFor="aboutText">Текст (пустая строка — новый абзац)</label>
-                <textarea className="textarea" id="aboutText" name="aboutText" defaultValue={aboutText} maxLength={LIMITS.aboutText} />
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="aboutText">Текст (пустая строка — новый абзац)</label>
+                  <textarea className="textarea" id="aboutText" name="aboutText" defaultValue={aboutText} maxLength={LIMITS.aboutText} />
+                </div>
+                <div className="field">
+                  <label htmlFor="aboutTextKz">Текст (қазақша)</label>
+                  <textarea className="textarea" id="aboutTextKz" name="aboutTextKz" defaultValue={aboutTextKz} maxLength={LIMITS.aboutText} />
+                </div>
               </div>
+              <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>
+                Казахские поля можно оставить пустыми: тогда на казахской версии сайта
+                покажется русский текст. Заполните, когда будет перевод.
+              </p>
             </div>
 
             <div className="panel form-grid">

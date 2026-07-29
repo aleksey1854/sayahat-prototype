@@ -20,7 +20,7 @@ type Ui = {
 
 type Props = {
   catalogTitle: string;
-  categories: { slug: string; name: string }[];
+  categories: { slug: string; name: string; icon?: string | null }[];
   lang: "ru" | "kz";
   ui: Ui;
 };
@@ -261,7 +261,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                   title={c.name}
                 >
                   <span className={`cat__ico tile--${c.slug}`}>
-                    <CategoryIcon slug={c.slug} />
+                    <CategoryIcon slug={c.icon ?? c.slug} />
                   </span>
                   <span className="cat__label">{short ? t(short.ru, short.kz) : c.name}</span>
                 </button>

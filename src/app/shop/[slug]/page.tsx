@@ -147,7 +147,7 @@ export default async function ShopPage({
     name: shop.nameRu,
     url: shopUrl,
     image: absUrl(photoUrl(shop.cover)),
-    description: shop.descRu ?? undefined,
+    description: pick(lang, shop.descRu ?? "", shop.descKz) || undefined,
     telephone: shop.phone ?? undefined,
     priceRange,
     sameAs: shop.instagram ? [`https://instagram.com/${shop.instagram}`] : undefined,
@@ -671,8 +671,10 @@ export default async function ShopPage({
               <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
                 {name}
               </div>
-              {shop.descRu && (
-                <p style={{ margin: 0, color: "var(--muted)", fontSize: 14.5, maxWidth: "36ch" }}>{shop.descRu}</p>
+              {(shop.descKz || shop.descRu) && (
+                <p style={{ margin: 0, color: "var(--muted)", fontSize: 14.5, maxWidth: "36ch" }}>
+                  {pick(lang, shop.descRu ?? "", shop.descKz)}
+                </p>
               )}
             </div>
             <div>
