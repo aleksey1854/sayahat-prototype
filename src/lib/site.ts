@@ -35,8 +35,8 @@ export const site = {
   // Аренда мест — отдельный номер
   rentPhone: "+7 775 847 8819",
   rentWhatsapp: "77758478819",
-  rentFrom: "от 7 000 ₸/м²",
-  rentFromKz: "7 000 ₸/м²-ден",
+  rentFrom: "от 1 500 ₸/м²",
+  rentFromKz: "1 500 ₸/м²-ден",
 
   instagram: "sayahat_kst",
   instagramUrl: "https://instagram.com/sayahat_kst",

@@ -1685,3 +1685,10 @@ a.news-card__more:active { transform: scale(.97); }
 }
 details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-quint) both; }
 .admin-add, .shop-row__more > summary { transition: color .18s ease; }
+
+/* Ссылки в панели «Как добраться»: телефон, WhatsApp, Instagram.
+   Наследуют размер соседних строк, подчёркивание появляется на наведении —
+   в плотном списке постоянное подчёркивание всех трёх шумит. */
+.getthere__link { color: inherit; text-decoration: none; }
+.getthere__link:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; }
+.getthere__row span .getthere__link { color: var(--brand); }
