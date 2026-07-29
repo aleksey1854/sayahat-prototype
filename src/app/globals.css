@@ -1805,7 +1805,7 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 
 .promo__box {
   position: relative;
-  width: 100%; max-width: 440px;
+  width: 100%; max-width: 400px;
   max-height: calc(100dvh - 40px); overflow: auto;
   background: var(--surface);
   border-radius: 26px;
@@ -1823,13 +1823,20 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   position: relative; overflow: hidden;
   border-radius: 26px 26px 0 0;
   animation: promo-part .5s var(--ease-out-expo) .1s both;
+  /* Баннер вертикальный, 4:5. При ширине окна 400px это 500px высоты,
+     и вместе с текстом выходит около 690px — на ноутбуке с невысоким
+     окном кнопка ушла бы за нижний край. Поэтому на низких экранах
+     картинку подрезаем, а не прячем кнопку: невидимая кнопка хуже,
+     чем срезанный край баннера. */
+  max-height: min(58dvh, 560px);
 }
-.promo__img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+.promo__img { display: block; width: 100%; height: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
 
 /* Заглушка. Фирменная амбра, пунктир и размер прямо в рамке. */
 .promo__ph {
   position: relative;
-  aspect-ratio: 1 / 1;
+  height: 100%;
+  aspect-ratio: 4 / 5;
   display: grid; place-content: center; justify-items: center; gap: 8px;
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(226,147,15,.16), transparent 62%),
