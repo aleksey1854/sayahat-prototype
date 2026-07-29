@@ -1,16 +1,5 @@
 import { getLang, pick } from "@/lib/i18n";
 import { site, waLink, telHref } from "@/lib/site";
-import { WhatsAppIcon } from "@/components/WhatsAppIcon";
-import { InstagramIcon } from "@/components/InstagramIcon";
-
-function MapIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
-      <circle cx="12" cy="10" r="2.5" />
-    </svg>
-  );
-}
 
 export function Footer() {
   const lang = getLang();
@@ -25,17 +14,6 @@ export function Footer() {
             <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: 15, maxWidth: "34ch" }}>
               {t(site.slogan, site.sloganKz)}
             </p>
-            <div className="socials">
-              <a href={site.instagramUrl} target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
-                <InstagramIcon />
-              </a>
-              <a href={site.gis2Url} target="_blank" rel="noopener" aria-label="2ГИС" title="2ГИС">
-                <MapIcon />
-              </a>
-              <a href={waLink(site.whatsapp)} target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
-                <WhatsAppIcon />
-              </a>
-            </div>
           </div>
 
           <div>
