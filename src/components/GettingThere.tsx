@@ -89,10 +89,7 @@ export function GettingThere({ lang }: { lang: Lang }) {
             </div>
 
             <p className="getthere__note">
-              {t(
-                `Рынок и автовокзал — в одном здании: удобно закупиться перед выездом. ${site.station.name} — отдельная организация, ${site.station.hours}.`,
-                `Базар мен автовокзал — бір ғимаратта: жол жүрер алдында дүкен аралау ыңғайлы. ${site.station.nameKz} — бөлек ұйым, ${site.station.hoursKz}.`,
-              )}
+              {t("Покупки и поездки — в одном месте!", "Сауда мен сапар — бір жерде!")}
             </p>
           </div>
         </div>

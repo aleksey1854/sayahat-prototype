@@ -1633,3 +1633,55 @@ a.news-card__more:active { transform: scale(.97); }
   .topbar__addr-txt i { display: none; }
   .topbar__addr:hover .topbar__addr-txt b { color: var(--brand-700); }
 }
+
+/* ── Движение в админке ─────────────────────────────────────────────────
+   Те же кривые, что на сайте: --ease-out-quint для быстрых откликов,
+   --ease-out-expo для того, что крупнее. Глобальный блок
+   prefers-reduced-motion выше отключает всё это разом, отдельных
+   проверок не нужно.
+
+   Одно отличие от витрины сознательное: строки списков НЕ поднимаются.
+   На сайте карточка уезжает на 4px вверх, и это уместно — их шесть
+   в ряду. В админке строк полсотни, они идут сплошной колонкой, и если
+   каждая будет подпрыгивать под курсором при прокрутке списка, работать
+   станет неприятно. Поэтому здесь отклик даёт рамка и фон, а геометрия
+   стоит на месте. */
+.shop-row,
+.cat-row {
+  transition: border-color .18s var(--ease-out-quint), background .18s ease, box-shadow .22s var(--ease-out-quint);
+}
+.shop-row:hover,
+.cat-row:hover { border-color: var(--line-strong); box-shadow: 0 1px 3px rgba(26,24,21,.05); }
+
+/* Ссылка «Ещё →» проявляется вместе со строкой, а не сама по себе:
+   так глаз не цепляется за неё отдельно при быстрой прокрутке. */
+.shop-row__more-link { opacity: .75; transition: opacity .18s ease, color .18s ease; }
+.shop-row:hover .shop-row__more-link { opacity: 1; }
+
+/* Фильтры и разделы. Те же .18s, что у кнопок сайта. */
+.chip { transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s var(--ease-out-quint); }
+.chip:active { transform: scale(.97); }
+.admin-side__link { transition: background .18s ease, color .18s ease; }
+
+/* Поля ввода: подсветка рамки при фокусе теперь наезжает плавно.
+   Работает и в кабинете — класс общий. */
+.input, .textarea, .select { transition: border-color .18s var(--ease-out-quint), background .18s ease; }
+
+/* Сообщения после сохранения. Короткая подача снизу: если просто
+   возникнуть в потоке, человек не замечает, что что-то появилось,
+   и жмёт «Сохранить» второй раз. */
+@keyframes admin-notice-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: none; }
+}
+.notice { animation: admin-notice-in .24s var(--ease-out-expo) both; }
+
+/* Раскрытие «Добавить магазин», «Ещё» и подобных. Высоту не анимируем:
+   она неизвестна заранее, а прыжок от неверной высоты хуже отсутствия
+   анимации. Проявляем содержимое. */
+@keyframes admin-details-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-quint) both; }
+.admin-add, .shop-row__more > summary { transition: color .18s ease; }
