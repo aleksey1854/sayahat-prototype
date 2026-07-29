@@ -1598,15 +1598,24 @@ a.news-card__more:active { transform: scale(.97); }
 .arenda__cta .btn { justify-content: center; }
 
 /* ── Адрес рынка в шапке ────────────────────────────────────────────────
-   Ведёт на блок «Как добраться». Живёт в одном ряду с иконками соцсетей,
-   поэтому наследует их круглую форму — на телефоне остаётся ровно такой
-   же кружок с меткой, только текст скрыт.
+   Ведёт на блок «Как добраться».
 
-   Причина: в шапке телефона под адрес нет места. Логотип, две иконки и
-   переключатель языка занимают почти всю ширину; строка «Костанай,
-   ул. Карбышева, 131» ушла бы на второй ряд и подняла шапку. Нажать при
-   этом нужно уметь одинаково с обоих устройств, поэтому кнопка остаётся,
-   пропадает только подпись. */
+   Форма — капсула, как у всего остального в шапке: поиск, обе иконки
+   соцсетей и переключатель языка сделаны через border-radius 999px.
+   Первая версия была скруглённым прямоугольником на 14px и выпадала
+   из ряда.
+
+   Отсюда же одна строка вместо двух. В капсуле радиус равен половине
+   высоты: на двух строках она вырастает до 47px и превращается в толстую
+   таблетку, рядом с 38-пиксельными кружками это перевешивает. На одной
+   строке высота совпадает с переключателем языка, и ряд читается ровно.
+
+   Вторая строка осталась в разметке и просто скрыта. Вернуть — заменить
+   display: none на block у .topbar__addr-txt i, но тогда стоит вернуть
+   и прямоугольную форму.
+
+   На телефоне подпись скрыта целиком, остаётся кружок с меткой: там
+   в шапке нет места даже под одну строку адреса. */
 .topbar__addr svg { width: 19px; height: 19px; flex: none; }
 .topbar__addr-txt { display: none; }
 
@@ -1614,13 +1623,13 @@ a.news-card__more:active { transform: scale(.97); }
   .topbar__addr {
     width: auto !important;
     height: auto !important;
-    border-radius: 14px !important;
-    padding: 7px 14px 7px 11px;
-    gap: 9px;
+    border-radius: 999px !important;
+    padding: 9px 18px 9px 14px;
+    gap: 8px;
     text-decoration: none;
   }
-  .topbar__addr-txt { display: grid; gap: 1px; line-height: 1.25; text-align: left; }
-  .topbar__addr-txt b { font-size: 13.5px; font-weight: 600; color: var(--ink); }
-  .topbar__addr-txt i { font-size: 12px; font-style: normal; color: var(--muted); }
+  .topbar__addr-txt { display: block; line-height: 1.2; text-align: left; }
+  .topbar__addr-txt b { font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .topbar__addr-txt i { display: none; }
   .topbar__addr:hover .topbar__addr-txt b { color: var(--brand-700); }
 }
