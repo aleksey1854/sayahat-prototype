@@ -2197,3 +2197,45 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 @media (max-width: 860px) {
   .shop-row__acts { justify-content: flex-end; }
 }
+
+/* ── Липкая панель сохранения ───────────────────────────────────────────
+   Кнопка остаётся внизу формы, но прилипает к низу окна, пока форма
+   на экране. Место внизу верное: так советует и PatternFly, и разбор
+   айтрекинга у Adam Silver — кнопка замыкает движение по форме сверху
+   вниз, а не выдёргивает наверх.
+
+   Ломалось другое: в форме кабинета двадцать пять полей, и кнопка уезжала
+   на два экрана вниз. В обсуждении Drupal и в просьбах пользователей
+   Workfront сходятся на одном решении — панель, которая липнет к низу
+   окна. Тогда сохранить можно из любого места, и при ошибке валидации
+   не надо чинить поле, скроллить, сохранять.
+
+   sticky, а не fixed: панель живёт внутри формы и уезжает вместе с ней,
+   когда форма кончилась. Фиксированная висела бы над подвалом и над
+   блоками фотографий, к которым она не относится. */
+.save-bar {
+  position: sticky; bottom: 0; z-index: 20;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-top: 4px; padding: 14px 18px;
+  background: rgba(251,244,232,.93);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 -4px 20px rgba(26,24,21,.06);
+}
+.save-bar__hint { font-size: 13px; color: var(--muted); }
+
+/* Уведомление всплывает поверх панели, а не под ней. */
+.toast { z-index: 90; }
+
+@media (max-width: 560px) {
+  .save-bar { padding: 12px 14px; }
+  .save-bar .btn { width: 100%; justify-content: center; }
+  .save-bar__hint { display: none; }
+}
+
+/* Без поддержки размытия панель просто плотная: полупрозрачная поверх
+   текста читалась бы как грязное стекло. */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .save-bar { background: var(--bg); }
+}

@@ -967,9 +967,16 @@ export default async function CabinetPage({
               </details>
             </div>
 
-            <SubmitButton className="btn btn--primary btn--lg" style={{ justifySelf: "start" }}>
-              Сохранить изменения
-            </SubmitButton>
+            {/* Кнопка липнет к низу окна, пока форма на экране. Место
+                внизу правильное: оно не ломает движение по форме сверху
+                вниз, и при ошибке валидации не приходится чинить поле,
+                скроллить и только потом сохранять. Ломалось другое —
+                в этой форме двадцать пять полей, и кнопка уезжала так
+                далеко, что до неё надо было доскроллить. */}
+            <div className="save-bar">
+              <SubmitButton className="btn btn--primary btn--lg">Сохранить изменения</SubmitButton>
+              <span className="save-bar__hint">Фотографии сохраняются отдельно, сразу при загрузке</span>
+            </div>
           </form>
 
           {/* Блок товаров скрыт целиком, пока ассортимент не выводится на
