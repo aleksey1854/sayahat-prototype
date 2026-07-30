@@ -11,16 +11,19 @@ import Link from "next/link";
  * и модал молча получал белый текст на кремовом фоне и скруглённые углы
  * у затемнения, сквозь которые была видна страница.
  *
- * Показывается один раз за визит. Ключ в sessionStorage, а не в
- * localStorage: закрыл вкладку, пришёл завтра — увидит снова. Внутри
- * визита не повторяется, переход «главная → магазин → главная» экран
- * не закрывает.
+ * Закрыл крестиком — не показывается три дня, потом появляется снова.
+ * Дата закрытия в localStorage, поэтому пауза переживает закрытие браузера.
+ * Внутри визита окно тоже не повторяется: переход «главная → магазин →
+ * главная» экран не закрывает.
  *
  * Картинки пока нет. Когда придёт от дизайнера — положить в public
  * и вписать путь в IMAGE. До тех пор на её месте рисуется рамка
  * с нужным размером: так видно, подо что делается макет.
  */
-const KEY = "sayahat-promo-seen";
+const KEY = "sayahat-promo-closed";
+// Сколько не показывать после закрытия. Три дня: чаще раздражает,
+// реже — про акцию забудут.
+const PAUSE_DAYS = 3;
 const DELAY = 900;
 
 // Путь к баннеру. Пусто — на его месте рамка с размером.
@@ -44,13 +47,17 @@ export function PromoModal({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    let seen = false;
+    let paused = false;
     try {
-      seen = sessionStorage.getItem(KEY) === "1";
+      const closedAt = Number(localStorage.getItem(KEY));
+      if (closedAt) {
+        const days = (Date.now() - closedAt) / 86400000;
+        paused = days < PAUSE_DAYS;
+      }
     } catch {
       // приватный режим может запретить доступ — тогда просто показываем
     }
-    if (seen) return;
+    if (paused) return;
 
     // Задержка: окно поверх ещё не отрисованной страницы выглядит
     // как ошибка загрузки.
@@ -61,7 +68,8 @@ export function PromoModal({
   const close = () => {
     setOpen(false);
     try {
-      sessionStorage.setItem(KEY, "1");
+      // Пишем момент закрытия, а не флаг: от него считается пауза.
+      localStorage.setItem(KEY, String(Date.now()));
     } catch {
       /* пусто */
     }

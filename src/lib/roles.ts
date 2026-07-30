@@ -9,7 +9,7 @@
  *
  *   роль       магазины  категории  новости  отзывы  сотрудники
  *   admin         да        да        да       да       да
- *   operator      да       нет        да       да      нет
+ *   operator      да        да        да       да      нет
  *   editor       нет       нет        да      нет      нет
  *   tenant       нет       нет       нет      нет      нет   (только свой кабинет)
  *
@@ -36,10 +36,10 @@ type Area = "shops" | "categories" | "news" | "reviews" | "staff";
 
 const ACCESS: Record<Role, Area[]> = {
   admin: ["shops", "categories", "news", "reviews", "staff"],
-  // Категории оператору не даём: переименование меняет надписи по всему
-  // сайту, удаление перестраивает каталог. Назначить магазину одну из
-  // существующих категорий он может и без этого раздела.
-  operator: ["shops", "news", "reviews"],
+  // Категории оператору открыты: он заводит магазины и первым видит, что
+  // нужного раздела нет. Удаление категории при этом остаётся за админом —
+  // оно перестраивает каталог и делается раз в полгода.
+  operator: ["shops", "categories", "news", "reviews"],
   editor: ["news"],
   tenant: [],
 };
@@ -50,6 +50,11 @@ export function can(role: Role | undefined, area: Area): boolean {
 
 // Опасное внутри «Магазинов»: доступы арендаторов и удаление точки.
 export function canManageShopAccess(role: Role | undefined): boolean {
+  return role === "admin";
+}
+
+// Удаление категории: перестраивает каталог, оставляем админу.
+export function canDeleteCategory(role: Role | undefined): boolean {
   return role === "admin";
 }
 
