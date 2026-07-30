@@ -8,3 +8,6 @@ prisma/*.db
 prisma/*.db-journal
 .DS_Store
 /uploads
+backups/
+photos-input/
+tsconfig.tsbuildinfo
