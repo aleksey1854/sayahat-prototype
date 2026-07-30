@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PAVILION_LIST, type PavKey } from "@/lib/site";
-import { CategoryIcon, SHORT_CAT } from "./CategoryIcon";
+import { CategoryIcon, SHORT_CAT, tileKey } from "./CategoryIcon";
 import { PhotoFallback, SafeImg } from "./PhotoFallback";
 import { useCatalogSearch } from "./CatalogProvider";
 import { price, ruPlural, srcSetFor } from "@/lib/format";
@@ -45,15 +45,6 @@ function tintFor(slug: string) {
   return TINT[slug] ?? "tile--shop";
 }
 
-// Ключи, под которые в стилях есть цвет плитки. Всё остальное получает
-// зелёный по умолчанию, а не пустой фон.
-const TILE: Record<string, string> = Object.fromEntries(
-  [
-    "meat", "sweets", "cloth", "veg", "flowers", "shoe", "kids", "home",
-    "beauty", "optics", "tech", "tea", "pets", "handmade", "bags",
-    "grocery", "household",
-  ].map((k) => [k, k]),
-);
 
 // Сколько карточек показываем до нажатия «Показать ещё».
 // 9 = ровно 3 ряда на десктопе (3 колонки), поэтому последний ряд не рваный.
@@ -275,7 +266,7 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                       (produkty, hoz-tovary), класса под него нет, и плитка
                       оставалась без фона. Иконка же выбирается из готового
                       набора, под каждую есть цвет. */}
-                  <span className={`cat__ico tile--${TILE[c.icon ?? c.slug] ?? "shop"}`}>
+                  <span className={`cat__ico tile--${tileKey(c.icon, c.slug)}`}>
                     <CategoryIcon slug={c.icon ?? c.slug} />
                   </span>
                   <span className="cat__label">{short ? t(short.ru, short.kz) : c.name}</span>

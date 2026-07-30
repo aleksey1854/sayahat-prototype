@@ -136,6 +136,24 @@ const P: Record<string, React.ReactNode> = {
 // Ключи всех нарисованных иконок — для выбора в админке.
 export const ICON_KEYS = Object.keys(P);
 
+/**
+ * Какой класс цвета плитки использовать.
+ *
+ * Сначала явно выбранная иконка, затем слаг, и зелёный по умолчанию.
+ * Слаг подходит только у категорий из первоначального набора: у созданных
+ * из админки он свой (produkty, hoz-tovary), класса под него нет, и плитка
+ * оставалась без фона.
+ *
+ * Считается в одном месте, потому что то же самое нужно и на главной,
+ * и в админке: если считать порознь, у категории без явной иконки цвета
+ * разойдутся.
+ */
+export function tileKey(icon?: string | null, slug?: string | null): string {
+  if (icon && icon in P) return icon;
+  if (slug && slug in P) return slug;
+  return "shop";
+}
+
 export function CategoryIcon({ slug, className }: Props) {
   const d = P[slug];
   if (!d) {

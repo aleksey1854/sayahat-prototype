@@ -8,7 +8,7 @@ import { can, canDeleteCategory } from "@/lib/roles";
 import { makeSlug } from "@/lib/slug";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
-import { CategoryIcon, ICON_KEYS, SHORT_CAT } from "@/components/CategoryIcon";
+import { CategoryIcon, ICON_KEYS, SHORT_CAT, tileKey } from "@/components/CategoryIcon";
 
 export const metadata: Metadata = { title: "Категории", robots: { index: false } };
 
@@ -264,13 +264,6 @@ export default async function AdminCategoriesPage({
           вложенных форм в HTML не существует, браузер их молча ломает. */}
       <form action={saveOrder} id="cat-order" />
 
-      <div className="cat-order__bar">
-        <span>Впишите номера и сохраните порядок одним разом</span>
-        <button className="btn btn--primary" type="submit" form="cat-order">
-          Сохранить порядок
-        </button>
-      </div>
-
       <div className="cat-list">
         {categories.map((c, i) => (
           <div className="cat-item" key={c.id}>
@@ -287,7 +280,7 @@ export default async function AdminCategoriesPage({
 
               {/* В том же цвете, что на главной: выбор иконки заодно
                   задаёт цвет плитки, и это должно быть видно здесь. */}
-              <span className={`cat-item__icon tile--${c.icon ?? "shop"}`} aria-hidden="true">
+              <span className={`cat-item__icon tile--${tileKey(c.icon, c.slug)}`} aria-hidden="true">
                 <CategoryIcon slug={c.icon ?? c.slug} />
               </span>
 
@@ -380,10 +373,18 @@ export default async function AdminCategoriesPage({
         ))}
       </div>
 
-      <div className="cat-order__bar cat-order__bar--bottom">
-        <button className="btn btn--primary" type="submit" form="cat-order">
+      {/* Одна кнопка вместо двух, и она липнет к низу окна. Две сбивали
+          с толку: у них разный смысл — эта меняет порядок всего списка,
+          а «Сохранить» внутри раскрытой строки правит только её название
+          и иконку. */}
+      <div className="save-bar">
+        <button className="btn btn--primary btn--lg" type="submit" form="cat-order">
           Сохранить порядок
         </button>
+        <span className="save-bar__hint">
+          Порядок задаётся номерами в строках. Название и иконку каждой категории
+          сохраняет своя кнопка внутри «Изменить».
+        </span>
       </div>
 
     </>
