@@ -16,6 +16,7 @@ import { SHOW_PRODUCTS } from "@/lib/features";
 import { ScrollTopOnMount } from "@/components/ScrollTopOnMount";
 import { can } from "@/lib/roles";
 import { Toast } from "@/components/Toast";
+import { DirtyOnly } from "@/components/DirtyOnly";
 
 const PHOTO_ERRORS: Record<string, string> = {
   big: "Файл больше 8 МБ — выберите фото полегче или сожмите это.",
@@ -557,26 +558,30 @@ export default async function CabinetPage({
       <Header variant="shop" withSearch={false} />
       <section className="section">
         <div className="wrap cab">
-          <div className="cab__top">
-            <div>
-              <div className="eyebrow">Кабинет арендатора</div>
-              <h1 style={{ fontSize: 34, margin: "8px 0 0" }}>{shop.nameRu}</h1>
+          {/* Верх прилипает под шапку сайта: форма длинная, и возврат
+              «К магазинам» иначе остаётся на два экрана выше. Компактный
+              ряд вместо крупного заголовка — прилипшая полоса высотой
+              в сотню пикселей съедала бы экран. */}
+          <div className="cab__top cab__top--stick">
+            <div className="cab__who">
+              <span className="eyebrow">Кабинет магазина</span>
+              <b>{shop.nameRu}</b>
             </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="cab__nav">
               {/* Возврат нужен всем, кто пришёл сюда из админки, а не только
                   админу. У оператора раньше выхода отсюда не было вовсе:
                   оставалась кнопка «Выйти», то есть выход из системы целиком
                   посреди заполнения полусотни точек. */}
               {can(session.role, "shops") && (
-                <Link className="btn btn--primary" href="/admin">
+                <Link className="btn btn--primary btn--sm" href="/admin">
                   ← К магазинам
                 </Link>
               )}
-              <Link className="btn btn--ghost" href={`/shop/${shop.slug}`}>
-                Открыть мою страницу
+              <Link className="btn btn--ghost btn--sm" href={`/shop/${shop.slug}`}>
+                Моя страница
               </Link>
               <form action={logout}>
-                <button className="btn btn--ghost" type="submit">
+                <button className="btn btn--ghost btn--sm" type="submit">
                   Выйти
                 </button>
               </form>
@@ -973,10 +978,16 @@ export default async function CabinetPage({
                 скроллить и только потом сохранять. Ломалось другое —
                 в этой форме двадцать пять полей, и кнопка уезжала так
                 далеко, что до неё надо было доскроллить. */}
-            <div className="save-bar">
-              <SubmitButton className="btn btn--primary btn--lg">Сохранить изменения</SubmitButton>
-              <span className="save-bar__hint">Фотографии сохраняются отдельно, сразу при загрузке</span>
-            </div>
+            {/* Панель появляется только когда в форме что-то изменили,
+                и прячется обратно, если вернуть прежнее значение. */}
+            <DirtyOnly>
+              <div className="save-bar">
+                <SubmitButton className="btn btn--primary btn--lg">Сохранить изменения</SubmitButton>
+                <span className="save-bar__hint">
+                  Есть несохранённые изменения. Фотографии сохраняются отдельно, сразу при загрузке.
+                </span>
+              </div>
+            </DirtyOnly>
           </form>
 
           {/* Блок товаров скрыт целиком, пока ассортимент не выводится на

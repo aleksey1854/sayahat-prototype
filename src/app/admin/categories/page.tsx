@@ -9,6 +9,7 @@ import { makeSlug } from "@/lib/slug";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { CategoryIcon, ICON_KEYS, SHORT_CAT, tileKey } from "@/components/CategoryIcon";
+import { DirtyOnly } from "@/components/DirtyOnly";
 
 export const metadata: Metadata = { title: "Категории", robots: { index: false } };
 
@@ -350,7 +351,9 @@ export default async function AdminCategoriesPage({
                 </div>
 
                 <div className="cat-item__acts">
-                  <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
+                  <DirtyOnly>
+                    <SubmitButton pendingText="Сохраняю…">Сохранить</SubmitButton>
+                  </DirtyOnly>
                   <span className="cat-item__slug">адрес: /{c.slug}</span>
                 </div>
               </form>

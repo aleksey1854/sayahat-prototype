@@ -2244,3 +2244,40 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 @supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
   .save-bar { background: var(--bg); }
 }
+
+/* ── Кабинет: закреплённый верх ─────────────────────────────────────────
+   Форма кабинета в двадцать пять полей, и возврат «К магазинам» оставался
+   на два экрана выше. Полоса прилипает под шапку сайта.
+
+   Компактная, а не с крупным заголовком: прилипшая полоса высотой
+   в сотню пикселей вместе с шапкой съедала бы пятую часть экрана
+   на ноутбуке. Название магазина осталось — по нему видно, какую точку
+   правишь, а это главное, что нужно из заголовка. */
+.cab__top--stick {
+  position: sticky; top: 72px; z-index: 30;
+  align-items: center;
+  margin: 0 -12px 20px; padding: 10px 12px;
+  background: rgba(251,244,232,.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.cab__who { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.cab__who .eyebrow { margin: 0; }
+.cab__who b {
+  font-family: var(--font-display); font-size: 19px; font-weight: 700;
+  color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cab__nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cab__nav form { display: contents; }
+
+@media (max-width: 640px) {
+  /* На телефоне шапка сайта ниже, и две прилипшие полосы забирают
+     половину экрана. Здесь верх едет вместе со страницей. */
+  .cab__top--stick { position: static; margin: 0 0 18px; padding: 0 0 12px; background: none; backdrop-filter: none; }
+  .cab__who { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .cab__who b { font-size: 22px; white-space: normal; }
+}
+
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  .cab__top--stick { background: var(--bg); }
+}

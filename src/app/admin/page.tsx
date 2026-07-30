@@ -264,43 +264,45 @@ export default async function AdminPage({
                     {gaps.length > 0 && <span className="shop-row__gaps">{gaps.join(" · ")}</span>}
                   </div>
 
-                  {/* Только иконки, подпись — во всплывающей подсказке.
-                      С подписями пять кнопок не влезали в строку справа
-                      и переносились под неё. */}
+                  {/* Иконка с подписью под ней. Одна иконка без слова
+                      требует, чтобы её сначала выучили, а оператор садится
+                      и работает сразу. Подписи короткие: с полными
+                      формулировками пять кнопок не влезали в строку справа
+                      и переносились под неё. Полная формулировка остаётся
+                      во всплывающей подсказке. */}
                   <div className="shop-row__acts">
                     <form action={impersonate}>
                       <input type="hidden" name="id" value={s.id} />
-                      <button className="iact iact--main" type="submit" title="Редактировать" aria-label="Редактировать">
+                      <button className="iact iact--main" type="submit" title="Редактировать магазин">
                         <IconEdit />
+                        <i>Править</i>
                       </button>
                     </form>
 
-                    <Link className="iact" href={`/shop/${s.slug}`} title="Посмотреть на сайте" aria-label="Посмотреть на сайте">
+                    <Link className="iact" href={`/shop/${s.slug}`} title="Посмотреть страницу на сайте">
                       <IconEye />
+                      <i>Смотреть</i>
                     </Link>
 
                     <form action={toggleStatus}>
                       <input type="hidden" name="id" value={s.id} />
-                      <button
-                        className="iact"
-                        type="submit"
-                        title={live ? "Убрать с сайта" : "Показать на сайте"}
-                        aria-label={live ? "Убрать с сайта" : "Показать на сайте"}
-                      >
+                      <button className="iact" type="submit" title={live ? "Убрать с сайта, можно вернуть" : "Показать на сайте"}>
                         {live ? <IconHide /> : <IconShow />}
+                        <i>{live ? "Скрыть" : "Показать"}</i>
                       </button>
                     </form>
 
-                    <Link className="iact" href={base({ cat: s.id })} title="Сменить категорию" aria-label="Сменить категорию">
+                    <Link className="iact" href={base({ cat: s.id })} title="Сменить категорию">
                       <IconTag />
+                      <i>Категория</i>
                     </Link>
 
-                    {/* Удаление отделено чертой и окрашено: рядом стоит
-                        обратимое «Убрать с сайта», спутать их нельзя. */}
+                    {/* Черта отделяет обратимые действия от необратимого. */}
                     <span className="iact-sep" aria-hidden="true" />
 
-                    <Link className="iact iact--kill" href={base({ del: s.id })} title="Удалить полностью" aria-label="Удалить полностью">
+                    <Link className="iact iact--kill" href={base({ del: s.id })} title="Удалить магазин полностью, без возврата">
                       <IconTrash />
+                      <i>Удалить</i>
                     </Link>
                   </div>
 
