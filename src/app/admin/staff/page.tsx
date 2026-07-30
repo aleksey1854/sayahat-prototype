@@ -238,8 +238,9 @@ export default async function AdminStaffPage({
         <details style={{ marginTop: 28 }}>
           <summary className="admin-add">Доступы арендаторов ({tenants.length})</summary>
           <p style={{ color: "var(--muted)", fontSize: 14, margin: "12px 0" }}>
-            Эти аккаунты привязаны к магазинам. Логин и пароль меняются на карточке магазина,
-            в разделе «Магазины».
+            Эти аккаунты привязаны к магазинам. Выдача доступов арендаторам входит во второй
+            этап, из админки она пока убрана — сейчас в кабинет магазина заходят через
+            «Заполнить» в разделе «Магазины».
           </p>
           <div className="cat-rows">
             {tenants.map((a) => (

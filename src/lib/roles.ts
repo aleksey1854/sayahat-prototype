@@ -58,6 +58,13 @@ export function canDeleteCategory(role: Role | undefined): boolean {
   return role === "admin";
 }
 
+// Удаление магазина открыто и оператору: он же их и заводит, в том числе
+// пробные, и убирать их за ним некому. Барьеров два: галочка подтверждения
+// и отдельный блок, а не кнопка в общем ряду.
+export function canDeleteShop(role: Role | undefined): boolean {
+  return can(role, "shops");
+}
+
 /** Куда отправить человека сразу после входа. */
 export function homeFor(role: Role | undefined, shopId?: string | null): string {
   if (can(role, "shops")) return "/admin";

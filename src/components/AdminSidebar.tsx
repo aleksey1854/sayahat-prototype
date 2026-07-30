@@ -20,7 +20,7 @@ export function AdminSidebar({ role }: { role: Role | undefined }) {
     <aside className="admin-side">
       <nav aria-label="Разделы админки">
         {items.map((a) => {
-          const active = a.href === "/admin" ? pathname === "/admin" || pathname.startsWith("/admin/shop") : pathname.startsWith(a.href);
+          const active = a.href === "/admin" ? pathname === "/admin" : pathname.startsWith(a.href);
           return (
             <Link key={a.href} className={`admin-side__link ${active ? "is-on" : ""}`} href={a.href}>
               {a.label}

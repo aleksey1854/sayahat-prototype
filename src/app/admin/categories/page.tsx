@@ -9,7 +9,6 @@ import { makeSlug } from "@/lib/slug";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { CategoryIcon, ICON_KEYS, SHORT_CAT } from "@/components/CategoryIcon";
-import { Toast } from "@/components/Toast";
 
 export const metadata: Metadata = { title: "Категории", robots: { index: false } };
 
@@ -203,12 +202,12 @@ export default async function AdminCategoriesPage({
         </div>
       </div>
 
-      {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
-      {searchParams.err === "name" && <Toast kind="err" param={["err", "perr"]}>Заполните название по-русски.</Toast>}
+      {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
+      {searchParams.err === "name" && <div className="notice notice--err">Заполните название по-русски.</div>}
       {searchParams.err === "used" && (
-        <Toast kind="err" param={["err", "perr"]}>
+        <div className="notice notice--err">
           В категории есть магазины — сначала перенесите их в другую, потом удаляйте.
-        </Toast>
+        </div>
       )}
 
       <p style={{ color: "var(--muted)", maxWidth: 640, margin: "0 0 20px" }}>
@@ -241,7 +240,7 @@ export default async function AdminCategoriesPage({
                 {ICON_KEYS.map((k) => (
                   <label className="icon-pick__item" key={k} title={SHORT_CAT[k]?.ru ?? k}>
                     <input type="radio" name="icon" value={k} />
-                    <span className="icon-pick__box">
+                    <span className={`icon-pick__box tile--${k}`}>
                       <CategoryIcon slug={k} />
                     </span>
                   </label>
@@ -286,7 +285,9 @@ export default async function AdminCategoriesPage({
                 aria-label={`Позиция категории ${c.nameRu}`}
               />
 
-              <span className="cat-item__icon" aria-hidden="true">
+              {/* В том же цвете, что на главной: выбор иконки заодно
+                  задаёт цвет плитки, и это должно быть видно здесь. */}
+              <span className={`cat-item__icon tile--${c.icon ?? "shop"}`} aria-hidden="true">
                 <CategoryIcon slug={c.icon ?? c.slug} />
               </span>
 
@@ -347,7 +348,7 @@ export default async function AdminCategoriesPage({
                     {ICON_KEYS.map((k) => (
                       <label className="icon-pick__item" key={k} title={SHORT_CAT[k]?.ru ?? k}>
                         <input type="radio" name="icon" value={k} defaultChecked={c.icon === k} />
-                        <span className="icon-pick__box">
+                        <span className={`icon-pick__box tile--${k}`}>
                           <CategoryIcon slug={k} />
                         </span>
                       </label>

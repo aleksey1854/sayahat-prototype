@@ -45,6 +45,16 @@ function tintFor(slug: string) {
   return TINT[slug] ?? "tile--shop";
 }
 
+// Ключи, под которые в стилях есть цвет плитки. Всё остальное получает
+// зелёный по умолчанию, а не пустой фон.
+const TILE: Record<string, string> = Object.fromEntries(
+  [
+    "meat", "sweets", "cloth", "veg", "flowers", "shoe", "kids", "home",
+    "beauty", "optics", "tech", "tea", "pets", "handmade", "bags",
+    "grocery", "household",
+  ].map((k) => [k, k]),
+);
+
 // Сколько карточек показываем до нажатия «Показать ещё».
 // 9 = ровно 3 ряда на десктопе (3 колонки), поэтому последний ряд не рваный.
 
@@ -260,7 +270,12 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
                   aria-pressed={cat === c.slug}
                   title={c.name}
                 >
-                  <span className={`cat__ico tile--${c.slug}`}>
+                  {/* Цвет плитки берём по выбранной иконке, а не по слагу:
+                      у категорий, созданных из админки, слаг свой
+                      (produkty, hoz-tovary), класса под него нет, и плитка
+                      оставалась без фона. Иконка же выбирается из готового
+                      набора, под каждую есть цвет. */}
+                  <span className={`cat__ico tile--${TILE[c.icon ?? c.slug] ?? "shop"}`}>
                     <CategoryIcon slug={c.icon ?? c.slug} />
                   </span>
                   <span className="cat__label">{short ? t(short.ru, short.kz) : c.name}</span>

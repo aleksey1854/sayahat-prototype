@@ -612,6 +612,12 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
   font-weight: 800; font-size: 24px; background: linear-gradient(150deg,#2E8068,#14513F); border: 0;
 }
 .btn--danger { color: var(--terracotta-700); }
+/* В блоке удаления это единственное действие, поэтому кнопка залита,
+   а не просто окрашена: рядом с ней нет ничего, с чем её спутать. */
+.danger .btn--danger {
+  background: var(--terracotta); color: #fff; border-color: transparent;
+}
+.danger .btn--danger:hover { background: var(--terracotta-700); }
 .btn:disabled { opacity: .55; pointer-events: none; }
 .notice--warn { background: #F7ECD4; color: #8A6116; }
 .pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
@@ -757,6 +763,8 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; lett
 .tile--pets { background: linear-gradient(150deg,#E8A23C,#B5571A); }
 .tile--handmade { background: linear-gradient(150deg,#C86A44,#7E3220); }
 .tile--bags { background: linear-gradient(150deg,#7E68A0,#3E2C5A); }
+.tile--grocery { background: linear-gradient(150deg,#D9A24E,#9A6A1E); }
+.tile--household { background: linear-gradient(150deg,#6E93A8,#33566B); }
 .tile--shop { background: linear-gradient(150deg,#2E8068,#14513F); }
 
 @media (max-width: 720px) {
@@ -1945,17 +1953,20 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   display: inline-flex; align-items: center; justify-content: center;
   width: 44px; height: 44px; border-radius: 13px;
   background: var(--surface); border: 1.5px solid var(--line-strong);
-  color: var(--ink-soft);
+  color: #fff;
   transition: border-color .16s var(--ease-out-quint), background .16s ease,
               color .16s ease, transform .16s var(--ease-out-quint);
 }
 .icon-pick__box svg { width: 24px; height: 24px; }
 .icon-pick__box--auto { font-size: 11.5px; font-weight: 700; color: var(--muted); }
 
-.icon-pick__item:hover .icon-pick__box { border-color: var(--brand); color: var(--brand); }
+/* Выбранная плитка обводится, а не перекрашивается: цвет тут и есть
+   часть выбора, перекрашивать его нельзя. */
+.icon-pick__item:hover .icon-pick__box { transform: translateY(-2px); }
 .icon-pick__item input:checked + .icon-pick__box {
-  background: var(--brand); border-color: var(--brand); color: #fff; transform: scale(1.04);
+  border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; transform: scale(1.05);
 }
+.icon-pick__box--auto { background: var(--surface) !important; border-color: var(--line-strong); }
 .icon-pick__item input:focus-visible + .icon-pick__box { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 /* ── Админка: категории ─────────────────────────────────────────────────
@@ -1985,6 +1996,9 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--brand-50); color: var(--brand);
 }
+/* Когда иконка выбрана явно, плитка красится тем же цветом, что на
+   главной: выбор иконки заодно задаёт цвет, и это видно сразу. */
+.cat-item__icon[class*="tile--"] { color: #fff; }
 .cat-item__icon svg { width: 23px; height: 23px; }
 
 .cat-item__name { flex: 1; min-width: 0; display: grid; gap: 2px; }
@@ -2081,3 +2095,105 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
 .toast__x svg { width: 14px; height: 14px; }
 .toast__x:hover { background: rgba(255,255,255,.28); }
 .toast__x:active { transform: scale(.9); }
+
+/* ── Опасное действие ───────────────────────────────────────────────────
+   Удаление магазина. Раньше это была кнопка в общем ряду среди прочих
+   форм, и найти её было нечем — заголовок «Удаление» ничем не выделялся.
+   Теперь отдельный блок с терракотовой рамкой: он и заметен, и сам по
+   себе предупреждает, что тут не как везде.
+
+   Галочка подтверждения оставлена: одного нажатия для необратимого
+   действия мало. */
+.danger {
+  border: 1.5px solid rgba(192,85,47,.35);
+  background: rgba(192,85,47,.05);
+  border-radius: 18px; padding: 20px 22px;
+  display: grid; gap: 16px;
+}
+.danger__head h3 { margin: 0 0 6px; font-size: 18px; color: var(--terracotta-700); }
+.danger__head p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; max-width: 56ch; }
+.danger__act { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.danger__act label {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14.5px; color: var(--ink); cursor: pointer;
+}
+
+
+/* Залитая кнопка окончательного удаления. Стоит только внутри блока
+   подтверждения, спутать её не с чем. */
+.btn--kill {
+  background: var(--terracotta); color: #fff; border-color: transparent; gap: 7px;
+}
+.btn--kill svg { width: 16px; height: 16px; flex: none; }
+.btn--kill:hover { background: var(--terracotta-700); }
+
+/* ── Раскрытая часть строки: категория или удаление ─────────────────────
+   Раскрывается только у выбранного магазина, по ссылке с его номером.
+   Держать выпадающий список категорий в каждой строке нельзя: семнадцать
+   вариантов на пятидесяти магазинах дают почти две тысячи элементов,
+   и страница снова начинает тормозить — ровно от этого мы уходили. */
+.row-open {
+  grid-column: 1 / -1;
+  margin-top: 12px; padding: 14px 16px;
+  background: var(--surface-2); border-radius: 13px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  animation: row-open-in .22s var(--ease-out-quint) both;
+}
+@keyframes row-open-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: none; }
+}
+.row-open__lbl { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+.row-open--danger {
+  display: grid; gap: 14px;
+  background: rgba(192,85,47,.06);
+  border: 1.5px solid rgba(192,85,47,.3);
+}
+.row-open__warn { display: grid; gap: 5px; }
+.row-open__warn b { font-size: 15.5px; color: var(--terracotta-700); }
+.row-open__warn span { font-size: 13.5px; color: var(--muted); line-height: 1.5; max-width: 62ch; }
+.row-open__acts { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.row-open__acts label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+
+@media (max-width: 860px) {
+  .shop-row__acts { gap: 6px; }
+  .btn--ico { padding-left: 10px; padding-right: 12px; }
+}
+
+/* ── Кнопки-иконки в строке магазина ────────────────────────────────────
+   Только иконка, подпись во всплывающей подсказке. С подписями пять
+   кнопок не влезали в строку справа и переносились под неё, из-за чего
+   строка расползалась на две.
+
+   Квадрат 34px — палец на телефоне попадает, а в ряду из пяти они
+   занимают 190px вместе с разделителем. */
+.shop-row__acts { display: flex; align-items: center; gap: 5px; flex: none; }
+.shop-row__acts form { display: contents; }
+
+.iact {
+  width: 34px; height: 34px; border-radius: 10px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--ink-soft);
+  border: 1px solid transparent; cursor: pointer; text-decoration: none;
+  transition: background .16s ease, color .16s ease, border-color .16s ease,
+              transform .16s var(--ease-out-quint);
+}
+.iact svg { width: 18px; height: 18px; }
+.iact:hover { background: var(--surface-2); color: var(--brand); border-color: var(--line); }
+.iact:active { transform: scale(.92); }
+.iact:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* Первое действие — основное, поэтому залито. */
+.iact--main { background: var(--brand); color: #fff; border-color: transparent; }
+.iact--main:hover { background: var(--brand-700); color: #fff; border-color: transparent; }
+
+/* Удаление окрашено и отделено чертой от обратимых действий. */
+.iact--kill { color: var(--terracotta-700); }
+.iact--kill:hover { background: rgba(192,85,47,.09); color: var(--terracotta); border-color: rgba(192,85,47,.3); }
+
+.iact-sep { width: 1px; height: 22px; background: var(--line); margin: 0 3px; flex: none; }
+
+@media (max-width: 860px) {
+  .shop-row__acts { justify-content: flex-end; }
+}

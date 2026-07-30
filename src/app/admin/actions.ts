@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath, revalidateTag } from "next/cache";
-import bcrypt from "bcryptjs";
 import { CATALOG_TAG } from "@/lib/cached";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -29,12 +28,6 @@ function backTo(formData: FormData, fallback = "/admin") {
 async function requireShops() {
   const session = await getSession();
   if (!session.accountId || !can(session.role, "shops")) redirect("/login");
-  return session;
-}
-
-async function requireAdmin() {
-  const session = await getSession();
-  if (!session.accountId || session.role !== "admin") redirect("/login");
   return session;
 }
 
@@ -90,32 +83,10 @@ export async function impersonate(formData: FormData) {
   redirect("/cabinet?from=admin");
 }
 
-export async function setCredentials(formData: FormData) {
-  await requireAdmin();
-  const shopId = str(formData, "shopId");
-  const login = str(formData, "login").toLowerCase();
-  const password = str(formData, "password");
-  const back = backTo(formData);
-  if (!login) redirect(`${back}?err=login`);
-  if (password.length < 6) redirect(`${back}?err=pass`);
-
-  const shop = await db.shop.findUnique({ where: { id: shopId }, include: { account: true } });
-  if (!shop) redirect(back);
-
-  const taken = await db.account.findUnique({ where: { login } });
-  if (taken && taken.shopId !== shop.id) redirect(`${back}?err=login`);
-
-  const passwordHash = bcrypt.hashSync(password, 10);
-  if (shop.account) {
-    await db.account.update({ where: { id: shop.account.id }, data: { login, passwordHash } });
-  } else {
-    await db.account.create({ data: { login, passwordHash, role: "tenant", shopId: shop.id } });
-  }
-  redirect(`${back}?ok=1`);
-}
-
 export async function deleteShop(formData: FormData) {
-  await requireAdmin();
+  // Оператору тоже: он заводит магазины, включая пробные, и убирать
+  // их за ним некому.
+  await requireShops();
   const id = str(formData, "id");
   const shop = await db.shop.findUnique({ where: { id } });
   if (!shop) redirect("/admin");

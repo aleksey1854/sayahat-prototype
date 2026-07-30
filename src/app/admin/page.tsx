@@ -9,8 +9,9 @@ import { makeSlug } from "@/lib/slug";
 import { site } from "@/lib/site";
 import { SubmitButton } from "@/components/SubmitButton";
 import { can } from "@/lib/roles";
-import { toggleStatus, impersonate } from "./actions";
+import { setCategory, toggleStatus, impersonate, deleteShop } from "./actions";
 import { Toast } from "@/components/Toast";
+import { IconEdit, IconEye, IconHide, IconShow, IconTag, IconTrash } from "@/components/AdminIcons";
 
 export const metadata: Metadata = {
   title: "Админка базара",
@@ -82,7 +83,7 @@ async function createShop(formData: FormData) {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { ok?: string; err?: string; q?: string; f?: string };
+  searchParams: { ok?: string; err?: string; q?: string; f?: string; cat?: string; del?: string };
 }) {
   const session = await requireShopsAccess();
   const isAdmin = session.role === "admin";
@@ -99,6 +100,7 @@ export default async function AdminPage({
         nameRu: true,
         slug: true,
         status: true,
+        categoryId: true,
         phone: true,
         cover: true,
         descRu: true,
@@ -131,6 +133,17 @@ export default async function AdminPage({
     all: shops.length,
     hidden: shops.filter((x) => x.status !== "published").length,
     todo: shops.filter((x) => gapsOf(x).length > 0).length,
+  };
+
+  // Адрес списка с сохранёнными поиском и фильтром: раскрытие строки
+  // не должно сбрасывать то, что оператор уже отфильтровал.
+  const base = (extra?: Record<string, string>) => {
+    const u = new URLSearchParams();
+    if (searchParams.q) u.set("q", searchParams.q);
+    if (searchParams.f) u.set("f", searchParams.f);
+    for (const [k, v] of Object.entries(extra ?? {})) u.set(k, v);
+    const qs = u.toString();
+    return qs ? `/admin?${qs}` : "/admin";
   };
 
   const visible = shops
@@ -251,27 +264,97 @@ export default async function AdminPage({
                     {gaps.length > 0 && <span className="shop-row__gaps">{gaps.join(" · ")}</span>}
                   </div>
 
+                  {/* Только иконки, подпись — во всплывающей подсказке.
+                      С подписями пять кнопок не влезали в строку справа
+                      и переносились под неё. */}
                   <div className="shop-row__acts">
                     <form action={impersonate}>
                       <input type="hidden" name="id" value={s.id} />
-                      <button className="btn btn--primary btn--sm" type="submit">
-                        Заполнить
+                      <button className="iact iact--main" type="submit" title="Редактировать" aria-label="Редактировать">
+                        <IconEdit />
                       </button>
                     </form>
-                    <Link className="btn btn--ghost btn--sm" href={`/shop/${s.slug}`}>
-                      Посмотреть
+
+                    <Link className="iact" href={`/shop/${s.slug}`} title="Посмотреть на сайте" aria-label="Посмотреть на сайте">
+                      <IconEye />
                     </Link>
+
                     <form action={toggleStatus}>
                       <input type="hidden" name="id" value={s.id} />
-                      <button className="btn btn--ghost btn--sm" type="submit">
-                        {live ? "Убрать с сайта" : "Показать на сайте"}
+                      <button
+                        className="iact"
+                        type="submit"
+                        title={live ? "Убрать с сайта" : "Показать на сайте"}
+                        aria-label={live ? "Убрать с сайта" : "Показать на сайте"}
+                      >
+                        {live ? <IconHide /> : <IconShow />}
                       </button>
                     </form>
+
+                    <Link className="iact" href={base({ cat: s.id })} title="Сменить категорию" aria-label="Сменить категорию">
+                      <IconTag />
+                    </Link>
+
+                    {/* Удаление отделено чертой и окрашено: рядом стоит
+                        обратимое «Убрать с сайта», спутать их нельзя. */}
+                    <span className="iact-sep" aria-hidden="true" />
+
+                    <Link className="iact iact--kill" href={base({ del: s.id })} title="Удалить полностью" aria-label="Удалить полностью">
+                      <IconTrash />
+                    </Link>
                   </div>
 
-                  <Link className="shop-row__more-link" href={`/admin/shop/${s.id}`}>
-                    Ещё
-                  </Link>
+                  {/* Категория и удаление раскрываются только у выбранной
+                      строки. Держать выпадающий список в каждой строке нельзя:
+                      семнадцать категорий на пятидесяти магазинах дают почти
+                      две тысячи элементов, и страница снова начинает тормозить. */}
+                  {searchParams.cat === s.id && (
+                    <form action={setCategory} className="row-open">
+                      <input type="hidden" name="id" value={s.id} />
+                      <input type="hidden" name="back" value={base()} />
+                      <span className="row-open__lbl">Категория магазина</span>
+                      <select className="select" name="categoryId" defaultValue={s.categoryId} style={{ width: "auto", minWidth: 220 }}>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.nameRu}
+                          </option>
+                        ))}
+                      </select>
+                      <SubmitButton className="btn btn--primary btn--sm" pendingText="Меняю…">
+                        Сохранить
+                      </SubmitButton>
+                      <Link className="btn btn--ghost btn--sm" href={base()}>
+                        Отмена
+                      </Link>
+                    </form>
+                  )}
+
+                  {searchParams.del === s.id && (
+                    <form action={deleteShop} className="row-open row-open--danger">
+                      <input type="hidden" name="id" value={s.id} />
+                      <div className="row-open__warn">
+                        <b>Удалить «{s.nameRu}» полностью?</b>
+                        <span>
+                          Вместе с магазином пропадут его товары, отзывы и загруженные фотографии.
+                          Восстановить не получится. Если нужно просто убрать со сайта на время —
+                          закройте это и нажмите «Убрать с сайта».
+                        </span>
+                      </div>
+                      <div className="row-open__acts">
+                        <label>
+                          <input type="checkbox" required /> да, удалить навсегда
+                        </label>
+                        <button className="btn btn--sm btn--kill" type="submit">
+                          <IconTrash />
+                          Удалить
+                        </button>
+                        <Link className="btn btn--ghost btn--sm" href={base()}>
+                          Отмена
+                        </Link>
+                      </div>
+                    </form>
+                  )}
+
                 </div>
               );
             })}
