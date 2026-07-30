@@ -15,6 +15,7 @@ import { PhotoInput } from "@/components/PhotoInput";
 import { SHOW_PRODUCTS } from "@/lib/features";
 import { ScrollTopOnMount } from "@/components/ScrollTopOnMount";
 import { can } from "@/lib/roles";
+import { Toast } from "@/components/Toast";
 
 const PHOTO_ERRORS: Record<string, string> = {
   big: "Файл больше 8 МБ — выберите фото полегче или сожмите это.",
@@ -585,14 +586,14 @@ export default async function CabinetPage({
           {searchParams.from === "admin" && <ScrollTopOnMount />}
 
           {searchParams.saved && (
-            <div className="notice notice--ok">
+            <Toast kind="ok" param={["ok", "saved", "kb"]}>
               Сохранено.{searchParams.kb ? ` Фото сжато до ${searchParams.kb} КБ.` : ""} Изменения уже на вашей
               странице.
-            </div>
+            </Toast>
           )}
-          {searchParams.err && <div className="notice notice--err">Название не может быть пустым.</div>}
+          {searchParams.err && <Toast kind="err" param={["err", "perr"]}>Название не может быть пустым.</Toast>}
           {searchParams.perr && (
-            <div className="notice notice--err">{PHOTO_ERRORS[searchParams.perr] ?? PHOTO_ERRORS.bad}</div>
+            <Toast kind="err" param={["err", "perr"]}>{PHOTO_ERRORS[searchParams.perr] ?? PHOTO_ERRORS.bad}</Toast>
           )}
 
           <form action={uploadCover} className="panel form-grid" style={{ marginBottom: 16 }}>

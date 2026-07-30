@@ -2037,3 +2037,47 @@ details[open] > *:not(summary) { animation: admin-details-in .2s var(--ease-out-
   transition: border-color .18s var(--ease-out-quint);
 }
 .cat-item__num:focus { border-color: var(--brand); }
+
+/* ── Уведомление о сохранении ───────────────────────────────────────────
+   Всплывает поверх страницы, а не появляется в потоке сверху. Сохранение
+   идёт через редирект, страница перезагружается, и плашка в начале
+   содержимого оказывалась выше области просмотра: нажал «Сохранить»
+   в конце длинной формы и не увидел подтверждения.
+
+   Снизу, а не сверху: сверху сидит шапка панели, и уведомление либо
+   лезло бы под неё, либо перекрывало навигацию. Снизу свободно, и это
+   то место, где такие сообщения ищут по привычке. */
+.toast {
+  position: fixed; z-index: 90;
+  left: 16px; right: 16px; bottom: 16px;
+  display: flex; align-items: center; gap: 11px;
+  padding: 13px 14px 13px 16px;
+  border-radius: 15px;
+  box-shadow: 0 14px 40px rgba(26,24,21,.24);
+  animation: toast-in .32s var(--ease-out-expo) both;
+}
+@media (min-width: 721px) {
+  .toast { left: auto; right: 24px; bottom: 24px; max-width: 400px; }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.toast--ok  { background: var(--brand); color: #fff; }
+.toast--err { background: var(--terracotta); color: #fff; }
+
+.toast__ico { flex: none; display: inline-flex; }
+.toast__ico svg { width: 21px; height: 21px; }
+
+.toast__txt { flex: 1; font-size: 14.5px; font-weight: 600; line-height: 1.4; }
+
+.toast__x {
+  flex: none; width: 28px; height: 28px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.16); color: inherit; border: 0; cursor: pointer;
+  transition: background .16s ease, transform .16s var(--ease-out-quint);
+}
+.toast__x svg { width: 14px; height: 14px; }
+.toast__x:hover { background: rgba(255,255,255,.28); }
+.toast__x:active { transform: scale(.9); }

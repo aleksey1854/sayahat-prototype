@@ -10,6 +10,7 @@ import { site } from "@/lib/site";
 import { SubmitButton } from "@/components/SubmitButton";
 import { can } from "@/lib/roles";
 import { toggleStatus, impersonate } from "./actions";
+import { Toast } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "Админка базара",
@@ -153,13 +154,13 @@ export default async function AdminPage({
           </div>
 
 
-          {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
-          {err === "name" && <div className="notice notice--err">Заполните название и категорию.</div>}
-          {err === "cat" && <div className="notice notice--err">Категория не выбрана или не найдена.</div>}
-          {err === "login" && <div className="notice notice--err">Такой логин уже занят — выберите другой.</div>}
-          {err === "pass" && <div className="notice notice--err">Пароль слишком короткий — минимум 6 символов.</div>}
+          {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
+          {err === "name" && <Toast kind="err" param={["err", "perr"]}>Заполните название и категорию.</Toast>}
+          {err === "cat" && <Toast kind="err" param={["err", "perr"]}>Категория не выбрана или не найдена.</Toast>}
+          {err === "login" && <Toast kind="err" param={["err", "perr"]}>Такой логин уже занят — выберите другой.</Toast>}
+          {err === "pass" && <Toast kind="err" param={["err", "perr"]}>Пароль слишком короткий — минимум 6 символов.</Toast>}
           {err === "catUsed" && (
-            <div className="notice notice--err">В категории есть магазины — сначала перенесите их в другую.</div>
+            <Toast kind="err" param={["err", "perr"]}>В категории есть магазины — сначала перенесите их в другую.</Toast>
           )}
 
           {/* Форма создания свёрнута: она нужна один раз на магазин,

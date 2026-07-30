@@ -9,6 +9,7 @@ import { makeSlug } from "@/lib/slug";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { CategoryIcon, ICON_KEYS, SHORT_CAT } from "@/components/CategoryIcon";
+import { Toast } from "@/components/Toast";
 
 export const metadata: Metadata = { title: "Категории", robots: { index: false } };
 
@@ -202,12 +203,12 @@ export default async function AdminCategoriesPage({
         </div>
       </div>
 
-      {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
-      {searchParams.err === "name" && <div className="notice notice--err">Заполните название по-русски.</div>}
+      {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
+      {searchParams.err === "name" && <Toast kind="err" param={["err", "perr"]}>Заполните название по-русски.</Toast>}
       {searchParams.err === "used" && (
-        <div className="notice notice--err">
+        <Toast kind="err" param={["err", "perr"]}>
           В категории есть магазины — сначала перенесите их в другую, потом удаляйте.
-        </div>
+        </Toast>
       )}
 
       <p style={{ color: "var(--muted)", maxWidth: 640, margin: "0 0 20px" }}>

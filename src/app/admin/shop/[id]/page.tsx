@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { can } from "@/lib/roles";
 import { SubmitButton } from "@/components/SubmitButton";
 import { setCategory, setCredentials, deleteShop, toggleStatus, impersonate } from "../../actions";
+import { Toast } from "@/components/Toast";
 
 export const metadata: Metadata = { title: "Магазин", robots: { index: false } };
 
@@ -58,10 +59,10 @@ export default async function AdminShopPage({
         <span className={live ? "pill pill--ok" : "pill pill--muted"}>{live ? "на сайте" : "не на сайте"}</span>
       </div>
 
-      {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
-      {searchParams.err === "cat" && <div className="notice notice--err">Категория не выбрана или не найдена.</div>}
-      {searchParams.err === "login" && <div className="notice notice--err">Такой логин уже занят.</div>}
-      {searchParams.err === "pass" && <div className="notice notice--err">Пароль короче шести символов.</div>}
+      {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
+      {searchParams.err === "cat" && <Toast kind="err" param={["err", "perr"]}>Категория не выбрана или не найдена.</Toast>}
+      {searchParams.err === "login" && <Toast kind="err" param={["err", "perr"]}>Такой логин уже занят.</Toast>}
+      {searchParams.err === "pass" && <Toast kind="err" param={["err", "perr"]}>Пароль короче шести символов.</Toast>}
 
       <div className="admin-meta" style={{ marginBottom: 18 }}>
         <span>{shop.category.nameRu}</span>

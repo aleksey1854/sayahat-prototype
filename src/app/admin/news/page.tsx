@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { FormButton } from "@/components/FormButton";
 import { can } from "@/lib/roles";
+import { Toast } from "@/components/Toast";
 
 // Лимиты длины: карточки новостей на главной — блоки одинаковой высоты,
 // длинный текст ломает сетку. maxLength в форме подсказывает,
@@ -170,8 +171,8 @@ export default async function AdminNewsPage({
           </div>
 
 
-          {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
-          {err === "title" && <div className="notice notice--err">Заполните заголовок (русский).</div>}
+          {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
+          {err === "title" && <Toast kind="err" param={["err", "perr"]}>Заполните заголовок (русский).</Toast>}
 
           <p style={{ color: "var(--muted)", margin: "0 0 20px" }}>
             Заголовок и текст — коротко. «Ссылка» ведёт на пост в Instagram: на сайте у новости

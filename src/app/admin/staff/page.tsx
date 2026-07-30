@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { ROLE_NAMES, isRole, type Role } from "@/lib/roles";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { Toast } from "@/components/Toast";
 
 export const metadata: Metadata = { title: "Сотрудники", robots: { index: false } };
 
@@ -143,9 +144,9 @@ export default async function AdminStaffPage({
         </div>
       </div>
 
-      {searchParams.ok && <div className="notice notice--ok">Готово.</div>}
+      {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Готово.</Toast>}
       {searchParams.err && (
-        <div className="notice notice--err">{errors[searchParams.err] ?? "Не сохранилось."}</div>
+        <Toast kind="err" param={["err", "perr"]}>{errors[searchParams.err] ?? "Не сохранилось."}</Toast>
       )}
 
       <p style={{ color: "var(--muted)", maxWidth: 640, margin: "0 0 20px" }}>

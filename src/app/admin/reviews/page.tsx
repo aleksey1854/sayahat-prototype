@@ -9,6 +9,7 @@ import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { can } from "@/lib/roles";
+import { Toast } from "@/components/Toast";
 
 // Отзыв — это публичное высказывание о чужом бизнесе, который платит за место.
 // Поэтому лимиты жёсткие: короткая подпись и текст в размер карточки.
@@ -159,7 +160,7 @@ export default async function AdminReviewsPage({
           <div className="wrap">
             <div className="eyebrow">Модерация</div>
             <h1 style={{ fontSize: 34, margin: "8px 0 16px" }}>Отзывы</h1>
-            <div className="notice notice--err">Таблица отзывов не создана в базе.</div>
+            <Toast kind="err" param={["err", "perr"]}>Таблица отзывов не создана в базе.</Toast>
             <p style={{ color: "var(--muted)", maxWidth: 640 }}>
               Выполните <code>npm run db:push</code> в корне проекта. Локальный <code>.env</code> должен
               содержать те же <code>DATABASE_URL</code> и <code>DATABASE_URL_UNPOOLED</code>, что заданы
@@ -202,9 +203,9 @@ export default async function AdminReviewsPage({
             пока вы не нажмёте «Опубликовать». Здесь же можно завести отзыв вручную.
           </p>
 
-          {searchParams.ok && <div className="notice notice--ok">Сохранено.</div>}
+          {searchParams.ok && <Toast kind="ok" param={["ok", "saved", "kb"]}>Сохранено.</Toast>}
           {searchParams.err && (
-            <div className="notice notice--err">{errText[searchParams.err] ?? "Не сохранилось."}</div>
+            <Toast kind="err" param={["err", "perr"]}>{errText[searchParams.err] ?? "Не сохранилось."}</Toast>
           )}
 
           <form action={addReview} className="panel form-grid" style={{ marginTop: 24, marginBottom: 32 }}>
