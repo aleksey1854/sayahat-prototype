@@ -11,3 +11,4 @@ prisma/*.db-journal
 backups/
 photos-input/
 tsconfig.tsbuildinfo
+next-env.d.ts 
