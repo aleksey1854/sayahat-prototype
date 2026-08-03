@@ -232,6 +232,10 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
         : `Найдено ${hits.length} ${ruPlural(hits.length, "магазин", "магазина", "магазинов")} по запросу «${q}»`
       : "";
 
+  // «Все» — такая же плитка в сетке, поэтому её считаем вместе с
+  // категориями: пороги двух рядов заданы в плитках, не в категориях.
+  const tiles = categories.length + 1;
+
   return (
     <>
       <section className="section catalog-grid-section" id="catalog">
@@ -250,13 +254,12 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
               </span>
               <span className="cat__label">{ui.all}</span>
             </button>
-            {categories.map((c, ci) => {
+            {categories.map((c) => {
               const short = SHORT_CAT[c.slug];
-              const extra = ci >= 7 ? " cat--extra" : "";
               return (
                 <button
                   key={c.slug}
-                  className={(cat === c.slug ? "cat on" : "cat") + extra}
+                  className={cat === c.slug ? "cat on" : "cat"}
                   onClick={() => chooseCat(c.slug)}
                   aria-pressed={cat === c.slug}
                   title={c.name}
@@ -275,11 +278,28 @@ export function CatalogSection({ catalogTitle, categories, lang, ui }: Props) {
             })}
           </div>
 
-          {categories.length > 7 && (
-            <button className="cat-more" onClick={() => setAllCats((v) => !v)} aria-expanded={allCats}>
+          {/* Плиток на одну больше, чем категорий: первой идёт «Все».
+              Два ряда вмещают 18 на широком экране, 12 на планшете и 8
+              на телефоне — под каждую ширину свой класс, а показывать
+              кнопку решает CSS.
+
+              В подписи общее число категорий, а не «сколько скрыто»:
+              скрыто на каждой ширине своё, и одна цифра была бы верна
+              максимум в одном случае из трёх. */}
+          {tiles > 8 && (
+            <button
+              className={
+                "cat-more" +
+                (tiles > 8 ? " cat-more--m" : "") +
+                (tiles > 12 ? " cat-more--t" : "") +
+                (tiles > 18 ? " cat-more--d" : "")
+              }
+              onClick={() => setAllCats((v) => !v)}
+              aria-expanded={allCats}
+            >
               {allCats
                 ? t("Свернуть", "Жию")
-                : t(`Ещё ${categories.length - 7} категорий`, `Тағы ${categories.length - 7} санат`)}
+                : t(`Все ${categories.length} категорий`, `Барлық ${categories.length} санат`)}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M6 9l6 6 6-6" />
               </svg>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getShopFullCached, getNeighborsCached } from "@/lib/cached";
 import { getSession } from "@/lib/auth";
 import { getLang, pick, type Lang } from "@/lib/i18n";
-import { site, waLink, igUrl, boothLabel, pavilionLabel } from "@/lib/site";
+import { site, waLink, igUrl, boothText, pavilionLabel, shopLocation } from "@/lib/site";
 import { getShopReviews } from "@/lib/reviews";
 import { SHOW_PRODUCTS } from "@/lib/features";
 import { submitReview } from "@/lib/reviewActions";
@@ -41,12 +41,6 @@ function telHref(phone: string) {
   return `tel:${phone.replace(/[^+\d]/g, "")}`;
 }
 
-// Адрес точки: pavilion = павильон, row = номер бутика.
-function shopLoc(lang: Lang, pavilion?: string | null, booth?: string | null): string {
-  if (!pavilion) return "";
-  return `${pavilionLabel(lang, pavilion)}${boothLabel(lang, booth)}`;
-}
-
 // Ключ павильона для подсветки на схеме.
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const shop = await getShopFullCached(params.slug);
@@ -59,7 +53,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const bits: string[] = [];
   if (shop.descRu) bits.push(shop.descRu.replace(/\.\s*$/, ""));
   if (goods) bits.push(`В наличии: ${goods}`);
-  if (shop.pavilion) bits.push(shop.row ? `${shop.pavilion}${boothLabel("ru", shop.row)}` : shop.pavilion);
+  if (shop.pavilion) bits.push(shopLocation("ru", shop.pavilion, shop.row));
   const description =
     shop.metaDesc ??
     (bits.length > 0
@@ -239,7 +233,7 @@ export default async function ShopPage({
               )}
             </div>
             <div className="eyebrow">
-              {shopLoc(lang, shop.pavilion, shop.row) || pick(lang, shop.category.nameRu, shop.category.nameKz)}
+              {shopLocation(lang, shop.pavilion, shop.row) || pick(lang, shop.category.nameRu, shop.category.nameKz)}
             </div>
             <h1>{name}</h1>
             {layout.tagline && <p className="hero__tag">{L(layout.tagline, layout.taglineKz)}</p>}
@@ -579,7 +573,7 @@ export default async function ShopPage({
                   <b>{pavilionLabel(lang, shop.pavilion) || pick(lang, "Уточняется", "Нақтылануда")}</b>
                   <span>
                     {[
-                      boothLabel(lang, shop.row).replace(/^ · /, ""),
+                      boothText(lang, shop.row),
                       shop.landmark,
                     ]
                       .filter(Boolean)
@@ -702,7 +696,7 @@ export default async function ShopPage({
               </div>
               <div style={{ color: "var(--ink-soft)", fontSize: 14.5, marginBottom: 8 }}>
                 {pick(lang, "Рынок «Саяхат», ", "«Саяхат» базары, ")}
-                {shopLoc(lang, shop.pavilion, shop.row) || site.address}
+                {shopLocation(lang, shop.pavilion, shop.row) || site.address}
               </div>
               <div style={{ color: "var(--ink-soft)", fontSize: 14.5 }}>{shop.hours ?? site.hours}</div>
             </div>

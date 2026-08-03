@@ -2,7 +2,7 @@ import { getCatalogShopsCached } from "@/lib/cached";
 import { SHOW_PRODUCTS } from "@/lib/features";
 import { pick, type Lang } from "@/lib/lang";
 import { photoUrl } from "@/lib/format";
-import { pavilionKey, boothLabel, pavilionLabel } from "@/lib/site";
+import { pavilionKey, shopLocation } from "@/lib/site";
 import type { CardShop } from "@/components/CatalogProvider";
 
 // Один и тот же набор нужен главной (каталог) и странице магазина (поиск в шапке).
@@ -37,7 +37,7 @@ export async function loadCatalogCards(lang: Lang): Promise<CardShop[]> {
       fields.push({ text: `павильон бутик ${s.pavilion} ${s.row ?? ""}`, weight: 1, kind: "other" });
     }
 
-    const loc = s.pavilion ? `${pavilionLabel(lang, s.pavilion)}${boothLabel(lang, s.row)}` : "";
+    const loc = shopLocation(lang, s.pavilion, s.row);
 
     return {
       slug: s.slug,

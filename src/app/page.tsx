@@ -2,7 +2,7 @@ import { getCategoriesCached, getCatalogShopsCached, getNewsCached } from "@/lib
 import { getLang, pick } from "@/lib/i18n";
 import { newsDateParts, photoUrl } from "@/lib/format";
 import { absUrl } from "@/lib/seo";
-import { site, pavilionKey, boothLabel } from "@/lib/site";
+import { site, pavilionKey, shopLocation } from "@/lib/site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { PromoModal } from "@/components/PromoModal";
@@ -11,13 +11,6 @@ import { GettingThere } from "@/components/GettingThere";
 import { Reveal } from "@/components/Reveal";
 import { CatalogSection } from "@/components/CatalogSection";
 import { CatalogProvider, type CardShop } from "@/components/CatalogProvider";
-
-// Адрес точки: «Павильон · бутик №N». pavilion = павильон, row = номер бутика.
-function shopLocation(lang: "ru" | "kz", pavilion?: string | null, booth?: string | null): string {
-  if (!pavilion) return "";
-  const boothPart = boothLabel(lang, booth);
-  return `${pavilion}${boothPart}`;
-}
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const sp = await searchParams;
