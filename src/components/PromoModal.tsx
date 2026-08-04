@@ -143,7 +143,7 @@ export function PromoModal({
           <span className="pmodal__badge">Рынок «Саяхат»</span>
           <h2 id="pmodal-title">{title}</h2>
           <p>{text}</p>
-          <Link className="btn btn--accent btn--lg pmodal__cta" href={href} onClick={close}>
+          <Link className="btn btn--accent btn--lg pmodal__cta" href={href} onClick={close} data-goal="promo_click">
             {action}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <path d="M5 12h14M13 6l6 6-6 6" />

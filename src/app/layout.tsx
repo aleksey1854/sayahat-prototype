@@ -7,6 +7,8 @@ import "@fontsource/manrope/600.css";
 import "@fontsource/manrope/700.css";
 import { getLang } from "@/lib/i18n";
 import { Analytics } from "@/components/Analytics";
+import { GoalTracker } from "@/components/GoalTracker";
+import { PageViews } from "@/components/PageViews";
 import "./globals.css";
 
 // generateMetadata вместо статического объекта: заголовок вкладки, описание
@@ -60,6 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {children}
         <Analytics />
+        <GoalTracker />
+        <PageViews />
       </body>
     </html>
   );

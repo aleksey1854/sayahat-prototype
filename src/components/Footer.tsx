@@ -24,7 +24,7 @@ export function Footer() {
             <a className="foot-link" href={site.instagramUrl} target="_blank" rel="noopener">
               Instagram · @{site.instagram}
             </a>
-            <a className="foot-link" href={site.gis2Url} target="_blank" rel="noopener">
+            <a className="foot-link" href={site.gis2Url} target="_blank" rel="noopener" data-goal="route_click">
               {t("Мы в 2ГИС", "2ГИС-те")} · ★ {site.rating}
             </a>
           </div>
@@ -35,7 +35,7 @@ export function Footer() {
             <div className="foot-text">
               {t(site.hours, site.hoursKz)} · {t(site.dayOff, site.dayOffKz)}
             </div>
-            <a className="foot-link" href={telHref(site.rentPhone)} style={{ marginTop: 8 }}>
+            <a className="foot-link" href={telHref(site.rentPhone)} style={{ marginTop: 8 }} data-goal="rent_call">
               {t("Аренда мест", "Орын жалдау")}: {site.rentPhone}
             </a>
           </div>

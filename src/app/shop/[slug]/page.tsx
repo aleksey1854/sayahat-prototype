@@ -18,7 +18,6 @@ import { CallBar } from "@/components/CallBar";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { PhotoFallback, SafeImg } from "@/components/PhotoFallback";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
-import { GoalTracker } from "@/components/GoalTracker";
 
 type ShopLayout = {
   tagline?: string; taglineKz?: string;
@@ -199,7 +198,6 @@ export default async function ShopPage({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <GoalTracker shop={shop.slug} />
       <CatalogProvider shops={searchCards}>
         <Header variant="shop" />
       </CatalogProvider>
